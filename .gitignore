@@ -1,0 +1,5 @@
+*.class
+*.cache
+project/target
+target/resolution-cache
+target
