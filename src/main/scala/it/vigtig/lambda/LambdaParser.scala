@@ -11,7 +11,8 @@ class LambdaParser extends RegexParsers with PackratParsers {
   
     lazy val identifier:PackratParser[String]  = """[_\p{L}][_\p{L}\p{Nd}]*""".r ^^ {_.toString}
     
-    lazy val TERM:PackratParser[LambdaTerm] = (LABSTR | APP | ID )
+    lazy val TERM:PackratParser[LambdaTerm] = rep("(") ~ (LABSTR | APP | ID) ~ rep(")") ^^
+     { case _ ~ term ~ _ => term }
       
     lazy val ID:PackratParser[Id] = identifier ^^ { Id(_:String) }
     
@@ -29,7 +30,7 @@ case class LambdaAbstraction(id:Id,body:LambdaTerm) extends LambdaTerm
 case class Application(left:LambdaTerm,right:LambdaTerm) extends LambdaTerm
 
 object TestLambdaParser extends LambdaParser with App {
-  parseAll(TERM, "x . y z") match {
+  parseAll(TERM, "((x . (y z)))") match {
     case Success(lup,_) => println(lup)
     case x => println(x)
   }
