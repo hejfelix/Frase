@@ -24,9 +24,9 @@ trait Parser extends RegexParsers with PackratParsers {
       ID ~ "." ~ TERM ^^
         { case id ~ _ ~ term => Abstraction(id,term) }
 
-    lazy val APP:PackratParser[Application] =
-      TERM ~ TERM ^^
-        { case t1 ~ t2 => Application(t1,t2) }
+    lazy val APP:PackratParser[Term] =
+      TERM ~ ID ^^
+        { case t1 ~ t2 => Application(t1,t2)}
 
 }
 
