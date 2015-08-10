@@ -6,9 +6,10 @@ package it.vigtig.lambda
 object Interpreter extends Parser with App {
   import LambdaAST._
   
-  val TEST1 = "(y . x . y z x) a b"
+  val TEST1 = "(y . x . y z x) (a b)"
+  val TEST2 = "a b c d"
   
-  parseAll(TERM, TEST1) match {
+  parseAll(TERM, TEST2) match {
     case Success(lup,_) => println(lup); println(interpret(lup))
     case x => println(x)
   }
@@ -25,8 +26,10 @@ object Interpreter extends Parser with App {
   def betaReduce(newX:Term, oldX:Id, in:Term): Term = in match {
     case `oldX` => newX
     case Id(_) => in
-    case Abstraction(id,body) => Abstraction(id, betaReduce(newX, oldX, body))
-    case Application(l,r) => Application(betaReduce(newX, oldX, l), betaReduce(newX, oldX, r))
+    case Abstraction(id,body) => 
+      Abstraction(id, betaReduce(newX, oldX, body))
+    case Application(l,r) => 
+      Application(betaReduce(newX, oldX, l), betaReduce(newX, oldX, r))
   }
  
 }

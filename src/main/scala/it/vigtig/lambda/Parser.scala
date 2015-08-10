@@ -11,17 +11,15 @@ trait Parser extends RegexParsers with PackratParsers {
   import LambdaAST._
   
     lazy val identifier:PackratParser[String]  = 
-      """[a-z]""".r ^^ {_.toString}
+      """[a-zA-Z]+""".r ^^ {_.toString}
     
-    lazy val TERM:PackratParser[Term] = EXPR | PEXPR
+    lazy val TERM:PackratParser[Term] = LABSTR | APP | ID | PEXPR
     
-    lazy val PEXPR:PackratParser[Term] = "("~EXPR~")" ^^ 
-      { case _ ~ term ~ _ => term }
-  
-    lazy val EXPR:PackratParser[Term] = (APP | LABSTR  | ID) 
+    lazy val PEXPR:PackratParser[Term] = "(" ~> TERM <~ ")" ^^ 
+      { term => term }
       
     lazy val ID:PackratParser[Id] = 
-      identifier ^^ { Id(_:String) }
+      identifier ^^ Id
     
     lazy val LABSTR:PackratParser[Abstraction] = 
       ID ~ "." ~ TERM ^^
