@@ -6,30 +6,22 @@ package it.vigtig.lambda
 object Interpreter extends Parser with App {
   import LambdaAST._
   
-  val TEST1 = "( y . x . y z x ) a b"
+  val TEST1 = "( y . (x . y z x ) a) b"
   val TEST2 = "a b c d"
   
-  def prettyPrintln(t:Term):Unit = {prettyPrint(t);println()}
-  def prettyPrint(t:Term):Unit = t match {
+  def prettyStr(t:Term):String = t match {
     case Application(a,b) => 
-      print("(")
-      prettyPrint(a)
-      print(" ")
-      prettyPrint(b) 
-      print(")")
-    case Abstraction(x,b) => 
-      prettyPrint(x)
-      print(".")
-      prettyPrint(b)
-    case Id(x) => print(x)
-    case _ => print(t)
+      s"(${prettyStr(a)} ${prettyStr(b)})"
+    case Abstraction(Id(x),b) => 
+      s"λ$x -> ${prettyStr(b)}"
+    case Id(x) => x
   }
   
   parseAll(TERM, TEST1) match {
     case Success(lup,_) => 
-      prettyPrintln(lup)
+      println(prettyStr(lup))
       println("  beta-reduction ->")
-      prettyPrintln(interpret(lup))
+      println(prettyStr(reduce(lup)))
     case x => println(x)
   }
   
