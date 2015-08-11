@@ -26,7 +26,10 @@ object Interpreter extends Parser with App {
   }
   
   parseAll(TERM, TEST1) match {
-    case Success(lup,_) => prettyPrintln(lup); prettyPrintln(interpret(lup))
+    case Success(lup,_) => 
+      prettyPrintln(lup)
+      println("  beta-reduction ->")
+      prettyPrintln(interpret(lup))
     case x => println(x)
   }
   
