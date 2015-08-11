@@ -9,11 +9,21 @@ import scala.language.postfixOps
  */
 trait Parser extends RegexParsers with PackratParsers {
   import LambdaAST._
+ 
+//  override val skipWhitespace = false
+  override val whiteSpace = """[ ]+""".r
 
   lazy val identifier: PackratParser[String] =
     """[a-zA-Z]+""".r ^^ { _.toString }
 
-  lazy val PRGM:PackratParser[List[Term]] = (NAMED | TERM).*
+  lazy val PRGM:PackratParser[List[Term]] = (LINE | EMPTYLINE).*
+  
+  lazy val EMPTYLINE = ENDLINE ^^ {_ => Empty}
+  
+  lazy val ENDLINE:PackratParser[String] = sys.props("line.separator").r ^^ identity
+  
+  lazy val LINE:PackratParser[Term] = (NAMED | TERM)
+  
   
   lazy val NAMED:PackratParser[Named] = 
     ID ~ ("=" ~> TERM) ^^
@@ -41,6 +51,7 @@ trait Parser extends RegexParsers with PackratParsers {
 object LambdaAST {
 
   abstract trait Term
+  case object Empty extends Term
   case class Id(id: String) extends Term
   case class Abstraction(id: Id, body: Term) extends Term
   case class Application(left: Term, right: Term) extends Term

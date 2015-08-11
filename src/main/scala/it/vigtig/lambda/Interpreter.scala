@@ -8,13 +8,18 @@ object Interpreter extends Parser with App {
 
   val TEST1 = "( y . (x . y z x ) a) b"
   val TEST2 = "a b c d"
-  val TESTNAMED = "a = ( y . (x . y z x ) a) b"
-
+  val TESTNAMED =
+    """
+      a = ( y . (x . y z x ) a) b
+      
+      b = a x b
+      """
+  
   parseAll(PRGM, TESTNAMED) match {
     case Success(lup, _) =>
-      println(lup.map(prettyStr).mkString)
-      println("  beta-reduction --->")
-      println( lup.map( (prettyStr _).compose(reduce)).mkString )
+      println(lup.map(prettyStr).mkString("\n"))
+//      println("  beta-reduction --->")
+//      println( lup.map( (prettyStr _).compose(reduce)).mkString )
     case x => println(x)
   }
 
@@ -37,6 +42,7 @@ object Interpreter extends Parser with App {
       s"$x . ${prettyStr(b)}"
     case Id(x)              => x
     case Named(Id(x), term) => s"$x = ${prettyStr(term)}"
+    case Empty => "<Empty>"
   }
 
   def fixPoint[T](t: T)(p: T => T): T =
