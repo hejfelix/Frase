@@ -26,28 +26,25 @@ object Interpreter extends Parser with App {
     case x => println(x)
   }
 
-  def interpret(term: Term) = betaReduction(term)
+  def interpret(t: Term):Term = fixPoint(t)(reduce)
 
   def reduce(t: Term): Term = t match {
-    case Id(_)           => t
-    case Named(id, body) => Named(id, reduce(body))
-    case Application(Abstraction(id, body), rhs) =>
-      reduce(betaReduce(rhs, id, body))
-    case Application(t, y) => Application(reduce(t), reduce(y))
-    case Abstraction(a, b) => Abstraction(a, reduce(b))
-    case _                 => t
+    case Id(_)                        => t
+    case Named(id, body)              => Named(id, reduce(body))
+    case Applic(Abstr(id, body), rhs) => reduce(betaReduce(rhs, id, body))
+    case Applic(t, y)                 => Applic(reduce(t), reduce(y))
+    case Abstr(a, b)                  => Abstr(a, reduce(b))
+    case _                            => t
   }
 
   def prettyStr(t: Term): String = t match {
-    case Application(a, b) =>
-      s"(${prettyStr(a)} ${prettyStr(b)})"
-    case Abstraction(Id(x), b) =>
-      s"$x . ${prettyStr(b)}"
+    case Applic(a, b)       => s"(${prettyStr(a)} ${prettyStr(b)})"
+    case Abstr(Id(x), b)    => s"$x . ${prettyStr(b)}"
     case Id(x)              => x
     case Named(Id(x), term) => s"$x = ${prettyStr(term)}"
     case Empty              => "<Empty>"
     case Integer(i)         => i.toString
-    case FloatingPoint(f)   => f.toString
+    case Floating(f)        => f.toString
     case Bit(b)             => b.toString
   }
 
@@ -57,15 +54,13 @@ object Interpreter extends Parser with App {
     else
       t
 
-  def betaReduction(t: Term): Term = fixPoint(t)(reduce)
-
   def betaReduce(newX: Term, oldX: Id, in: Term): Term = in match {
     case `oldX` => newX
     case Id(_)  => in
-    case Abstraction(id, body) =>
-      Abstraction(id, betaReduce(newX, oldX, body))
-    case Application(l, r) =>
-      Application(betaReduce(newX, oldX, l), betaReduce(newX, oldX, r))
+    case Abstr(id, body) =>
+      Abstr(id, betaReduce(newX, oldX, body))
+    case Applic(l, r) =>
+      Applic(betaReduce(newX, oldX, l), betaReduce(newX, oldX, r))
   }
 
 }
