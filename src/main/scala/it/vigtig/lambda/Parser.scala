@@ -7,57 +7,78 @@ import scala.language.postfixOps
 /**
  * @author Hargreaves
  */
-trait Parser extends RegexParsers with PackratParsers {
+trait Parser 
+  extends RegexParsers 
+  with PackratParsers  {
   import LambdaAST._
- 
-//  override val skipWhitespace = false
+  
+  type PParser[T] = PackratParser[T]
+  
   override val whiteSpace = """[ ]+""".r
 
-  lazy val identifier: PackratParser[String] =
-    """[a-zA-Z]+""".r ^^ { _.toString }
+  lazy val BIT:PParser[Bit] = """(true|false)""".r ^^ {
+    case "true" => Bit(true)
+    case "false" => Bit(false)
+  }
+  
+  lazy val INTEGER:PParser[Integer] = 
+    """-?\d+""".r ^^ 
+    {i => Integer(i.toInt)}
+  
+  lazy val FLOAT:PParser[FloatingPoint] =
+    """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ 
+      {f => FloatingPoint(f.toFloat)}
+  
+  lazy val identifier: PParser[String] =
+    """[a-zA-Z+\-\\/\*]+""".r ^^ { _.toString }
+  
+  lazy val ATOM:PParser[Atom] = BIT | INTEGER | FLOAT | ID
 
-  lazy val PRGM:PackratParser[List[Term]] = (LINE | EMPTYLINE).*
+  lazy val PRGM:PParser[List[Term]] = (LINE | EMPTYLINE).*
   
-  lazy val EMPTYLINE = ENDLINE ^^ {_ => Empty}
+  lazy val EMPTYLINE = EOL ^^ {_ => Empty}
   
-  lazy val ENDLINE:PackratParser[String] = sys.props("line.separator").r ^^ identity
+  lazy val EOF:PParser[String] = """\z""".r ^^ identity
+  lazy val EOL:PParser[String] = sys.props("line.separator").r ^^ identity
   
-  lazy val LINE:PackratParser[Term] = (NAMED | TERM)
+  lazy val LINE:PParser[Term] = (NAMED | TERM) <~ (EOL | EOF)
   
-  
-  lazy val NAMED:PackratParser[Named] = 
+  lazy val NAMED:PParser[Named] = 
     ID ~ ("=" ~> TERM) ^^
      { case id ~ body => Named(id,body) }
   
-  lazy val TERM: PackratParser[Term] = LABSTR | APP | ID | PEXPR
+  lazy val TERM: PParser[Term] = LABSTR | APP | ATOM | PEXPR
 
-  lazy val PEXPR: PackratParser[Term] = "(" ~> TERM <~ ")"
+  lazy val PEXPR: PParser[Term] = "(" ~> TERM <~ ")"
 
-  lazy val ID: PackratParser[Id] =
+  lazy val ID: PParser[Id] =
     identifier ^^ Id
 
-  lazy val LABSTR: PackratParser[Abstraction] =
+  lazy val LABSTR: PParser[Abstraction] =
     ID ~ "." ~ TERM ^^
       { case id ~ _ ~ term => Abstraction(id, term) }
 
-  lazy val APP: PackratParser[Term] =
-    TERM ~ ID ^^
+  lazy val APP: PParser[Term] =
+    TERM ~ ATOM ^^
       { case t1 ~ t2 => Application(t1, t2) }
-
-  
   
 }
 
 object LambdaAST {
 
   abstract trait Term
+  
   case object Empty extends Term
-  case class Id(id: String) extends Term
+  
   case class Abstraction(id: Id, body: Term) extends Term
   case class Application(left: Term, right: Term) extends Term
   case class Named(id:Id,body:Term) extends Term
   
-
+  abstract trait Atom extends Term //"Normal Form", term cannot be reduced further
+  case class Id(id: String) extends Atom
+  case class Integer(i:Int) extends Atom
+  case class FloatingPoint(f:Float) extends Atom
+  case class Bit(b:Boolean) extends Atom
 }
 
 object TestLambdaParser extends Parser with App {

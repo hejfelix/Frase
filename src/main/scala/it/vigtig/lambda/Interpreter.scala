@@ -8,26 +8,29 @@ object Interpreter extends Parser with App {
 
   val TEST1 = "( y . (x . y z x ) a) b"
   val TEST2 = "a b c d"
+  val TEST3 = "a = + 1 2 true - .32f"
+
   val TESTNAMED =
     """
       a = ( y . (x . y z x ) a) b
       
       b = a x b
       """
-  
-  parseAll(PRGM, TESTNAMED) match {
+
+  parseAll(PRGM, TEST3) match {
     case Success(lup, _) =>
-      println(lup.map(prettyStr).mkString("\n"))
-//      println("  beta-reduction --->")
-//      println( lup.map( (prettyStr _).compose(reduce)).mkString )
+      println(lup)
+      println(lup.map(prettyStr).mkString)
+    //      println("  beta-reduction --->")
+    //      println( lup.map( (prettyStr _).compose(reduce)).mkString )
     case x => println(x)
   }
 
   def interpret(term: Term) = betaReduction(term)
 
   def reduce(t: Term): Term = t match {
-    case Id(_) => t
-    case Named(id,body) => Named(id,reduce(body))
+    case Id(_)           => t
+    case Named(id, body) => Named(id, reduce(body))
     case Application(Abstraction(id, body), rhs) =>
       reduce(betaReduce(rhs, id, body))
     case Application(t, y) => Application(reduce(t), reduce(y))
@@ -42,7 +45,10 @@ object Interpreter extends Parser with App {
       s"$x . ${prettyStr(b)}"
     case Id(x)              => x
     case Named(Id(x), term) => s"$x = ${prettyStr(term)}"
-    case Empty => "<Empty>"
+    case Empty              => "<Empty>"
+    case Integer(i)         => i.toString
+    case FloatingPoint(f)   => f.toString
+    case Bit(b)             => b.toString
   }
 
   def fixPoint[T](t: T)(p: T => T): T =
