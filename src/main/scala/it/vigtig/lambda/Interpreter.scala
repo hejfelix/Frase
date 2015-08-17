@@ -3,31 +3,20 @@ package it.vigtig.lambda
 /**
  * @author Hargreaves
  */
-object Interpreter extends Parser with App {
-  import LambdaAST._
 
-  val TEST1 = "( y . (x . y z x ) a) b"
-  val TEST2 = "a b c d"
-  val TEST3 = "a = + 1 2 true - .32f"
-
-  val TESTNAMED =
-    """
-      a = ( y . (x . y z x ) a) b
-      
-      b = a x b
-      """
-
-  parseAll(PRGM, TEST3) match {
-    case Success(lup, _) =>
-      println(lup)
-      println(lup.map(prettyStr).mkString)
-    //      println("  beta-reduction --->")
-    //      println( lup.map( (prettyStr _).compose(reduce)).mkString )
-    case x => println(x)
-  }
-
+trait InterpreterLike{
+    import LambdaAST._
   def interpret(t: Term):Term = fixPoint(t)(reduce)
 
+  def size(t:Term):Int = t match { 
+    case Id(_)                        => 1
+    case Named(id, body)              => 2 + size(body)
+    case Applic(Abstr(id, body), rhs) => 3+size(body)+size(rhs)
+    case Applic(t, y)                 => 1+size(t)+size(y)
+    case Abstr(a, b)                  => 1+size(a)+size(b)
+    case _                            => 1  
+  }
+  
   def reduce(t: Term): Term = t match {
     case Id(_)                        => t
     case Named(id, body)              => Named(id, reduce(body))
@@ -62,5 +51,30 @@ object Interpreter extends Parser with App {
     case Applic(l, r) =>
       Applic(betaReduce(newX, oldX, l), betaReduce(newX, oldX, r))
   }
+}
+
+object Interpreter extends Parser with InterpreterLike with App {
+
+
+  val TEST1 = "( y . (x . y z x ) a) b"
+  val TEST2 = "a b c d"
+  val TEST3 = "a = + 1 2 true - .32f"
+
+  val TESTNAMED =
+    """
+      a = ( y . (x . y z x ) a) b
+      
+      b = a x b
+      """
+
+  parseAll(PRGM, TEST3) match {
+    case Success(lup, _) =>
+      println(lup)
+      println(lup.map(prettyStr).mkString)
+    //      println("  beta-reduction --->")
+    //      println( lup.map( (prettyStr _).compose(reduce)).mkString )
+    case x => println(x)
+  }
+
 
 }
