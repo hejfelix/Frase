@@ -8,10 +8,11 @@ trait InterpreterLike {
   import LambdaAST._
   def interpret(t: Term): Term = fixPoint(t)(reduce)
 
+
+
   def size(t: Term): Int = t match {
     case Id(_)                        => 1
-    case Named(id, body)              => 2 + size(body)
-    case Applic(Abstr(id, body), rhs) => 3 + size(body) + size(rhs)
+    case Named(id, body)              => 1 + size(id) + size(body)
     case Applic(t, y)                 => 1 + size(t) + size(y)
     case Abstr(a, b)                  => 1 + size(a) + size(b)
     case _                            => 1
@@ -20,6 +21,7 @@ trait InterpreterLike {
   def reduce(t: Term): Term = t match {
     case Id(_)                        => t
     case Named(id, body)              => Named(id, reduce(body))
+    case Applic(Applic(Bit(p),yes),no) => if(p) yes else no
     case Applic(Abstr(id, body), rhs) => reduce(substitute(body)(id -> rhs))
     case Applic(t, y)                 => Applic(reduce(t), reduce(y))
     case Abstr(a, b)                  => Abstr(a, reduce(b))
@@ -32,7 +34,7 @@ trait InterpreterLike {
     case Abstr(Id(x), b)      => s"$x . ${prettyStr(b)}"
     case Id(x)                => x
     case Named(Id(x), term)   => s"$x = ${prettyStr(term)}"
-    case Empty                => "<Empty>"
+    case Empty                => "< >"
     case Integer(i)           => i.toString
     case Floating(f)          => f.toString
     case Bit(b)               => b.toString
@@ -49,6 +51,8 @@ trait InterpreterLike {
     case _: Atom         => Set()
     case Abstr(id, body) => freeVars(body) - id
     case Applic(a, b)    => freeVars(a) ++ freeVars(b)
+    case Empty           => Set()
+    case Named(id, term) => freeVars(term)
   }
 
   //Capture-avoiding substitution
@@ -73,19 +77,29 @@ object Interpreter extends Parser with InterpreterLike with App {
 
   val TESTNAMED =
     """
-      a = ( y . (x . y z x ) a) b
-      
+      true = x . y . x
+      false = x . y . y
       b = a x b
+      
+      
       """
 
   val label = Id("y") -> Id("y")
 
-  parseAll(PRGM, "((x . y) x)") match {
+  parseAll(PRGM, TESTNAMED) match {
     case Success(lup, _) =>
-      println(lup)
+      val nameds = lup filter {
+        case n: Named => true
+        case _        => false
+      }
+
+      val dict = nameds.map {
+        case Named(a, b) => a -> b
+      }.toMap
+
+      println("DICT:" + dict)
+      println((nameds map prettyStr).mkString("\n"))
       println(s"free vars: ${(lup map freeVars).mkString}")
-      println(s"sub [y := y] ${lup map (t => substitute(t)(Id("x") -> Id("y")))}")
-      println(lup.map(prettyStr).mkString)
       println("  beta-reduction --->")
       println(lup.map((prettyStr _).compose(reduce)).mkString)
     case x => println(x)

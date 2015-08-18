@@ -59,7 +59,7 @@ trait Parser
       { case id ~ _ ~ term => Abstr(id, term) }
 
   lazy val APP: PParser[Term] =
-    TERM ~ TERM ^^
+    TERM ~ ID ^^
       { case t1 ~ t2 => Applic(t1, t2) }
 
 }
