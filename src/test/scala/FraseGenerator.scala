@@ -15,6 +15,7 @@ import org.scalatest.Matchers._
 
 class FraseGenerator extends PropSpec
 with InterpreterLike 
+with Parser
 with GeneratorDrivenPropertyChecks
  {
   import it.vigtig.lambda.LambdaAST._
@@ -41,7 +42,21 @@ with GeneratorDrivenPropertyChecks
   property("Atoms cannot be reduced"){
     forAll {
      (a:Atom) => 
-       size(reduce(a)) shouldEqual size(a)
+       reduce(a) shouldEqual a
+    }
+  }
+  
+  property("Constant-function reduces to constant-function"){
+    forAll{
+      (x:Id,y:Id) => 
+        whenever(x!=y){
+          val str = s"((${x.id} . ${y.id}) ${x.id})"
+          parseAll(LINE,str) match {
+            case Success(ast, _) => 
+              reduce(ast) == y
+            case _ => 
+          }
+        }
     }
   }
   
