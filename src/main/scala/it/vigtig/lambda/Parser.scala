@@ -32,7 +32,7 @@ trait Parser
   lazy val identifier: PParser[String] =
     """[a-zA-Z+\-\\/\*]+""".r ^^ { _.toString }
 
-  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID
+  lazy val ATOM: PParser[Atom] =  FLOAT | BIT | INTEGER  | ID
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 
