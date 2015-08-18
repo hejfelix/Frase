@@ -61,11 +61,6 @@ trait InterpreterLike {
     case (a @ Abstr(_, _), _) => a
   }
 
-  def alphaConvert(t: Term)(bound: Set[Id] = Set()): Term = t match {
-    case Abstr(id, body) => Abstr(id, alphaConvert(body)(bound + id))
-  }
-
-
 }
 
 object Interpreter extends Parser with InterpreterLike with App {
