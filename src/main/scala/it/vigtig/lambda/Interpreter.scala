@@ -23,6 +23,7 @@ trait InterpreterLike {
     case Applic(Applic(Id("+"),Integer(x)),Integer(y)) => Integer(x+y)
     case Applic(Applic(Bit(p),yes),no) => if(p) yes else no
   }
+  
   def betaReduce:PartialFunction[Term,Term] = builtIns orElse {
     case i@Id(_)                      => i
     case Named(id, body)              => Named(id, betaReduce(body))

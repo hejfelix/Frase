@@ -47,7 +47,7 @@ trait Parser
     ID ~ ("=" ~> TERM) ^^
       { case id ~ body => Named(id, body) }
 
-  lazy val TERM: PParser[Term] = APP | ATOM | PEXPR | LABSTR  
+  lazy val TERM: PParser[Term] =  LABSTR | APP | ATOM | PEXPR   
 
   lazy val PEXPR: PParser[Term] = "(" ~> TERM <~ ")"
 

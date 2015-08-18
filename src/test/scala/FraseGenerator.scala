@@ -53,13 +53,37 @@ with GeneratorDrivenPropertyChecks
           val str = s"((${x.id} . ${y.id}) ${x.id})"
           parseAll(LINE,str) match {
             case Success(ast, _) => 
-              interpret(ast) == y
+              interpret(ast) shouldBe y
             case _ => fail("Term failed to parse")
           }
         }
     }
   }
   
+  property("'false' returns 2nd argument"){
+    forAll{
+      (x:Id,y:Id) => 
+        val str = s"false ${x.id} ${y.id}"
+        parseAll(LINE,str) match {
+            case Success(ast, _) => 
+              interpret(ast) shouldBe y
+            case _ => fail("Term failed to parse")
+        }
+    }
+  }
+  
+    
+  property("'true' returns 1st argument"){
+    forAll{
+      (x:Id,y:Id) => 
+        val str = s"true ${x.id} ${y.id}"
+        parseAll(LINE,str) match {
+            case Success(ast, _) => 
+              interpret(ast) shouldBe x
+            case _ => fail("Term failed to parse")
+        }
+    }
+  }
   
 
 }
