@@ -6,7 +6,7 @@ package it.vigtig.lambda
 
 trait InterpreterLike {
   import LambdaAST._
-  def interpret(t: Term): Term = fixPoint(t)(reduce)
+  def interpret(t: Term): Term = fixPoint(t)(betaReduce)
 
 
 
@@ -18,14 +18,18 @@ trait InterpreterLike {
     case _                            => 1
   }
 
-  def reduce(t: Term): Term = t match {
-    case Id(_)                        => t
-    case Named(id, body)              => Named(id, reduce(body))
+  def builtIns:PartialFunction[Term,Term] = {
+    case Applic(Applic(Id("=="),a),b) => if(a==b) Bit(true) else Bit(false)
+    case Applic(Applic(Id("+"),Integer(x)),Integer(y)) => Integer(x+y)
     case Applic(Applic(Bit(p),yes),no) => if(p) yes else no
-    case Applic(Abstr(id, body), rhs) => reduce(substitute(body)(id -> rhs))
-    case Applic(t, y)                 => Applic(reduce(t), reduce(y))
-    case Abstr(a, b)                  => Abstr(a, reduce(b))
-    case _                            => t
+  }
+  def betaReduce:PartialFunction[Term,Term] = builtIns orElse {
+    case i@Id(_)                      => i
+    case Named(id, body)              => Named(id, betaReduce(body))
+    case Applic(Abstr(id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+    case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
+    case Abstr(a, b)                  => Abstr(a, betaReduce(b))
+    case t                            => t
   }
 
   def prettyStr(t: Term): String = t match {
@@ -48,11 +52,11 @@ trait InterpreterLike {
 
   def freeVars(t: Term): Set[Id] = t match {
     case a @ Id(_)       => Set(a)
-    case _: Atom         => Set()
     case Abstr(id, body) => freeVars(body) - id
     case Applic(a, b)    => freeVars(a) ++ freeVars(b)
     case Empty           => Set()
     case Named(id, term) => freeVars(term)
+    case _         => Set()
   }
 
   //Capture-avoiding substitution
@@ -101,7 +105,7 @@ object Interpreter extends Parser with InterpreterLike with App {
       println((nameds map prettyStr).mkString("\n"))
       println(s"free vars: ${(lup map freeVars).mkString}")
       println("  beta-reduction --->")
-      println(lup.map((prettyStr _).compose(reduce)).mkString)
+      println(lup.map((prettyStr _).compose(betaReduce)).mkString)
     case x => println(x)
   }
 

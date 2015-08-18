@@ -11,7 +11,8 @@ with InterpreterLike {
       val exprSrc = io.StdIn.readLine("Frase>")
       parseAll(LINE,exprSrc) match {
         case Success(expr, _) => 
-          println("Parsed: " + prettyStr(expr))
+          println(s"Parsed:  ${prettyStr(expr)}")
+          println(s"AST: $expr")
           println("Evaluated: "+prettyStr(interpret(expr)))
           println()
         case err: NoSuccess   => println(err)
