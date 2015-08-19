@@ -89,6 +89,7 @@ trait InterpreterLike {
     case (Abstr(id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
       Abstr(id, substitute(body)(label))
     case (a @ Abstr(_, _), _) => a
+    case _ => t
   }
 
 }
