@@ -30,7 +30,7 @@ trait Parser
       { f => Floating(f.toFloat) }
 
   lazy val identifier: PParser[String] =
-    """[a-zA-Z+\-\\/\*=]+""".r ^^ { _.toString }
+    """[a-zA-Z+\-\\/\*=%<]+""".r ^^ { _.toString }
 
   lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID
 
@@ -59,7 +59,7 @@ trait Parser
       { case id ~ _ ~ term => Abstr(id, term) }
 
   lazy val APP: PParser[Term] =
-    TERM ~ (ATOM | PEXPR) ^^
+    TERM ~ (PEXPR | ATOM ) ^^
       { case t1 ~ t2 => Applic(t1, t2) }
 
 }

@@ -42,7 +42,7 @@ with GeneratorDrivenPropertyChecks
   property("Atoms cannot be reduced"){
     forAll {
      (a:Atom) => 
-       interpret(a) shouldEqual a
+       interpret(a)() shouldEqual a
     }
   }
   
@@ -53,7 +53,7 @@ with GeneratorDrivenPropertyChecks
           val str = s"((${x.id} . ${y.id}) ${x.id})"
           parseAll(LINE,str) match {
             case Success(ast, _) => 
-              interpret(ast) shouldBe y
+              interpret(ast)() shouldBe y
             case _ => fail("Term failed to parse")
           }
         }
@@ -66,7 +66,7 @@ with GeneratorDrivenPropertyChecks
         val str = s"false ${x.id} ${y.id}"
         parseAll(LINE,str) match {
             case Success(ast, _) => 
-              interpret(ast) shouldBe y
+              interpret(ast)() shouldBe y
             case _ => fail("Term failed to parse")
         }
     }
@@ -79,7 +79,7 @@ with GeneratorDrivenPropertyChecks
         val str = s"true ${x.id} ${y.id}"
         parseAll(LINE,str) match {
             case Success(ast, _) => 
-              interpret(ast) shouldBe x
+              interpret(ast)() shouldBe x
             case _ => fail("Term failed to parse")
         }
     }

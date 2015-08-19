@@ -13,7 +13,7 @@ with InterpreterLike {
         case Success(expr, _) => 
           println(s"Parsed:  ${prettyStr(expr)}")
           println(s"AST: $expr")
-          println("Evaluated: "+prettyStr(interpret(expr)))
+          println("Evaluated: "+prettyStr(interpret(expr)()))
           println()
         case err: NoSuccess   => println(err)
       }

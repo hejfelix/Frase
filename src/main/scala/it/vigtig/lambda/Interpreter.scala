@@ -6,10 +6,20 @@ package it.vigtig.lambda
 
 trait InterpreterLike {
   import LambdaAST._
-  def interpret(t: Term): Term = fixPoint(t)(betaReduce)
+  def interpret(t: Term)(context:Map[Id,Term] = Map()): Term 
+    = fixPoint(t)(evalStep(context))
 
+   def show[T](t:T):T = {
+    println(t)
+    t
+  }
+  
+  def evalStep(context:Map[Id,Term])(t:Term) = {
+    fixPoint(resolve(t)(context))(reducer)
+  }
 
-
+  def resolve(t:Term)(context:Map[Id,Term]):Term = context.foldLeft(t)((a,b) => substitute(a)(b))
+  
   def size(t: Term): Int = t match {
     case Id(_)                        => 1
     case Named(id, body)              => 1 + size(id) + size(body)
@@ -19,19 +29,27 @@ trait InterpreterLike {
   }
 
   def builtIns:PartialFunction[Term,Term] = {
-    case Applic(Applic(Id("=="),a),b) => if(a==b) Bit(true) else Bit(false)
+    case Applic(Applic(Id("=="),a),b) => Bit(a==b)
+    case Applic(Applic(Id("*"),Integer(x)),Integer(y)) => Integer(x*y)
     case Applic(Applic(Id("+"),Integer(x)),Integer(y)) => Integer(x+y)
+    case Applic(Applic(Id("-"),Integer(x)),Integer(y)) => Integer(x-y)
     case Applic(Applic(Bit(p),yes),no) => if(p) yes else no
+    case Applic(Applic(Id("%"),Integer(a)),Integer(b)) => Integer(a%b)
+    case Applic(Applic(Id("<="),Integer(a)),Integer(b)) => Bit(a<=b)
   }
-  
-  def betaReduce:PartialFunction[Term,Term] = builtIns orElse {
-    case i@Id(_)                      => i
-    case Named(id, body)              => Named(id, betaReduce(body))
-    case Applic(Abstr(id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
-    case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
-    case Abstr(a, b)                  => Abstr(a, betaReduce(b))
-    case t                            => t
+
+  def reducer = {
+      def betaReduce:PartialFunction[Term,Term] = builtIns orElse {
+      case Named(id, body)              => Named(id, betaReduce(body))
+      case Applic(Abstr(id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+      case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
+      case Abstr(a, b)                  => Abstr(a, betaReduce(b))
+      case i@Id(_)                      => i
+      case t                            => t
+    }
+      betaReduce
   }
+ 
 
   def prettyStr(t: Term): String = t match {
     case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
@@ -45,11 +63,12 @@ trait InterpreterLike {
     case Bit(b)               => b.toString
   }
 
-  def fixPoint[T](t: T)(p: T => T): T =
+  def fixPoint[T](t: T)(p: T => T): T ={
     if (p(t) != t)
       fixPoint(p(t))(p)
     else
       t
+  }
 
   def freeVars(t: Term): Set[Id] = t match {
     case a @ Id(_)       => Set(a)
@@ -62,8 +81,10 @@ trait InterpreterLike {
 
   //Capture-avoiding substitution
   def substitute(t: Term)(label: (Id, Term)): Term = (t, label) match {
+    case (Empty,_) => Empty
     case (i: Id, (j, k)) if i == j => k
     case (i: Id, _)                => i
+    case (a:Atom, _)               => a
     case (Applic(a, b), _)         => Applic(substitute(a)(label), substitute(b)(label))
     case (Abstr(id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
       Abstr(id, substitute(body)(label))
@@ -82,31 +103,62 @@ object Interpreter extends Parser with InterpreterLike with App {
 
   val TESTNAMED =
     """
-      true = x . y . x
-      false = x . y . y
-      b = a x b
-      
-      
+      double = x . (+ x x)
+      double 4
       """
 
+  val TESTFIB = """
+    fib = n . + (- n 1) (- n 2)
+    
+    fib 0
+    fib 1
+    fib 2 
+    fib 3
+    fib 4 
+    fib 5
+    """
+  
+  val TESTSUB = """
+    x = a b c
+    y = d e f
+    z = g h i
+    
+    x y z
+    """
+  
+  val TESTFAC = """
+    fac = n . (<= n 1) (1) (* (n) (fac (- n 1)))
+    
+    fac 1 
+    fac 2
+    fac 3
+    fac 4
+    fac 5
+    fac 6
+    """
+  
   val label = Id("y") -> Id("y")
 
-  parseAll(PRGM, TESTNAMED) match {
+  parseAll(PRGM, TESTFAC) match {
     case Success(lup, _) =>
-      val nameds = lup filter {
+      val (nameds,unnameds) = lup filter (_!=Empty) partition {
         case n: Named => true
         case _        => false
       }
+      
 
-      val dict = nameds.map {
+      val dict:Map[Id,Term] = nameds.map {
         case Named(a, b) => a -> b
       }.toMap
 
-      println("DICT:" + dict)
-      println((nameds map prettyStr).mkString("\n"))
-      println(s"free vars: ${(lup map freeVars).mkString}")
-      println("  beta-reduction --->")
-      println(lup.map((prettyStr _).compose(betaReduce)).mkString)
+      println("program:\n"+(lup filter (_!=Empty) map prettyStr).mkString("\n"))
+      println()
+      
+      println("Evaluating...\n"+unnameds.map(t => {
+        interpret(t)(dict)
+      }).map(prettyStr).mkString("\n"))
+      
+      
     case x => println(x)
   }
 
