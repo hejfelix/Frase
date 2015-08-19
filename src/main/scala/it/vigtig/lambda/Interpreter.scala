@@ -14,9 +14,9 @@ trait InterpreterLike {
     t
   }
   
-  def evalStep(context:Map[Id,Term])(t:Term) = {
-    fixPoint(resolve(t)(context))(reducer)
-  }
+  def evalStep(context:Map[Id,Term])(t:Term) = 
+     fixPoint(resolve(t)(context))(reducer)
+  
 
   def resolve(t:Term)(context:Map[Id,Term]):Term = context.foldLeft(t)((a,b) => substitute(a)(b))
   
@@ -108,14 +108,16 @@ object Interpreter extends Parser with InterpreterLike with App {
       """
 
   val TESTFIB = """
-    fib = n . + (- n 1) (- n 2)
-    
+    fib = n . (<= n 1) (1) ((+ (fib (- n 2)) (fib (- n 1))))
+
     fib 0
     fib 1
-    fib 2 
+    fib 2
     fib 3
-    fib 4 
+    fib 4
     fib 5
+    fib 6
+    fib 7
     """
   
   val TESTSUB = """
@@ -139,7 +141,7 @@ object Interpreter extends Parser with InterpreterLike with App {
   
   val label = Id("y") -> Id("y")
 
-  parseAll(PRGM, TESTFAC) match {
+  parseAll(PRGM, TESTFIB) match {
     case Success(lup, _) =>
       val (nameds,unnameds) = lup filter (_!=Empty) partition {
         case n: Named => true
@@ -155,7 +157,8 @@ object Interpreter extends Parser with InterpreterLike with App {
       println()
       
       println("Evaluating...\n"+unnameds.map(t => {
-        interpret(t)(dict)
+        val res = interpret(t)(dict)
+        interpret(res)()
       }).map(prettyStr).mkString("\n"))
       
       
