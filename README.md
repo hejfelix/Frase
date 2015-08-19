@@ -3,7 +3,7 @@
 # Frase
 Frase is a programming language
 
-```scala
+```haskell
 Frase>double = x . + x x
 added "double" to context
 
@@ -35,6 +35,42 @@ Frase>false yes no
 Parsed:  ((false) (yes)) (no)
 AST: Applic(Applic(Bit(false),Id(yes)),Id(no))
 Evaluated: no
+
+Frase>
+```
+
+
+```haskell
+Frase>fac = n . (<= n 1) (1) (* (n) (fac (- n 1)))
+added "fac" to context
+
+Parsed:  fac = n . (((<= n) (1)) (1)) ((* n) (fac (- n) (1)))
+AST: Named(Id(fac),Abstr(Id(n),Applic(Applic(Applic(Applic(Id(<=),Id(n)),Integer(1)),Integer(1)),Applic(Applic(Id(*),Id(n)),Applic(Id(fac),Applic(Applic(Id(-),Id(n)),Integer(1)))))))
+Evaluated: fac = n . (((<= n) (1)) (1)) ((* n) (fac (- n) (1)))
+
+Frase>fac 0
+
+Parsed:  fac 0
+AST: Applic(Id(fac),Integer(0))
+Evaluated: 1
+
+Frase>fac 3
+
+Parsed:  fac 3
+AST: Applic(Id(fac),Integer(3))
+Evaluated: 6
+
+Frase>fac 4
+
+Parsed:  fac 4
+AST: Applic(Id(fac),Integer(4))
+Evaluated: 24
+
+Frase>fac 5
+
+Parsed:  fac 5
+AST: Applic(Id(fac),Integer(5))
+Evaluated: 120
 
 Frase>
 ```
