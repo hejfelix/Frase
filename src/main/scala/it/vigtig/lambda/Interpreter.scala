@@ -31,6 +31,7 @@ trait InterpreterLike {
     case App(App(Id("=="), a), b)                   => Bit(a == b)
     case App(App(Id("*"), Integer(x)), Integer(y))  => Integer(x * y)
     case App(App(Id("+"), Integer(x)), Integer(y))  => Integer(x + y)
+    case App(App(Id("+"), Floating(x)), Floating(y))  => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))  => Integer(x - y)
     case App(App(Bit(p), yes), no)                  => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))  => Integer(a % b)
@@ -138,7 +139,6 @@ object Interpreter extends Parser with InterpreterLike with App {
     fac 6
     """
 
-  val label = Id("y") -> Id("y")
 
   parseAll(PRGM, TESTFIB) match {
     case Success(lup, _) =>
