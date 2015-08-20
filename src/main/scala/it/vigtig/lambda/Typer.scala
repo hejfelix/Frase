@@ -9,11 +9,11 @@ trait Typer {
   abstract trait Type
   abstract trait TMono extends Type
   abstract trait TPoly extends Type
-  
+
   case class TInst(name: String) extends TMono
-  case class TVar(name:String) extends TMono
+  case class TVar(name: String) extends TMono
   case class TPolyInst(name: String, args: Type*) extends TPoly
-  
+
   case class TFunc(in: Type, out: Type) extends TPoly
   case class TFunc2(a: Type, b: Type, out: Type) extends TPoly
 
@@ -25,48 +25,53 @@ trait Typer {
       TVar("" + v)
     })
   }
-  
-  def min(a:Type,b:Type) = a match{
-    case _:TInst => a
-    case _ => b
+
+  def min(a: Type, b: Type) = a match {
+    case _: TInst => a
+    case _        => b
   }
 
   private def knownTypes(context: Map[Term, Type]): PartialFunction[Term, Type] = {
-    case Integer(_)  => TInst("Int")
-    case Bit(_)      => TInst("Bool")
-    case Floating(_) => TInst("Float")
-    case Applic(Id("+"), x) =>
-      val typX = context(x)
-      TFunc(typX, TFunc(typX,typX))
+    case Integer(_)          => TInst("Int")
+    case Bit(_)              => TInst("Bool")
+    case Floating(_)         => TInst("Float")
+    case Applic(Id("+"), x)  => val t=W(context)(x);TFunc(t,t)
+    case Applic(Id("-"), x)  => val t=W(context)(x);TFunc(t,t)
+    case Applic(Id("<="), x) => val t=W(context)(x);TFunc(t, TFunc(t, TInst("Bool")))
   }
 
   private def W(context: Map[Term, Type]): PartialFunction[Term, Type] =
     knownTypes(context) orElse {
-    
+
       case Id(x) =>
         context(Id(x))
+
+      case Named(id, body) =>
+        val idTyp = W(context)(id)
+        W(context + (id -> idTyp))(body)
+
         
-      case Applic(a, t) =>
+      case a@Applic(Abstr(i,e),t) => 
+        val iType = W(context)(i)
         val tType = W(context)(t)
-        val aType = a match {
-          case Abstr(i,e) =>
-            val iType = W(context)(i)
-            W(context+(i -> min(tType,iType) ))(a)
-          case _ => W(context+(t ->tType ))(a)
+        val eType = W(context+(i -> min(tType, iType)))(e)
+        val result = eType match{
+          case TFunc(in,out) => out
         }
-        println("applic: "+aType+"  "+tType)
-        println("applic: "+t)
-        aType match {
-          case TFunc(in, out)     => println(out); out
-        }
+        result
         
-      case Abstr(i, e) =>
+      case term@Applic(a, t) =>
+        val tType = W(context)(t)
+        val aType = W(context+(t -> tType))(a)
+        println("applic2> "+prettyStr(a)+": "+aType)
+        aType
+
+      case a@Abstr(i, e) =>
         val iType = W(context)(i)
         val eType = W(context + (i -> iType))(e)
-        println("abstr: "+iType+"  "+eType)
-        eType match{
-          case TFunc(_,res) => TFunc(iType,res)
-          case _ => TFunc(iType,eType)
+        eType match {
+          case TFunc(_, res) => TFunc(iType, res)
+          case _             => TFunc(iType, eType)
         }
 
       case term =>
@@ -81,7 +86,7 @@ object TyperTest extends Typer
     with App {
   import it.vigtig.lambda.LambdaAST._
 
-  parseAll(LINE, "(x . y) 42") match {
+  parseAll(LINE, "fib = n . (<= n 1) (1) ((+ (fib (- n 2)) (fib (- n 1))))") match {
     case Success(term, _) =>
       println(prettyStr(term))
       println()

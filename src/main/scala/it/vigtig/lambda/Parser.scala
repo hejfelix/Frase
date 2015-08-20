@@ -80,4 +80,16 @@ object LambdaAST {
   case class Floating(f: Float) extends Atom
   case class Bit(b: Boolean) extends Atom
   
+  
+  def prettyStr(t: Term): String = t match {
+    case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
+    case Applic(a, b)         => s"(${prettyStr(a)}) (${prettyStr(b)})"
+    case Abstr(Id(x), b)      => s"$x . ${prettyStr(b)}"
+    case Id(x)                => x
+    case Named(Id(x), term)   => s"$x = ${prettyStr(term)}"
+    case Empty                => "< >"
+    case Integer(i)           => i.toString
+    case Floating(f)          => f.toString
+    case Bit(b)               => b.toString
+  }
 }
