@@ -16,6 +16,13 @@ trait HindleyMilnerLike {
   case class TFunc(in: Type, out: Type) extends TPoly
   case class TFunc2(a: Type, b: Type, out: Type) extends TPoly
 
+  def prettyType(t:Type):String = t match {
+    case TFunc(in,out) => s"${prettyType(in)} -> ${prettyType(out)}"
+    case TVar(x) => x
+    case TInst(x) =>  x
+    case _ => t.toString
+  }
+  
   def newTyper = {
     var nextVar = 'a'
     W(Map[Term, Type]().withDefault { t =>
@@ -47,7 +54,6 @@ trait HindleyMilnerLike {
         context(Id(x))
 
       case Named(id, body) =>
-        println("named")
         val idTyp = W(context)(id)
         W(context + (id -> idTyp))(body)
 
@@ -57,6 +63,7 @@ trait HindleyMilnerLike {
         val eType = W(context+(i -> min(tType, iType)))(e)
         val result = eType match{
           case TFunc(in,out) => out
+          case _ => eType
         }
         result
         
@@ -70,14 +77,12 @@ trait HindleyMilnerLike {
             out
           case _ => aType
         }
-        println("applic2> "+prettyStr(a)+": "+aType)
         if(aType==TInst("Bool"))
           tType
         else
           result
 
       case a@Abstr(i, e) =>
-        println("abstr1")
         val iType = W(context)(i)
         val eType = W(context + (i -> iType))(e)
         eType match {
@@ -86,7 +91,6 @@ trait HindleyMilnerLike {
         }
 
       case term =>
-        println("Fallback")
         context(term) //Fallback
     }
 

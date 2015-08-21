@@ -5,7 +5,8 @@ package it.vigtig.lambda
 object REPL 
 extends ParserLike
 with InterpreterLike 
-with ASTLike {
+with ASTLike
+with HindleyMilnerLike{
   def main(args: Array[String]) = loop()
  
   def loop(context:Map[Id,Term] = Map()):Unit = {
@@ -20,9 +21,9 @@ with ASTLike {
             case _ => None
           }
           println()
-          println(s"Parsed:  ${prettyStr(expr)}")
-          println(s"AST: $expr")
-          println("Evaluated: "+prettyStr(interpret(expr)(context)))
+          println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")
+          println(s"AST:          $expr")
+          println("Evaluated:    "+prettyStr(interpret(expr)(context)))
           println()
           
           loop(context ++ definition)
