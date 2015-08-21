@@ -5,7 +5,7 @@ package it.vigtig.lambda
  */
 
 trait InterpreterLike {
-  import LambdaAST._
+  self:ASTLike =>
   def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = fixPoint(t)(evalStep(context))
 
   def show[T](t: T): T = {
@@ -83,8 +83,8 @@ trait InterpreterLike {
 
 }
 
-object Interpreter extends Parser with InterpreterLike with App {
-  import LambdaAST._
+object Interpreter extends ParserLike with InterpreterLike with ASTLike with App {
+  
 
   val TEST1 = "( y . (x . y z x ) a) b"
   val TEST2 = "a b c d"

@@ -15,10 +15,10 @@ import org.scalatest.Matchers._
 
 class FraseGenerator extends PropSpec
 with InterpreterLike 
-with Parser
+with ParserLike
+with ASTLike
 with GeneratorDrivenPropertyChecks
  {
-  import it.vigtig.lambda.LambdaAST._
   
   private object Generators {
     implicit def id = Arbitrary{ Gen.alphaChar map ( x => Id(""+x) ) }

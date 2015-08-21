@@ -1,11 +1,11 @@
 package it.vigtig.lambda
-import it.vigtig.lambda.LambdaAST._
 /**
  * @author Hargreaves
  */
 object REPL 
-extends Parser
-with InterpreterLike {
+extends ParserLike
+with InterpreterLike 
+with ASTLike {
   def main(args: Array[String]) = loop()
  
   def loop(context:Map[Id,Term] = Map()):Unit = {

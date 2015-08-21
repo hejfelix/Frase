@@ -1,0 +1,8 @@
+
+
+/**
+ * @author Hargreaves
+ */
+object TypeTest {
+  
+}

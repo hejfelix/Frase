@@ -3,9 +3,8 @@ package it.vigtig.lambda
 /**
  * @author Hargreaves
  */
-trait Typer {
-  import it.vigtig.lambda.LambdaAST._
-
+trait HindleyMilnerLike {
+  self:ASTLike =>
   abstract trait Type
   abstract trait TMono extends Type
   abstract trait TPoly extends Type
@@ -37,7 +36,8 @@ trait Typer {
     case Floating(_)         => TInst("Float")
     case Applic(Id("+"), x)  => val t=W(context)(x);TFunc(t,t)
     case Applic(Id("-"), x)  => val t=W(context)(x);TFunc(t,t)
-    case Applic(Id("<="), x) => val t=W(context)(x);TFunc(t, TFunc(t, TInst("Bool")))
+    case Applic(Id("<="), x) => val t=W(context)(x);val y=W(context)(Empty);TFunc(t, TInst("Bool"))
+    case Applic(Bit(p),x) => val t=W(context)(x);TFunc(t, t)
   }
 
   private def W(context: Map[Term, Type]): PartialFunction[Term, Type] =
@@ -47,10 +47,10 @@ trait Typer {
         context(Id(x))
 
       case Named(id, body) =>
+        println("named")
         val idTyp = W(context)(id)
         W(context + (id -> idTyp))(body)
 
-        
       case a@Applic(Abstr(i,e),t) => 
         val iType = W(context)(i)
         val tType = W(context)(t)
@@ -63,10 +63,21 @@ trait Typer {
       case term@Applic(a, t) =>
         val tType = W(context)(t)
         val aType = W(context+(t -> tType))(a)
+        val result =aType match {
+          case TFunc(in,out) => 
+            if(in!=tType && !(in.isInstanceOf[TVar])) 
+              System.err.println(in+" != "+tType+" in "+prettyStr(term))
+            out
+          case _ => aType
+        }
         println("applic2> "+prettyStr(a)+": "+aType)
-        aType
+        if(aType==TInst("Bool"))
+          tType
+        else
+          result
 
       case a@Abstr(i, e) =>
+        println("abstr1")
         val iType = W(context)(i)
         val eType = W(context + (i -> iType))(e)
         eType match {
@@ -75,27 +86,12 @@ trait Typer {
         }
 
       case term =>
+        println("Fallback")
         context(term) //Fallback
     }
 
 }
 
-object TyperTest extends Typer
-    with Parser
-    with InterpreterLike
-    with App {
-  import it.vigtig.lambda.LambdaAST._
-
-  parseAll(LINE, "fib = n . (<= n 1) (1) ((+ (fib (- n 2)) (fib (- n 1))))") match {
-    case Success(term, _) =>
-      println(prettyStr(term))
-      println()
-      println("AST:" + term)
-      println("Type:" + newTyper(term))
-    case _ =>
-  }
-
-}
 
 
 
