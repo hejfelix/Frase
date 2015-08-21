@@ -6,6 +6,8 @@ package it.vigtig.lambda
 
 trait InterpreterLike {
   self:ASTLike =>
+    
+
   def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = fixPoint(t)(evalStep(context))
 
   def show[T](t: T): T = {
