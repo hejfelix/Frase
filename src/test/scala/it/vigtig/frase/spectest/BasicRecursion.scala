@@ -39,14 +39,14 @@ fib = n . (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
   }
   
   
-  def fac(n:Int) = (1 /: (1 to n))(_*_) 
+  def fac(n:Int) = (1 to n).product
   val FAC_FUNC = 
 """
 fac = n . (<= n 1) (1) (* (n) (fac (- n 1)))
 """
   
   property("Factorial function") {
-    forAll(Gen.choose(0, 15)) {
+    forAll(Gen.choose(0, 1337)) {
       (n: Int) => parseProgramTest(FAC_FUNC + s"fac $n")(_ shouldBe Integer(fac(n)))
     }
   }

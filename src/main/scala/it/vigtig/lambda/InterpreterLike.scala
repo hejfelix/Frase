@@ -8,24 +8,28 @@ trait InterpreterLike extends ParserLike {
   import AST._
 
   def interpretProgram(program: String): Option[List[Term]] = {
-      parseAll(PRGM, program) match {
-    case Success(lup, _) =>
-      val (nameds, unnameds) = lup filter (_ != Empty) partition {
-        case n: Named => true
-        case _        => false
-      }
 
-      val dict: Map[Id, Term] = nameds.map {
-        case Named(a, b) => a -> b
-      }.toMap
+    parseAll(PRGM, program) match {
 
-      Some(unnameds.map(t => {
-        val res = interpret(t)(dict)
-        interpret(res)()
-      }))
+      case Success(lup, _) =>
 
-    case x => println(x); None
-  }
+        val (nameds, unnameds) = lup filter (_ != Empty) partition {
+          case n: Named => true
+          case _        => false
+        }
+
+        val dict: Map[Id, Term] = nameds.map {
+          case Named(a, b) => a -> b
+        }.toMap
+
+        Some(unnameds.map(t => {
+          val res = interpret(t)(dict)
+          interpret(res)()
+        }))
+
+      case x => println(x); None
+    }
+
   }
 
   def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = fixPoint(t)(evalStep(context))

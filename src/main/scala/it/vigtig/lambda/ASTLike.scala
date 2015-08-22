@@ -19,6 +19,9 @@ object AST {
   case class Floating(f: Float) extends Atom
   case class Bit(b: Boolean) extends Atom
 
+  case class SetType(id:Id,vars:List[Id],cons:List[Constructor]) extends Term
+  case class Constructor(id:Id,args:List[SetType]) extends Term
+  
   def prettyStr(t: Term): String = t match {
     case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
     case Applic(a, b)         => s"(${prettyStr(a)}) (${prettyStr(b)})"

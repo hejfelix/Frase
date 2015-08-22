@@ -14,8 +14,6 @@ trait ParserLike
 
   type PParser[T] = PackratParser[T]
 
-  override val whiteSpace = """[ ]+""".r
-
   lazy val BIT: PParser[Bit] = """(true|false)""".r ^^ {
     case "true"  => Bit(true)
     case "false" => Bit(false)
@@ -29,9 +27,23 @@ trait ParserLike
     """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^
       { f => Floating(f.toFloat) }
 
-  lazy val identifier: PParser[String] =
-    """[a-zA-Z+\-\\/\*=%<]+""".r ^^ { _.toString }
+  lazy val VARIABLE: PParser[String] =
+    """[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
+  
+  lazy val SET: PParser[String] = 
+    """[A-Z][a-z]*""".r ^^ identity
+    
+  lazy val SET_DEF: PParser[SetType] = 
+    (("""set """.r ~> SET ~ (VARIABLE.*) <~ """ = """.r) ~SET_INSTANCE.+) ^^ { 
+    case name ~ vars ~ is => 
+      SetType(Id(name),vars.map(Id),is.map(s => Constructor(Id(s),Nil)))
+    }
+  
+  lazy val SET_INSTANCE:PParser[String] = 
+    (SET~VARIABLE.*) ^^ { _.toString}
 
+    
+    
   lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
@@ -52,7 +64,7 @@ trait ParserLike
   lazy val PEXPR: PParser[Term] = "(" ~> TERM <~ ")"
 
   lazy val ID: PParser[Id] =
-    identifier ^^ Id
+    VARIABLE ^^ Id
 
   lazy val LABSTR: PParser[Abstr] =
     ID ~ "." ~ TERM ^^

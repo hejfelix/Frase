@@ -43,8 +43,8 @@ trait HindleyMilnerLike {
     case Floating(_)         => TInst("Float")
     case Applic(Id("+"), x)  => val t=W(context)(x);TFunc(t,t)
     case Applic(Id("-"), x)  => val t=W(context)(x);TFunc(t,t)
-    case Applic(Id("<="), x) => val t=W(context)(x);val y=W(context)(Empty);TFunc(t, TInst("Bool"))
-    case Applic(Bit(p),x) => val t=W(context)(x);TFunc(t, t)
+    case Applic(Id("<="), x) => val t=W(context)(x);TFunc(t, TInst("Bool"))
+    case Applic(Bit(p),x)    => val t=W(context)(x);TFunc(t, t)
   }
 
   private def W(context: Map[Term, Type]): PartialFunction[Term, Type] =
