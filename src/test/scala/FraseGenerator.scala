@@ -5,16 +5,16 @@ import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-import it.vigtig.lambda.ASTLike
+import it.vigtig.lambda.AST
 import it.vigtig.lambda.InterpreterLike
 import it.vigtig.lambda.ParserLike
 
 class FraseGenerator extends PropSpec
     with InterpreterLike
     with ParserLike
-    with ASTLike
     with ASTGenerators
     with GeneratorDrivenPropertyChecks {
+  import AST._
   
   property("Ids are leaves") {
     forAll {
@@ -45,6 +45,7 @@ class FraseGenerator extends PropSpec
         }
     }
   }    
+  
   property("Identity-function reduces to identity") {
     forAll {
       (x: String, y: String) => 

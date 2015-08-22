@@ -4,12 +4,12 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 
-import it.vigtig.lambda.ASTLike
+import it.vigtig.lambda.AST
 /*
  * @author Hargreaves
  */
 trait ASTGenerators  {
-  self:ASTLike =>
+  import AST._
   implicit def id = Arbitrary { Gen.alphaChar map (x => Id("" + x)) }
   val int: Gen[Atom] = arbitrary[Int] map Integer
   val float: Gen[Atom] = arbitrary[Float] map Floating

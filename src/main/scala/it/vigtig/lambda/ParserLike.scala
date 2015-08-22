@@ -10,7 +10,7 @@ import scala.language.postfixOps
 trait ParserLike
     extends RegexParsers
     with PackratParsers {
-  self:ASTLike =>
+  import AST._
 
   type PParser[T] = PackratParser[T]
 

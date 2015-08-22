@@ -4,7 +4,7 @@ package it.vigtig.lambda
  * @author Hargreaves
  */
 trait HindleyMilnerLike {
-  self:ASTLike =>
+  import AST._
   abstract trait Type
   abstract trait TMono extends Type
   abstract trait TPoly extends Type

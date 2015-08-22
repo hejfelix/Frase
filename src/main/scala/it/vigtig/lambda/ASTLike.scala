@@ -3,7 +3,7 @@ package it.vigtig.lambda
 /**
  * @author Hargreaves
  */
-trait ASTLike {
+object AST {
 
   abstract trait Term
 
