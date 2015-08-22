@@ -1,20 +1,23 @@
 /**
  * @author Felix
  */
+package it.vigtig.frase.spectest
+
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-import it.vigtig.lambda.AST
 import it.vigtig.lambda.InterpreterLike
 import it.vigtig.lambda.ParserLike
+import it.vigtig.lambda.AST.Atom
+import it.vigtig.lambda.AST.Id
+import it.vigtig.lambda.AST.Term
 
 class FraseGenerator extends PropSpec
     with InterpreterLike
     with ParserLike
     with ASTGenerators
     with GeneratorDrivenPropertyChecks {
-  import AST._
   
   property("Ids are leaves") {
     forAll {

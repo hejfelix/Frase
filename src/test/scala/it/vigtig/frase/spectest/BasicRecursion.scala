@@ -1,20 +1,23 @@
 /**
  * @author Felix
  */
+package it.vigtig.frase.spectest
+
+import org.scalacheck.Gen
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import it.vigtig.lambda.AST
+
+import it.vigtig.lambda.AST.Integer
+import it.vigtig.lambda.AST.Term
 import it.vigtig.lambda.InterpreterLike
 import it.vigtig.lambda.ParserLike
-import org.scalacheck.Gen
 
 class BasicRecursion extends PropSpec
     with InterpreterLike
     with ParserLike
     with ASTGenerators
     with GeneratorDrivenPropertyChecks {
-  import AST._
 
   def parseProgramTest(l: String)(b: Term => Unit) = {
     interpretProgram(l) match {
