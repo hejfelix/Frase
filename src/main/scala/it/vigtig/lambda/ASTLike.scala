@@ -23,6 +23,7 @@ object AST {
   case class Constructor(id:Id,args:List[SetType]) extends Term
   
   def prettyStr(t: Term): String = t match {
+    case SetType(Id(id),vars,cons) => s"set $id ${vars.mkString} = $cons"
     case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
     case Applic(a, b)         => s"(${prettyStr(a)}) (${prettyStr(b)})"
     case Abstr(Id(x), b)      => s"$x . ${prettyStr(b)}"

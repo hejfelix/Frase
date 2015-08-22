@@ -34,13 +34,13 @@ trait ParserLike
     """[A-Z][a-z]*""".r ^^ identity
     
   lazy val SET_DEF: PParser[SetType] = 
-    (("""set """.r ~> SET ~ (VARIABLE.*) <~ """ = """.r) ~SET_INSTANCE.+) ^^ { 
+    (("""set""".r ~> SET ~ ("""[a-z]""".r.*) <~ """=""".r) ~SET_INSTANCE.+) ^^ { 
     case name ~ vars ~ is => 
       SetType(Id(name),vars.map(Id),is.map(s => Constructor(Id(s),Nil)))
     }
   
   lazy val SET_INSTANCE:PParser[String] = 
-    (SET~VARIABLE.*) ^^ { _.toString}
+    (SET~ """[a-z]""".r.*) ^^ { _.toString}
 
     
     
@@ -53,7 +53,7 @@ trait ParserLike
   lazy val EOF: PParser[String] = """\z""".r ^^ identity
   lazy val EOL: PParser[String] = sys.props("line.separator").r ^^ identity
 
-  lazy val LINE: PParser[Term] = (NAMED | TERM) <~ (EOL | EOF)
+  lazy val LINE: PParser[Term] = (SET_DEF | NAMED | TERM ) <~ (EOL | EOF)
 
   lazy val NAMED: PParser[Named] =
     ID ~ ("=" ~> TERM) ^^
