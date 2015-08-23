@@ -13,11 +13,22 @@ trait InterpreterLike extends ParserLike {
 
       case Success(lup, _) =>
 
-        val (nameds, unnameds) = lup filter (_ != Empty) partition {
-          case n: Named => true
-          case _        => false
+//        val (nameds, unnameds) = lup filter (_ != Empty) partition {
+//          case n: Named => true
+//          case _        => false
+//        }
+        
+        val groups = lup.groupBy {
+          case n:Named => 'NAMED
+          case n:SetType => 'SET
+          case _ => 'EXPR
         }
+        
+        val nameds = groups.getOrElse('NAMED,Nil)
+        val unnameds = groups.getOrElse('EXPR,Nil)
+        val sets = groups.getOrElse('SET, Nil)
 
+        
         val dict: Map[Id, Term] = nameds.map {
           case Named(a, b) => a -> b
         }.toMap
@@ -59,7 +70,7 @@ trait InterpreterLike extends ParserLike {
     case App(App(Id("+"), Integer(x)), Integer(y))   => Integer(x + y)
     case App(App(Id("+"), Floating(x)), Floating(y)) => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))   => Integer(x - y)
-    case App(App(Bit(p), yes), no)                   => if (p) yes else no
+    case App(App(App(Id("if"),Bit(p)),yes),no)       => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))   => Integer(a % b)
     case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
   }

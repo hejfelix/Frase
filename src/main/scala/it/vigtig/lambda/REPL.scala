@@ -20,13 +20,29 @@ object REPL
     val exprSrc = io.StdIn.readLine("Frase>")
     parseAll(LINE, exprSrc) match {
       case Success(expr, _) =>
-
+        
+        
         val definition = expr match {
           case Named(id, body) =>
             println(s"""added "${id.id}" to context""")
             Some(id -> body)
+          case SetType(Id(setId),vars,cons) => 
+            cons map {
+              case Constructor(Id(id),args) => 
+                println(s"""$id = ${args.map(t => t._1).mkString(".")}. ${args.map(t=>t._1).mkString(" ")}""")
+                val consBody = 
+                  parseAll(LINE,s"""${args.map(t => t._1).mkString(".")}. ${args.map(t=>t._1).mkString(" ")}""")
+                  match {
+                  case Success(expr,_) => expr
+                  case x => System.err.println("Couldn't parse "+x); error("hej")
+                  }
+                println(Named(Id(id),consBody))   
+                Some(id -> consBody)
+            }
+            None
           case _ => None
         }
+
 
         println()
         println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")

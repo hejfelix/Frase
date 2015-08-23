@@ -46,7 +46,7 @@ trait ParserLike
   
   lazy val SET_INSTANCE:PParser[Constructor] = 
     ((SET <~ "(") ~ SET_ARGS <~ ")") ^^ {
-    case name ~ variables => Constructor(Id(name),variables.map(v => SetType(Id(v._1),Nil,Nil)))
+    case name ~ variables => Constructor(Id(name),variables)
   }
   
   lazy val SET_ARGS:PParser[List[(String,String)]] = 
@@ -55,7 +55,7 @@ trait ParserLike
     case v1 ~ v1t ~ None => List((v1,v1t))
   }
     
-  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID
+  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID | (SET ^^ Id)
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 

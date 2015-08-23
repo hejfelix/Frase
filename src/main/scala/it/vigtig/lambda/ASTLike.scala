@@ -20,10 +20,10 @@ object AST {
   case class Bit(b: Boolean) extends Atom
 
   case class SetType(id:Id,vars:List[Id],cons:List[Constructor]) extends Term
-  case class Constructor(id:Id,args:List[SetType]) extends Term
+  case class Constructor(id:Id,args:List[(String,String)]) extends Term
   
   def prettyStr(t: Term): String = t match {
-    case Constructor(Id(id),args) => s"$id ${args.map(prettyStr).mkString}"
+    case Constructor(Id(id),args) => s"$id ${args.mkString}"
     case SetType(Id(id),vars,cons) => s"set $id ${vars.mkString} = ${cons.map(prettyStr).mkString}"
     case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
     case Applic(a, b)         => s"(${prettyStr(a)}) (${prettyStr(b)})"
