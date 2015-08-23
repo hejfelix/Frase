@@ -23,11 +23,12 @@ trait ASTGenerators  {
 
   implicit def atom = Arbitrary { Gen.oneOf(id, int, float, bool) }
   
+  val keywords = Set("or","if")
   implicit lazy val idStr = 
     Arbitrary {
     for {
       x <- Gen.alphaLowerChar 
-      y <- Gen.alphaStr if x.isLetter
-    } yield {x + y}
+      y <- Gen.alphaStr if x.isLetter && !(x+y).startsWith("or")
+    } yield {x.toString + y}
   }
 }

@@ -41,7 +41,7 @@ class FraseGenerator extends PropSpec
   }
     
   property("Constant-function reduces to constant") {
-    forAll {
+    forAll  {
       (x: String, y: String) => 
         whenever(x!=y){
           parseLineTest(s"($x . $y) $x") (_ shouldBe Id(y))
@@ -62,7 +62,7 @@ class FraseGenerator extends PropSpec
     forAll {
       (x: String, y: String) => 
         whenever(x!=y){
-          parseLineTest(s"false $x $y") (_ shouldBe Id(y))
+          parseLineTest(s"if false $x $y") (_ shouldBe Id(y))
         }
     }
   }  
@@ -71,7 +71,7 @@ class FraseGenerator extends PropSpec
     forAll {
       (x: String, y: String) => 
         whenever(x!=y){
-          parseLineTest(s"true $x $y") (_ shouldBe Id(x))
+          parseLineTest(s"if true $x $y") (_ shouldBe Id(x))
         }
     }
   }
