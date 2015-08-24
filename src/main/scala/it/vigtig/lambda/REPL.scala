@@ -22,25 +22,24 @@ object REPL
       case Success(expr, _) =>
         
         
-        val definition = expr match {
+        val definition:List[(Id,Term)] = expr match {
           case Named(id, body) =>
             println(s"""added "${id.id}" to context""")
-            Some(id -> body)
+            List((id -> body))
           case SetType(Id(setId),vars,cons) => 
             cons map {
               case Constructor(Id(id),args) => 
-                println(s"""$id = ${args.map(t => t._1).mkString(".")}. ${args.map(t=>t._1).mkString(" ")}""")
+                println(s"""$id = ${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                 val consBody = 
-                  parseAll(LINE,s"""${args.map(t => t._1).mkString(".")}. ${args.map(t=>t._1).mkString(" ")}""")
+                  parseAll(LINE,s"""${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                   match {
                   case Success(expr,_) => expr
                   case x => System.err.println("Couldn't parse "+x); error("hej")
                   }
                 println(Named(Id(id),consBody))   
-                Some(id -> consBody)
+                (Id(id) -> consBody)
             }
-            None
-          case _ => None
+          case _ => Nil
         }
 
 

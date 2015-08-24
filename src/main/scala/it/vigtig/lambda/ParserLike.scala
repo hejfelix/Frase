@@ -28,13 +28,13 @@ trait ParserLike
       { f => Floating(f.toFloat) }
 
   lazy val VARIABLE: PParser[String] =
-    """(?!or)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
+    """(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
   
   lazy val SET: PParser[String] = 
     """[A-Z][a-z]*""".r ^^ identity
     
   lazy val SET_DEF: PParser[SetType] = 
-    ("""set""".r ~> SET ~ ("""[a-z]""".r.*) <~ """=""".r) ~ SET_DEF_RHS  ^^ { 
+    ("""set""".r ~> SET ~ """[a-z]""".r.* <~ """=""".r) ~ SET_DEF_RHS  ^^ { 
     case name ~ vars ~ constructors => 
       SetType(Id(name),vars.map(Id),constructors)
     }
@@ -45,8 +45,9 @@ trait ParserLike
   } 
   
   lazy val SET_INSTANCE:PParser[Constructor] = 
-    ((SET <~ "(") ~ SET_ARGS <~ ")") ^^ {
-    case name ~ variables => Constructor(Id(name),variables)
+    SET ~ ("(" ~> SET_ARGS <~ ")").? ^^ {
+    case name ~ Some(variables) => Constructor(Id(name),variables)
+    case name ~ None => Constructor(Id(name),Nil)
   }
   
   lazy val SET_ARGS:PParser[List[(String,String)]] = 
