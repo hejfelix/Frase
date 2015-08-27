@@ -6,7 +6,7 @@ object REPL
     extends ParserLike
     with InterpreterLike
     with HindleyMilnerLike 
-    with ASTLike{
+    with ASTLike {
 
   def main(args: Array[String]) = loop()
 
