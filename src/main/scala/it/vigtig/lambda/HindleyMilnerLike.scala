@@ -3,8 +3,8 @@ package it.vigtig.lambda
 /**
  * @author Hargreaves
  */
-trait HindleyMilnerLike {
-  import AST._
+trait HindleyMilnerLike extends ASTLike {
+  
   abstract trait Type
   abstract trait TMono extends Type
   abstract trait TPoly extends Type

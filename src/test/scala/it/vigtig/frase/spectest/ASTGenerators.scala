@@ -5,16 +5,13 @@ package it.vigtig.frase.spectest
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
+import it.vigtig.lambda.ASTLike
 
-import it.vigtig.lambda.AST.Atom
-import it.vigtig.lambda.AST.Bit
-import it.vigtig.lambda.AST.Floating
-import it.vigtig.lambda.AST.Id
-import it.vigtig.lambda.AST.Integer
 /*
  * @author Hargreaves
  */
-trait ASTGenerators  {
+trait ASTGenerators extends ASTLike {
+  
   implicit def id = Arbitrary { Gen.alphaChar map (x => Id("" + x)) }
   val int: Gen[Atom] = arbitrary[Int] map Integer
   val float: Gen[Atom] = arbitrary[Float] map Floating

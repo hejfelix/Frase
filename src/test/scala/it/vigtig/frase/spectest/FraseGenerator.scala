@@ -9,9 +9,6 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 import it.vigtig.lambda.InterpreterLike
 import it.vigtig.lambda.ParserLike
-import it.vigtig.lambda.AST.Atom
-import it.vigtig.lambda.AST.Id
-import it.vigtig.lambda.AST.Term
 
 class FraseGenerator extends PropSpec
     with InterpreterLike

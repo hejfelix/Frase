@@ -4,8 +4,7 @@ package it.vigtig.lambda
  * @author Hargreaves
  */
 
-trait InterpreterLike extends ParserLike {
-  import AST._
+trait InterpreterLike extends ParserLike with ASTLike {
 
   def interpretProgram(program: String): Option[List[Term]] = {
 

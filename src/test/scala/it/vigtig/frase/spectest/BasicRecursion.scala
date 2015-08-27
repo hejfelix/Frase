@@ -8,8 +8,6 @@ import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-import it.vigtig.lambda.AST.Integer
-import it.vigtig.lambda.AST.Term
 import it.vigtig.lambda.InterpreterLike
 import it.vigtig.lambda.ParserLike
 
@@ -17,7 +15,8 @@ class BasicRecursion extends PropSpec
     with InterpreterLike
     with ParserLike
     with ASTGenerators
-    with GeneratorDrivenPropertyChecks {
+    with GeneratorDrivenPropertyChecks 
+    {
 
   def parseProgramTest(l: String)(b: Term => Unit) = {
     interpretProgram(l) match {

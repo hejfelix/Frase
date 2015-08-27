@@ -5,8 +5,9 @@ package it.vigtig.lambda
 object REPL
     extends ParserLike
     with InterpreterLike
-    with HindleyMilnerLike {
-    import AST._
+    with HindleyMilnerLike 
+    with ASTLike{
+
   def main(args: Array[String]) = loop()
 
   def loop(context: Map[Id, Term] = Map()): Unit = {
