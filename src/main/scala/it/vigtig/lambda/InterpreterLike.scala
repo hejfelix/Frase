@@ -4,31 +4,40 @@ package it.vigtig.lambda
  * @author Hargreaves
  */
 
-trait InterpreterLike extends ParserLike {
-  import AST._
+trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
 
   def interpretProgram(program: String): Option[List[Term]] = {
-      parseAll(PRGM, program) match {
-    case Success(lup, _) =>
-      val (nameds, unnameds) = lup filter (_ != Empty) partition {
-        case n: Named => true
-        case _        => false
-      }
 
-      val dict: Map[Id, Term] = nameds.map {
-        case Named(a, b) => a -> b
-      }.toMap
+    parseAll(PRGM, program) match {
 
-      Some(unnameds.map(t => {
-        val res = interpret(t)(dict)
-        interpret(res)()
-      }))
+      case Success(terms, _) =>
+        
+        val groups = terms.groupBy {
+          case n:Named => 'NAMED
+          case n:SetType => 'SET
+          case _ => 'EXPR
+        }
+        
+        val nameds = groups.getOrElse('NAMED,Nil)
+        val unnameds = groups.getOrElse('EXPR,Nil)
+        val sets = groups.getOrElse('SET, Nil)
 
-    case x => println(x); None
+        val dict: Map[Id, Term] = nameds.map {
+          case Named(a, b) => a -> b
+        }.toMap
+
+        Some(unnameds.map(t => {
+          val res = interpret(t)(dict)
+          interpret(res)()
+        }))
+
+      case x => println(x); None
+    }
+
   }
-  }
 
-  def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = fixPoint(t)(evalStep(context))
+  def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = 
+    fixPoint(t)(evalStep(context))
 
   def show[T](t: T): T = {
     println(t)
@@ -38,7 +47,8 @@ trait InterpreterLike extends ParserLike {
   def evalStep(context: Map[Id, Term])(t: Term) =
     fixPoint(resolve(t)(context))(reducer)
 
-  def resolve(t: Term)(context: Map[Id, Term]): Term = context.foldLeft(t)((a, b) => substitute(a)(b))
+  def resolve(t: Term)(context: Map[Id, Term]): Term = 
+    context.foldLeft(t)((a, b) => substitute(a)(b))
 
   def size(t: Term): Int = t match {
     case Id(_)           => 1
@@ -51,19 +61,24 @@ trait InterpreterLike extends ParserLike {
   val App = Applic
   def builtIns: PartialFunction[Term, Term] = {
     case App(App(Id("=="), a), b)                    => Bit(a == b)
+    case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
     case App(App(Id("*"), Integer(x)), Integer(y))   => Integer(x * y)
     case App(App(Id("+"), Integer(x)), Integer(y))   => Integer(x + y)
     case App(App(Id("+"), Floating(x)), Floating(y)) => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))   => Integer(x - y)
-    case App(App(Bit(p), yes), no)                   => if (p) yes else no
+    case App(App(App(Id("if"),Bit(p)),yes),no)       => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))   => Integer(a % b)
-    case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
   }
 
   def reducer = {
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Named(id, body)              => Named(id, betaReduce(body))
-      case Applic(Abstr(id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+      case Applic(Abstr(id:Id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+      case Applic(Abstr(id, body), rhs) =>
+        unify(id, rhs) match {
+          case Some(ctx) => resolve(body)(ctx)
+          case None      => error("could not unify " + id + " with " + rhs)
+        }
       case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
       case Abstr(a, b)                  => Abstr(a, betaReduce(b))
       case i @ Id(_)                    => i
@@ -81,7 +96,7 @@ trait InterpreterLike extends ParserLike {
 
   def freeVars(t: Term): Set[Id] = t match {
     case a @ Id(_)       => Set(a)
-    case Abstr(id, body) => freeVars(body) - id
+    case Abstr(id:Id, body) => freeVars(body) - id
     case Applic(a, b)    => freeVars(a) ++ freeVars(b)
     case Empty           => Set()
     case Named(id, term) => freeVars(term)
@@ -95,7 +110,7 @@ trait InterpreterLike extends ParserLike {
     case (i: Id, _)                => i
     case (a: Atom, _)              => a
     case (Applic(a, b), _)         => Applic(substitute(a)(label), substitute(b)(label))
-    case (Abstr(id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
+    case (Abstr(id:Id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
       Abstr(id, substitute(body)(label))
     case (a @ Abstr(_, _), _) => a
     case _                    => t
