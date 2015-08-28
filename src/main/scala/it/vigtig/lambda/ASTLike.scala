@@ -28,6 +28,7 @@ trait ASTLike extends AST{
     case Applic(a @ Id(_), b) => s"${prettyStr(a)} ${prettyStr(b)}"
     case Applic(a, b)         => s"(${prettyStr(a)}) (${prettyStr(b)})"
     case Abstr(Id(x), b)      => s"$x . ${prettyStr(b)}"
+    case Abstr(x, b)      => s"${prettyStr(x)} . ${prettyStr(b)}"
     case Id(x)                => x
     case Named(Id(x), term)   => s"$x = ${prettyStr(term)}"
     case Empty                => "< >"

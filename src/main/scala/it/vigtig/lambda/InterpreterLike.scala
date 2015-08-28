@@ -4,7 +4,7 @@ package it.vigtig.lambda
  * @author Hargreaves
  */
 
-trait InterpreterLike extends ParserLike with ASTLike {
+trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
 
   def interpretProgram(program: String): Option[List[Term]] = {
 
@@ -22,7 +22,6 @@ trait InterpreterLike extends ParserLike with ASTLike {
         val unnameds = groups.getOrElse('EXPR,Nil)
         val sets = groups.getOrElse('SET, Nil)
 
-        
         val dict: Map[Id, Term] = nameds.map {
           case Named(a, b) => a -> b
         }.toMap
@@ -75,6 +74,11 @@ trait InterpreterLike extends ParserLike with ASTLike {
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Named(id, body)              => Named(id, betaReduce(body))
       case Applic(Abstr(id:Id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+      case Applic(Abstr(id, body), rhs) =>
+        unify(id, rhs) match {
+          case Some(ctx) => resolve(body)(ctx)
+          case None      => error("could not unify " + id + " with " + rhs)
+        }
       case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
       case Abstr(a, b)                  => Abstr(a, betaReduce(b))
       case i @ Id(_)                    => i
