@@ -9,7 +9,7 @@ trait ASTLike extends AST{
 
   case object Empty extends Term
 
-  case class Abstr(id: Id, body: Term) extends Term
+  case class Abstr(id: Term, body: Term) extends Term
   case class Applic(left: Term, right: Term) extends Term
   case class Named(id: Id, body: Term) extends Term
 

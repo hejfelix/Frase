@@ -18,17 +18,31 @@ trait UnificationLike extends ASTLike {
     case _                            => None
   }
 
+  def header(n:Term):Term = n match {
+    case Named(id,body) => header(body)
+    case Abstr(x,body) => Abstr(x,header(body))
+    case term => Empty
+  }
+  
 }
 
 abstract trait Unification extends AST {
   def unify(a: Term, b: Term): Map[Id, Term]
 }
 
-object UnificationTest extends UnificationLike with App {
+object UnificationTest extends UnificationLike with App with ParserLike {
 
-  val x = Applic(Applic(Applic(Applic(Id("Cons"), Integer(42)), Id("Cons")), Integer(1337)), Id("Nil"))
-  val y = Applic(Applic(Applic(Applic(Id("Cons"), Id("x")), Id("Cons")), Id("y")), Id("Nil"))
+  val x = parseAll(LINE,"Cons 42 (Cons 1337 Nil)")
+  val y = parseAll(LINE,"Cons x xs")
 
-  println(unify(x, y))
+  val func = parseAll(LINE,"func = Cons x . y . + x y")
+  
+  println("x:"+x.get)
+  println("y:"+y.get)
+  println(unify(x.get,y.get))
+  
+  
+  println(func.get)
 
+  println("header: "+header(func.get))
 }

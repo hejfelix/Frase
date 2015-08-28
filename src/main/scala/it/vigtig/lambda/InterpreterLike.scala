@@ -10,14 +10,9 @@ trait InterpreterLike extends ParserLike with ASTLike {
 
     parseAll(PRGM, program) match {
 
-      case Success(lup, _) =>
-
-//        val (nameds, unnameds) = lup filter (_ != Empty) partition {
-//          case n: Named => true
-//          case _        => false
-//        }
+      case Success(terms, _) =>
         
-        val groups = lup.groupBy {
+        val groups = terms.groupBy {
           case n:Named => 'NAMED
           case n:SetType => 'SET
           case _ => 'EXPR
@@ -42,7 +37,8 @@ trait InterpreterLike extends ParserLike with ASTLike {
 
   }
 
-  def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = fixPoint(t)(evalStep(context))
+  def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = 
+    fixPoint(t)(evalStep(context))
 
   def show[T](t: T): T = {
     println(t)
@@ -52,7 +48,8 @@ trait InterpreterLike extends ParserLike with ASTLike {
   def evalStep(context: Map[Id, Term])(t: Term) =
     fixPoint(resolve(t)(context))(reducer)
 
-  def resolve(t: Term)(context: Map[Id, Term]): Term = context.foldLeft(t)((a, b) => substitute(a)(b))
+  def resolve(t: Term)(context: Map[Id, Term]): Term = 
+    context.foldLeft(t)((a, b) => substitute(a)(b))
 
   def size(t: Term): Int = t match {
     case Id(_)           => 1
@@ -65,19 +62,19 @@ trait InterpreterLike extends ParserLike with ASTLike {
   val App = Applic
   def builtIns: PartialFunction[Term, Term] = {
     case App(App(Id("=="), a), b)                    => Bit(a == b)
+    case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
     case App(App(Id("*"), Integer(x)), Integer(y))   => Integer(x * y)
     case App(App(Id("+"), Integer(x)), Integer(y))   => Integer(x + y)
     case App(App(Id("+"), Floating(x)), Floating(y)) => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))   => Integer(x - y)
     case App(App(App(Id("if"),Bit(p)),yes),no)       => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))   => Integer(a % b)
-    case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
   }
 
   def reducer = {
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Named(id, body)              => Named(id, betaReduce(body))
-      case Applic(Abstr(id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
+      case Applic(Abstr(id:Id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
       case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
       case Abstr(a, b)                  => Abstr(a, betaReduce(b))
       case i @ Id(_)                    => i
@@ -95,7 +92,7 @@ trait InterpreterLike extends ParserLike with ASTLike {
 
   def freeVars(t: Term): Set[Id] = t match {
     case a @ Id(_)       => Set(a)
-    case Abstr(id, body) => freeVars(body) - id
+    case Abstr(id:Id, body) => freeVars(body) - id
     case Applic(a, b)    => freeVars(a) ++ freeVars(b)
     case Empty           => Set()
     case Named(id, term) => freeVars(term)
@@ -109,7 +106,7 @@ trait InterpreterLike extends ParserLike with ASTLike {
     case (i: Id, _)                => i
     case (a: Atom, _)              => a
     case (Applic(a, b), _)         => Applic(substitute(a)(label), substitute(b)(label))
-    case (Abstr(id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
+    case (Abstr(id:Id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
       Abstr(id, substitute(body)(label))
     case (a @ Abstr(_, _), _) => a
     case _                    => t
