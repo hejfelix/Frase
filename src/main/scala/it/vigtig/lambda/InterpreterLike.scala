@@ -22,7 +22,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
         val unnameds = groups.getOrElse('EXPR,Nil)
         val sets = groups.getOrElse('SET, Nil)
 
-        val dict: Map[Id, Term] = nameds.map {
+        val dict: Map[Term, Term] = nameds.map {
           case Named(a, b) => a -> b
         }.toMap
 
@@ -36,7 +36,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
 
   }
 
-  def interpret(t: Term)(context: Map[Id, Term] = Map()): Term = 
+  def interpret(t: Term)(context: Map[Term, Term] = Map()): Term = 
     fixPoint(t)(evalStep(context))
 
   def show[T](t: T): T = {
@@ -44,10 +44,10 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
     t
   }
 
-  def evalStep(context: Map[Id, Term])(t: Term) =
+  def evalStep(context: Map[Term, Term])(t: Term) =
     fixPoint(resolve(t)(context))(reducer)
 
-  def resolve(t: Term)(context: Map[Id, Term]): Term = 
+  def resolve(t: Term)(context: Map[Term, Term]): Term = 
     context.foldLeft(t)((a, b) => substitute(a)(b))
 
   def size(t: Term): Int = t match {
@@ -74,11 +74,8 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Named(id, body)              => Named(id, betaReduce(body))
       case Applic(Abstr(id:Id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
-      case Applic(Abstr(id, body), rhs) =>
-        unify(id, rhs) match {
-          case Some(ctx) => resolve(body)(ctx)
-          case None      => error("could not unify " + id + " with " + rhs)
-        }
+      case Applic(Abstr(id, body), rhs) if (unify(id,rhs).isDefined) =>
+          resolve(body)(unify(id,rhs).get)
       case Applic(t, y)                 => Applic(betaReduce(t), betaReduce(y))
       case Abstr(a, b)                  => Abstr(a, betaReduce(b))
       case i @ Id(_)                    => i
@@ -104,7 +101,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike{
   }
 
   //Capture-avoiding substitution
-  def substitute(t: Term)(label: (Id, Term)): Term = (t, label) match {
+  def substitute(t: Term)(label: (Term, Term)): Term = (t, label) match {
     case (Empty, _)                => Empty
     case (i: Id, (j, k)) if i == j => k
     case (i: Id, _)                => i

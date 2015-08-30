@@ -10,7 +10,7 @@ object REPL
 
   def main(args: Array[String]) = loop()
 
-  def loop(context: Map[Id, Term] = Map()): Unit = {
+  def loop(context: Map[Term, Term] = Map()): Unit = {
 
     def time(b: => Unit): Long = {
       val t = System.currentTimeMillis()
@@ -28,16 +28,16 @@ object REPL
             println(s"""added "${id.id}" to context""")
             List((id -> body))
           case SetType(Id(setId),vars,cons) => 
+            println("added constructor(s) to context:") 
             cons map {
               case ConstructorDef(Id(id),args) => 
-                println(s"""$id = ${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                 val consBody = 
                   parseAll(LINE,s"""${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                   match {
                   case Success(expr,_) => expr
                   case x => System.err.println("Couldn't parse "+x); error("hej")
-                  }
-                println(Named(Id(id),consBody))   
+                  }  
+                println("              "+prettyStr(Named(Id(id),consBody)))
                 (Id(id) -> consBody)
             }
           case _ => Nil

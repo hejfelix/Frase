@@ -8,7 +8,7 @@ trait UnificationLike extends ASTLike {
   def maybeUnion[A, B](a: Option[Map[A, B]], b: Option[Map[A, B]]) =
     for (x <- a; y <- b) yield x ++ y
 
-  def unify(a: Term, b: Term): Option[Map[Id, Term]] = (a, b) match {
+  def unify(a: Term, b: Term): Option[Map[Term, Term]] = (a, b) match {
     case (x: Id, y: Id) if x == y     => Some(Map())
     case (x: Id, y)                   => Some(Map(x -> y))
     case (x, y: Id)                   => Some(Map(y -> x))
