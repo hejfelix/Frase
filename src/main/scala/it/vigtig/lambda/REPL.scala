@@ -29,7 +29,7 @@ object REPL
             List((id -> body))
           case SetType(Id(setId),vars,cons) => 
             cons map {
-              case Constructor(Id(id),args) => 
+              case ConstructorDef(Id(id),args) => 
                 println(s"""$id = ${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                 val consBody = 
                   parseAll(LINE,s"""${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")

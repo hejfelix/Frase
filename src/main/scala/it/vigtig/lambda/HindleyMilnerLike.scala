@@ -41,6 +41,7 @@ trait HindleyMilnerLike extends ASTLike {
     case Integer(_)          => TInst("Int")
     case Bit(_)              => TInst("Bool")
     case Floating(_)         => TInst("Float")
+    case SetId(sid)          => TInst(sid)
     case Applic(Id("+"), x)  => val t=W(context)(x);TFunc(t,t)
     case Applic(Id("-"), x)  => val t=W(context)(x);TFunc(t,t)
     case Applic(Id("<="), x) => val t=W(context)(x);TFunc(t, TInst("Bool"))

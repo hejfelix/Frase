@@ -40,24 +40,24 @@ trait ParserLike
         SetType(Id(name), vars.map(Id), constructors)
     }
 
-  lazy val SET_DEF_RHS: PParser[List[Constructor]] =
+  lazy val SET_DEF_RHS: PParser[List[ConstructorDef]] =
     SET_INSTANCE ~ ("""or""".r ~> SET_INSTANCE).* ^^ {
       case i ~ is => i :: is
     }
 
-  lazy val SET_INSTANCE: PParser[Constructor] =
+  lazy val SET_INSTANCE: PParser[ConstructorDef] =
     SET ~ ("(" ~> SET_ARGS <~ ")").? ^^ {
-      case name ~ Some(variables) => Constructor(Id(name), variables)
-      case name ~ None            => Constructor(Id(name), Nil)
+      case name ~ Some(variables) => ConstructorDef(Id(name), variables)
+      case name ~ None            => ConstructorDef(Id(name), Nil)
     }
 
   lazy val SET_ARGS: PParser[List[(String, String)]] =
-    (VARIABLE <~ ":") ~ SET ~ ("," ~> SET_ARGS).? ^^ {
+    (VARIABLE <~ ":") ~ (SET | VARIABLE) ~ ("," ~> SET_ARGS).? ^^ {
       case v1 ~ v1t ~ Some(rest) => (v1, v1t) :: rest
       case v1 ~ v1t ~ None       => List((v1, v1t))
     }
 
-  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID | (SET ^^ Id)
+  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID | (SET ^^ SetId)
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 
