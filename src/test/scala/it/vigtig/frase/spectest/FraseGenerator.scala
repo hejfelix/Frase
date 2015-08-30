@@ -49,7 +49,7 @@ class FraseGenerator extends PropSpec
   property("Identity-function reduces to identity") {
     forAll {
       (x: String, y: String) => 
-        whenever(x!=y){
+        whenever(x!=y && x.length >0 && y.length>0){
           parseLineTest(s"($x . $x) $y") (_ shouldBe Id(y))
         }
     }

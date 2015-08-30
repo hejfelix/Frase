@@ -38,6 +38,20 @@ fib = n . if (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
   }
   
   
+  val ALT_FIB_FUNC = 
+"""
+fib = 1 . 1
+fib = 2 . 2
+fib = n . + (fib (- n 1)) (fib (- n 2))
+"""
+  
+  property("Alternative definition Fibonacci sequence") {
+    forAll(Gen.choose(0, 15)) {
+      (n: Int) => parseProgramTest(ALT_FIB_FUNC + s"fib $n")(_ shouldBe Integer(fib(n)))
+    }
+  }  
+  
+  
   def fac(n:Int) = (1 to n).product
   val FAC_FUNC = 
 """

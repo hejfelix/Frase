@@ -29,7 +29,7 @@ trait ParserLike
       { f => Floating(f.toFloat) }
 
   lazy val VARIABLE: PParser[String] =
-    """(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
+    """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
 
   lazy val SET: PParser[String] =
     """[A-Z][a-z]*""".r ^^ identity

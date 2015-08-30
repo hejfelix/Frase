@@ -14,6 +14,7 @@ trait UnificationLike extends ASTLike {
     case (x, y: Id)                   => Some(Map(y -> x))
     case (Applic(a, b), Applic(x, y)) => maybeUnion(unify(a, x), unify(b, y))
     case (Abstr(a, b), Abstr(x, y))   => maybeUnion(unify(a, x), unify(b, y))
+    case (Abstr(a, b), x:Atom)         =>unify(a,x)
     case (x, y) if (x == y)           => Some(Map())
     case _                            => None
   }
@@ -22,6 +23,11 @@ trait UnificationLike extends ASTLike {
     case Named(id,body) => header(body)
     case Abstr(x,body) => x :: header(body)
     case term => Nil
+  }
+  
+  def stripHeader(n:Term):Term = n match {
+    case Abstr(_,body) => stripHeader(body)
+    case _ => n
   }
   
 }

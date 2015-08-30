@@ -10,7 +10,7 @@ object REPL
 
   def main(args: Array[String]) = loop()
 
-  def loop(context: Map[Term, Term] = Map()): Unit = {
+  def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Unit = {
 
     def time(b: => Unit): Long = {
       val t = System.currentTimeMillis()
@@ -23,7 +23,7 @@ object REPL
       case Success(expr, _) =>
         
         
-        val definition:List[(Id,Term)] = expr match {
+        val definition:List[(Term,Term)] = expr match {
           case Named(id, body) =>
             println(s"""added "${id.id}" to context""")
             List((id -> body))
@@ -47,16 +47,20 @@ object REPL
         println()
         println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")
         println(s"AST:          $expr")
+        println(s"context:      $context")
         val evalTime = time {
           println("Evaluated:    " + prettyStr(interpret(expr)(context)))
         }
         println(s"time:         $evalTime ms")
         println()
 
-        loop(context ++ definition)
+        loop(combine(context,listToMap(definition)))
 
       case err: NoSuccess => println(err)
     }
 
   }
+  
+  def combine(a:Map[Term,List[Term]],b:Map[Term,List[Term]]) = 
+    (a.keys ++ b.keys).map(i => i -> (a.getOrElse(i, Nil) ++ b.getOrElse(i, Nil))).toMap
 }

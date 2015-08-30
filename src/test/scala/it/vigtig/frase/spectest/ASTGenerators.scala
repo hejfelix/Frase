@@ -25,7 +25,7 @@ trait ASTGenerators extends ASTLike {
     Arbitrary {
     for {
       x <- Gen.alphaLowerChar 
-      y <- Gen.alphaStr if x.isLetter && !(x+y).startsWith("or")
+      y <- Gen.alphaStr if x.isLetter && !(x+y).startsWith("or") && (x+y).length>0
     } yield {x.toString + y}
   }
 }
