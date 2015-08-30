@@ -46,7 +46,7 @@ trait ParserLike
     }
 
   lazy val SET_INSTANCE: PParser[ConstructorDef] =
-    SET ~ ("(" ~> SET_ARGS <~ ")").? ^^ {
+    SET ~  SET_ARGS.? ^^ {
       case name ~ Some(variables) => ConstructorDef(Id(name), variables)
       case name ~ None            => ConstructorDef(Id(name), Nil)
     }
