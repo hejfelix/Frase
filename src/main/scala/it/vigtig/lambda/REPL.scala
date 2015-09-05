@@ -36,8 +36,7 @@ object REPL
                   match {
                   case Success(term,_) => term
                   case x => System.err.println("Couldn't parse "+x); sys.error("hej")
-                  }  
-                println("              "+prettyStr(Named(Id(id),consBody)))
+                  }
                 Id(id) -> consBody
             }
           case _ => Nil

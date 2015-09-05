@@ -26,7 +26,7 @@ trait UnificationLike extends ASTLike {
   }
   
   def stripHeader(n:Term):Term = n match {
-    case Abstr(_,body) => stripHeader(body)
+    case Abstr(_,body) => body
     case _ => n
   }
   

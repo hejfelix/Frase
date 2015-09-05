@@ -62,11 +62,10 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
       case Applic(f,body) if context.contains(f) =>
         val candidate = context(f).dropWhile { x => unify(x, body).isEmpty }.take(1)
 
-        println(candidate+" "+context(f).mkString+"  "+body)
         if(candidate!=Nil){
           val newBody = stripHeader(candidate.head)
           val substitutions = unify(candidate.head,body).get
-          substitutions.foldLeft(newBody)( (a,b) => substitute(a)(b) )
+          show(substitutions.foldLeft(newBody)( (a,b) => substitute(a)(b) ))
         } else
           Applic(f,body)
 

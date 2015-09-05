@@ -20,12 +20,12 @@ trait ASTGenerators extends ASTLike {
 
   implicit def atom = Arbitrary { Gen.oneOf(id, int, float, bool) }
   
-  val keywords = Set("or","if")
+  val keywords = Set("or","if","set")
   implicit lazy val idStr = 
     Arbitrary {
     for {
       x <- Gen.alphaLowerChar 
-      y <- Gen.alphaStr if x.isLetter && !(x+y).startsWith("or") && (x+y).length>0
+      y <- Gen.alphaStr if x.isLetter && !keywords.exists((x+y).startsWith) && (x+y).length>0
     } yield {x.toString + y}
   }
 }
