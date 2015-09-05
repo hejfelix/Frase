@@ -20,7 +20,7 @@ class BasicRecursion extends PropSpec
 
   def parseProgramTest(l: String)(b: Term => Unit) = {
     interpretProgram(l) match {
-      case Some(ts) => ts map (t => b(interpret(t)()))
+      case Some(ts) => ts.filter(_!=Empty).map(t => b(interpret(t)()))
       case None     => ???
     }
   }
@@ -32,8 +32,8 @@ fib = n . if (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
 """
   
   property("Fibonacci sequence") {
-    forAll(Gen.choose(0, 15)) {
-      (n: Int) => parseProgramTest(FIB_FUNC + s"fib $n")(_ shouldBe Integer(fib(n)))
+    forAll(Gen.choose(1, 15)) {
+      (n: Int) => parseProgramTest(FIB_FUNC + s"\nfib $n")(_ shouldBe Integer(fib(n)))
     }
   }
   
@@ -41,13 +41,13 @@ fib = n . if (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
   val ALT_FIB_FUNC = 
 """
 fib = 1 . 1
-fib = 2 . 2
+fib = 2 . 1
 fib = n . + (fib (- n 1)) (fib (- n 2))
 """
   
   property("Alternative definition Fibonacci sequence") {
-    forAll(Gen.choose(0, 15)) {
-      (n: Int) => parseProgramTest(ALT_FIB_FUNC + s"fib $n")(_ shouldBe Integer(fib(n)))
+    forAll(Gen.choose(1, 15)) {
+      (n: Int) => parseProgramTest(ALT_FIB_FUNC + s"\nfib $n")(_ shouldBe Integer(fib(n)))
     }
   }  
   
@@ -59,9 +59,11 @@ fac = n . if (<= n 1) (1) (* (n) (fac (- n 1)))
 """
   
   property("Factorial function") {
-    forAll(Gen.choose(0, 1337)) {
-      (n: Int) => parseProgramTest(FAC_FUNC + s"fac $n")(_ shouldBe Integer(fac(n)))
+    forAll(Gen.choose(1, 20)) {
+      (n: Int) => parseProgramTest(FAC_FUNC + s"\nfac $n")(_ shouldBe Integer(fac(n)))
     }
   }
-  
+
+
+
 }

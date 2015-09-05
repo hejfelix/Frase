@@ -74,4 +74,6 @@ class FraseGenerator extends PropSpec
   }
 
 
+
+
 }

@@ -30,8 +30,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
           case Named(a, b) => a -> b
         }
         
-        val dict: Map[Term, List[Term]] = listToMap(mappings)
-
+        val dict: Map[Term, List[Term]] = listToMap(mappings.reverse)
 
         Some(unnameds.map(t => {
           val res = interpret(t)(dict)
@@ -65,7 +64,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         if(candidate!=Nil){
           val newBody = stripHeader(candidate.head)
           val substitutions = unify(candidate.head,body).get
-          show(substitutions.foldLeft(newBody)( (a,b) => substitute(a)(b) ))
+          substitutions.foldLeft(newBody)( (a,b) => substitute(a)(b) )
         } else
           Applic(f,body)
 
@@ -77,6 +76,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
     case Abstr(a, b)          => Abstr(transform(f)(a), transform(f)(b))
     case Id(id)               => Id(id)
     case s @ SetType(_, _, _) => s
+    case Empty => Empty
     case a: Atom              => a
   }
 

@@ -15,6 +15,9 @@ trait ParserLike
 
   type PParser[T] = PackratParser[T]
 
+
+  override val whiteSpace = """[ ]+""".r
+
   lazy val BIT: PParser[Bit] = """(true|false)""".r ^^ {
     case "true"  => Bit(true)
     case "false" => Bit(false)
@@ -64,7 +67,7 @@ trait ParserLike
   lazy val EMPTYLINE = EOL ^^ { _ => Empty }
 
   lazy val EOF: PParser[String] = """\z""".r ^^ identity
-  lazy val EOL: PParser[String] = sys.props("line.separator").r ^^ identity
+  lazy val EOL: PParser[String] = (System getProperty "line.separator").r ^^ identity
 
   lazy val LINE: PParser[Term] = (SET_DEF | NAMED | TERM) <~ (EOL | EOF)
 
