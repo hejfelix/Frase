@@ -14,8 +14,8 @@ trait UnificationLike extends ASTLike {
     case (x, y: Id)                   => Some(Map(y -> x))
     case (Applic(a, b), Applic(x, y)) => maybeUnion(unify(a, x), unify(b, y))
     case (Abstr(a, b), Abstr(x, y))   => maybeUnion(unify(a, x), unify(b, y))
-    case (Abstr(a, b), x:Atom)         =>unify(a,x)
-    case (x, y) if (x == y)           => Some(Map())
+    case (Abstr(a, b), x)         =>unify(a,x)
+    case (x, y) if x == y           => Some(Map())
     case _                            => None
   }
 

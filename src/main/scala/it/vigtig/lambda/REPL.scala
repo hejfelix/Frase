@@ -26,19 +26,19 @@ object REPL
         val definition:List[(Term,Term)] = expr match {
           case Named(id, body) =>
             println(s"""added "${id.id}" to context""")
-            List((id -> body))
-          case SetType(Id(setId),vars,cons) => 
+            List(id -> body)
+          case SetType(Id(setId),vars,cons) =>
             println("added constructor(s) to context:") 
             cons map {
               case ConstructorDef(Id(id),args) => 
                 val consBody = 
                   parseAll(LINE,s"""${args.map(t => t._1).mkString(".")} ${if(args != Nil)"." else ""} $id ${args.map(t=>t._1).mkString(" ")}""")
                   match {
-                  case Success(expr,_) => expr
-                  case x => System.err.println("Couldn't parse "+x); error("hej")
+                  case Success(term,_) => term
+                  case x => System.err.println("Couldn't parse "+x); sys.error("hej")
                   }  
                 println("              "+prettyStr(Named(Id(id),consBody)))
-                (Id(id) -> consBody)
+                Id(id) -> consBody
             }
           case _ => Nil
         }

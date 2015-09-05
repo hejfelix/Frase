@@ -73,7 +73,7 @@ trait HindleyMilnerLike extends ASTLike {
         val aType = W(context+(t -> tType))(a)
         val result =aType match {
           case TFunc(in,out) => 
-            if(in!=tType && !(in.isInstanceOf[TVar])) 
+            if(in!=tType && !in.isInstanceOf[TVar])
               System.err.println(in+" != "+tType+" in "+prettyStr(term))
             out
           case _ => aType

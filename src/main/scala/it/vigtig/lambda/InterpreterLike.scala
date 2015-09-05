@@ -8,6 +8,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
   def listToMap(l:List[(Term,Term)]) = 
     l.foldLeft(Map[Term,List[Term]]())( (map,m) => map + (m._1 -> (m._2 :: map.getOrElse(m._1, Nil))) )
+
   def interpretProgram(program: String): Option[List[Term]] = {
 
     parseAll(PRGM, program) match {
@@ -59,7 +60,9 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   def lookup(t: Term)(context: Map[Term, List[Term]]):Term =
     transform({
       case Applic(f,body) if context.contains(f) =>
-        val candidate = context(f).dropWhile { x => !unify(x,body).isDefined }.take(1)
+        val candidate = context(f).dropWhile { x => unify(x, body).isEmpty }.take(1)
+
+        println(candidate+" "+context(f).mkString+"  "+body)
         if(candidate!=Nil){
           val newBody = stripHeader(candidate.head)
           val substitutions = unify(candidate.head,body).get
@@ -133,7 +136,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
     case (i: Id, _)                => i
     case (a: Atom, _)              => a
     case (Applic(a, b), _)         => Applic(substitute(a)(label), substitute(b)(label))
-    case (Abstr(id: Id, body), (x, y)) if id != x && !(freeVars(y)(id)) =>
+    case (Abstr(id: Id, body), (x, y)) if id != x && !freeVars(y)(id) =>
       Abstr(id, substitute(body)(label))
     case (a @ Abstr(_, _), _) => a
     case _                    => t
