@@ -39,5 +39,14 @@ with GeneratorDrivenPropertyChecks {
     }
   }
 
+  property("TInst < TVar"){
+    min(TInst("foo"),TVar("bar")).shouldBe(TInst("foo"))
+  }
+
+  property("Known types"){
+    typeCheck("42") shouldBe TInst("Int")
+    typeCheck("true") shouldBe TInst("Bool")
+    typeCheck(".2f") shouldBe TInst("Float")
+  }
   
 }

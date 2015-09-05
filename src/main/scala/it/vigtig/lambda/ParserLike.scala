@@ -1,8 +1,7 @@
 package it.vigtig.lambda
 
-import scala.util.parsing.combinator.RegexParsers
-import scala.util.parsing.combinator.PackratParsers
 import scala.language.postfixOps
+import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
 /**
  * @author Hargreaves
