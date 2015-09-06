@@ -67,7 +67,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
           substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
         } else
           Applic(f, body)
-
+      case id@Id(i) if context.contains(id) => context(id).head
     })(t)
 
   def transform(f: PartialFunction[Term, Term]): PartialFunction[Term, Term] = f orElse {
