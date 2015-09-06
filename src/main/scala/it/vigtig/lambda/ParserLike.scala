@@ -78,7 +78,7 @@ trait ParserLike
   lazy val EMPTYLINE = EOL ^^ { _ => Empty }
 
   lazy val EOF: PParser[String] = """\z""".r ^^ identity
-  lazy val EOL: PParser[String] = (System getProperty "line.separator").r ^^ identity
+  lazy val EOL: PParser[String] = """\n""".r ^^ identity
 
   lazy val LINE: PParser[Term] = (SET_DEF | NAMED | TERM) <~ (EOL | EOF)
 
