@@ -47,6 +47,18 @@ trait ParserLike
       case i ~ is => i :: is
     }
 
+  lazy val LIST:PParser[Term] =
+    "[" ~> TERM ~ ("," ~> TERM).* <~ "]" ^^
+  {
+    case head ~ tail => listToCons(head :: tail)
+  }
+
+  def listToCons(xs:List[Term]):Term = xs match
+  {
+    case Nil => SetId("Nil")
+    case x :: xs => Applic(Applic(SetId("Cons"),x),listToCons(xs))
+  }
+
   lazy val SET_INSTANCE: PParser[ConstructorDef] =
     SET ~  SET_ARGS.? ^^ {
       case name ~ Some(variables) => ConstructorDef(Id(name), variables)
@@ -74,7 +86,7 @@ trait ParserLike
     ID ~ ("=" ~> TERM) ^^
       { case id ~ body => Named(id, body) }
 
-  lazy val TERM: PParser[Term] = LABSTR | APP | ATOM | PEXPR
+  lazy val TERM: PParser[Term] = LIST | LABSTR | APP | ATOM | PEXPR
 
   lazy val PEXPR: PParser[Term] = "(" ~> TERM <~ ")"
 

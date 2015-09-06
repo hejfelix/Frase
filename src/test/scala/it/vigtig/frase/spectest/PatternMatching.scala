@@ -22,7 +22,7 @@ with GeneratorDrivenPropertyChecks {
     }
   }
 
-  val LIST =
+  val LIST_DEF =
     """
 set List = Nil or Cons x:Int,xs:List
 
@@ -31,24 +31,27 @@ tail = (Cons x xs) . xs
 
 size = Nil . 0
 size = (Cons x xs) . (+ 1 (size xs))
+
+rev = Nil . x . x
+rev = (Cons x xs) . a . (rev (xs) (Cons x a))
     """
 
   property("Head") {
-    parseProgramTest(LIST+s"\nhead (Cons 42 Nil)")(_ shouldBe Integer(42))
+    parseProgramTest(LIST_DEF+s"\nhead (Cons 42 Nil)")(_ shouldBe Integer(42))
   }
 
   property("Tail") {
-    parseProgramTest(LIST+s"\ntail (Cons 42 Nil)")(_ shouldBe SetId("Nil"))
+    parseProgramTest(LIST_DEF+s"\ntail (Cons 42 Nil)")(_ shouldBe SetId("Nil"))
   }
 
 
   property("size Nil should be 0") {
-    parseProgramTest(LIST+s"\nsize Nil")(_ shouldBe Integer(0))
+    parseProgramTest(LIST_DEF+s"\nsize Nil")(_ shouldBe Integer(0))
   }
 
 
   property("Size") {
-    parseProgramTest(LIST+s"\nsize (Cons 42 (Cons 1337 (Cons 9000 Nil)))")(_ shouldBe Integer(3))
+    parseProgramTest(LIST_DEF+s"\nsize (Cons 42 (Cons 1337 (Cons 9000 Nil)))")(_ shouldBe Integer(3))
   }
 
 
