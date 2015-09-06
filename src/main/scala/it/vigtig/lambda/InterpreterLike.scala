@@ -6,8 +6,8 @@ package it.vigtig.lambda
 
 trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
-  def listToMap(l:List[(Term,Term)]) = 
-    l.foldLeft(Map[Term,List[Term]]())( (map,m) => map + (m._1 -> (m._2 :: map.getOrElse(m._1, Nil))) )
+  def listToMap(l: List[(Term, Term)]) =
+    l.foldLeft(Map[Term, List[Term]]())((map, m) => map + (m._1 -> (m._2 :: map.getOrElse(m._1, Nil))))
 
   def interpretProgram(program: String): Option[List[Term]] = {
 
@@ -25,11 +25,11 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val unnameds = groups.getOrElse('EXPR, Nil)
         val sets = groups.getOrElse('SET, Nil)
 
-        
-        val mappings:List[(Term,Term)] = nameds.map {
+
+        val mappings: List[(Term, Term)] = nameds.map {
           case Named(a, b) => a -> b
         }
-        
+
         val dict: Map[Term, List[Term]] = listToMap(mappings.reverse)
 
         Some(unnameds.map(t => {
@@ -56,28 +56,28 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   def resolve(t: Term)(context: Map[Term, List[Term]]): Term =
     lookup(t)(context)
 
-  def lookup(t: Term)(context: Map[Term, List[Term]]):Term =
+  def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
     transform({
-      case Applic(f,body) if context.contains(f) =>
+      case Applic(f, body) if context.contains(f) =>
         val candidate = context(f).dropWhile { x => unify(x, body).isEmpty }.take(1)
 
-        if(candidate!=Nil){
+        if (candidate != Nil) {
           val newBody = stripHeader(candidate.head)
-          val substitutions = unify(candidate.head,body).get
-          substitutions.foldLeft(newBody)( (a,b) => substitute(a)(b) )
+          val substitutions = unify(candidate.head, body).get
+          substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
         } else
-          Applic(f,body)
+          Applic(f, body)
 
     })(t)
 
   def transform(f: PartialFunction[Term, Term]): PartialFunction[Term, Term] = f orElse {
-    case Applic(t, y)         => Applic(transform(f)(t), transform(f)(y))
-    case Named(id, body)      => Named(id, transform(f)(body))
-    case Abstr(a, b)          => Abstr(transform(f)(a), transform(f)(b))
-    case Id(id)               => Id(id)
-    case s @ SetType(_, _, _) => s
-    case Empty => Empty
-    case a: Atom              => a
+    case Applic(t, y)       => Applic(transform(f)(t), transform(f)(y))
+    case Named(id, body)    => Named(id, transform(f)(body))
+    case Abstr(a, b)        => Abstr(transform(f)(a), transform(f)(b))
+    case Id(id)             => Id(id)
+    case s@SetType(_, _, _) => s
+    case Empty              => Empty
+    case a: Atom            => a
   }
 
   def size(t: Term): Int = t match {
@@ -89,6 +89,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   }
 
   val App = Applic
+
   def builtIns: PartialFunction[Term, Term] = {
     case App(App(Id("=="), a), b)                    => Bit(a == b)
     case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
@@ -96,7 +97,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
     case App(App(Id("+"), Integer(x)), Integer(y))   => Integer(x + y)
     case App(App(Id("+"), Floating(x)), Floating(y)) => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))   => Integer(x - y)
-    case App(App(App(Id("if"), Bit(p)), yes), no)    => if (p) yes else no
+    case App(App(Bit(p), yes), no)                   => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))   => Integer(a % b)
   }
 
@@ -106,7 +107,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
       case Applic(Abstr(id: Id, body), rhs) => betaReduce(substitute(body)(id -> rhs))
       case Applic(t, y)                     => Applic(betaReduce(t), betaReduce(y))
       case Abstr(a, b)                      => Abstr(a, betaReduce(b))
-      case i @ Id(_)                        => i
+      case i@Id(_)                          => i
       case t                                => t
     }
     betaReduce
@@ -120,7 +121,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   }
 
   def freeVars(t: Term): Set[Id] = t match {
-    case a @ Id(_)           => Set(a)
+    case a@Id(_)             => Set(a)
     case Abstr(id: Id, body) => freeVars(body) - id
     case Applic(a, b)        => freeVars(a) ++ freeVars(b)
     case Empty               => Set()
@@ -130,15 +131,15 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
   //Capture-avoiding substitution
   def substitute(t: Term)(label: (Term, Term)): Term = (t, label) match {
-    case (Empty, _)                => Empty
-    case (i: Id, (j, k)) if i == j => k
-    case (i: Id, _)                => i
-    case (a: Atom, _)              => a
-    case (Applic(a, b), _)         => Applic(substitute(a)(label), substitute(b)(label))
+    case (Empty, _)                                                   => Empty
+    case (i: Id, (j, k)) if i == j                                    => k
+    case (i: Id, _)                                                   => i
+    case (a: Atom, _)                                                 => a
+    case (Applic(a, b), _)                                            => Applic(substitute(a)(label), substitute(b)(label))
     case (Abstr(id: Id, body), (x, y)) if id != x && !freeVars(y)(id) =>
       Abstr(id, substitute(body)(label))
-    case (a @ Abstr(_, _), _) => a
-    case _                    => t
+    case (a@Abstr(_, _), _)                                           => a
+    case _                                                            => t
   }
 
 }

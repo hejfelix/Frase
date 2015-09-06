@@ -59,7 +59,7 @@ class FraseGenerator extends PropSpec
     forAll {
       (x: String, y: String) => 
         whenever(x!=y){
-          parseLineTest(s"if false $x $y") (_ shouldBe Id(y))
+          parseLineTest(s"false $x $y") (_ shouldBe Id(y))
         }
     }
   }  
@@ -68,7 +68,7 @@ class FraseGenerator extends PropSpec
     forAll {
       (x: String, y: String) => 
         whenever(x!=y){
-          parseLineTest(s"if true $x $y") (_ shouldBe Id(x))
+          parseLineTest(s"true $x $y") (_ shouldBe Id(x))
         }
     }
   }

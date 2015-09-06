@@ -28,7 +28,7 @@ class BasicRecursion extends PropSpec
   def fib(n: Int): Int = if (n < 2) n else fib(n - 1) + fib(n - 2)
   val FIB_FUNC = 
 """
-fib = n . if (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
+fib = n . (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
 """
   
   property("Fibonacci sequence") {
@@ -55,7 +55,7 @@ fib = n . + (fib (- n 1)) (fib (- n 2))
   def fac(n:Int) = (1 to n).product
   val FAC_FUNC = 
 """
-fac = n . if (<= n 1) (1) (* (n) (fac (- n 1)))
+fac = n . (<= n 1) (1) (* (n) (fac (- n 1)))
 """
   
   property("Factorial function") {
