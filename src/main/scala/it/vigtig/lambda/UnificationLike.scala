@@ -5,7 +5,7 @@ package it.vigtig.lambda
  */
 trait UnificationLike extends ASTLike {
 
-  def maybeUnion[A, B](a: Option[Map[A, B]], b: Option[Map[A, B]]) =
+  def maybeUnion[A, B](a: Option[Map[A, B]], b: Option[Map[A, B]]):Option[Map[A,B]] =
     for (x <- a; y <- b) yield x ++ y
 
   def unify(a: Term, b: Term): Option[Map[Term, Term]] = (a, b) match {
@@ -19,6 +19,12 @@ trait UnificationLike extends ASTLike {
     case _                            => None
   }
 
+  def unifyLists(xs:List[Term],ys:List[Term]) =
+    if(xs.size!=ys.size)
+      None
+    else
+      (xs,ys).zipped.map(unify).reduce(maybeUnion[Term,Term])
+
   def header(n:Term):List[Term] = n match {
     case Named(id,body) => header(body)
     case Abstr(x,body) => x :: header(body)
@@ -26,7 +32,7 @@ trait UnificationLike extends ASTLike {
   }
   
   def stripHeader(n:Term):Term = n match {
-    case Abstr(_,body) => body
+    case Abstr(_,body) => stripHeader(body)
     case _ => n
   }
   

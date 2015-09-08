@@ -58,17 +58,36 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
   def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
     transform({
-      case Applic(f, body) if context.contains(f) =>
-        val candidate = context(f).dropWhile { x => unify(x, body).isEmpty }.take(1)
-
-        if (candidate != Nil) {
-          val newBody = stripHeader(candidate.head)
-          val substitutions = unify(candidate.head, body).get
+      case Applic(f, body) if context.contains(applicant(t)) =>
+        val candidate = Nil
+        val ap = applicant(t)
+        val headers = context(ap).map(header)
+        val as:List[Term] = args(t)
+        println("Arguments: "+as)
+        println("Header: "+headers)
+        val substitutions = headers.map(x => unifyLists(x,as))
+        println("Substitutions: "+substitutions)
+        val candidates = (context(ap),substitutions).zipped.filter((a,b) => b.isDefined)
+        println("candidates: "+candidates)
+        if (candidates._1 != Nil) {
+          val newBody = stripHeader(candidates._1.head)
+          val substitutions = candidates._2.head.get
           substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
         } else
           Applic(f, body)
       case id@Id(i) if context.contains(id) => context(id).head
     })(t)
+
+
+  def args(t:Term):List[Term] = t match {
+    case Id(_) => Nil
+    case Applic(left,right) => args(left)++args(right)
+    case _ => List(t)
+  }
+  def applicant(t:Term):Term = transform({
+    case Applic(left,right) => applicant(left)
+    case Id(_) => t
+  })(t)
 
   def transform(f: PartialFunction[Term, Term]): PartialFunction[Term, Term] = f orElse {
     case Applic(t, y)       => Applic(transform(f)(t), transform(f)(y))
