@@ -48,7 +48,9 @@ object REPL
         println(s"AST:          $expr")
         println(s"context:      $context")
         val evalTime = time {
-          println("Evaluated:    " + prettyStr(interpret(expr)(context)))
+          val ast =  interpret(expr)(context)
+          println("Evaluated:    " + prettyStr(ast))
+          println("Evaluated(AST): " +ast)
         }
         println(s"time:         $evalTime ms")
         println()

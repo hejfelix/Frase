@@ -43,18 +43,16 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   }
 
   def interpret(t: Term)(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Term =
-    fixPoint(t)(evalStep(context))
+    fixPoint(t)(x => evalStep(x)(context))
+
+  def evalStep(t:Term)(context:Map[Term,List[Term]]) =
+    fixPoint(t)(t => reducer(fixPoint(t)(x => lookup(x)(context))))
+
 
   def show[T](t: T): T = {
     println(t)
     t
   }
-
-  def evalStep(context: Map[Term, List[Term]])(t: Term) =
-    fixPoint(resolve(t)(context))(reducer)
-
-  def resolve(t: Term)(context: Map[Term, List[Term]]): Term =
-    lookup(t)(context)
 
   def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
     transform({
@@ -63,19 +61,23 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val ap = applicant(t)
         val headers = context(ap).map(header)
         val as:List[Term] = args(t)
-        println("Arguments: "+as)
-        println("Header: "+headers)
+        println("Applicant: "+applicant(t) + "args: "+as)
+        //println("Arguments: "+as)
+        //println("Header: "+headers)
         val substitutions = headers.map(x => unifyLists(x,as))
-        println("Substitutions: "+substitutions)
+        //println("Substitutions: "+substitutions)
         val candidates = (context(ap),substitutions).zipped.filter((a,b) => b.isDefined)
-        println("candidates: "+candidates)
+        //println("candidates: "+candidates)
         if (candidates._1 != Nil) {
           val newBody = stripHeader(candidates._1.head)
+          println("NewBody: "+newBody)
           val substitutions = candidates._2.head.get
-          substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
+          val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
+          println("result: "+prettyStr(res))
+          res
         } else
-          Applic(f, body)
-      case id@Id(i) if context.contains(id) => context(id).head
+          Applic(lookup(f)(context), body)
+      case Applic(x,y) => Applic(lookup(x)(context),lookup(y)(context))
     })(t)
 
 
