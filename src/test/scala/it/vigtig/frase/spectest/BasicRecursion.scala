@@ -4,8 +4,6 @@
 package it.vigtig.frase.spectest
 
 import java.lang.Integer
-
-import it.vigtig.lambda.ParserTest._
 import org.scalacheck.Gen
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
