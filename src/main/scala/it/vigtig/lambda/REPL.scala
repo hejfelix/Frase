@@ -33,9 +33,9 @@ object REPL
             cons map {
               case ConstructorDef(Id(id), args) =>
                 val cons = s"""${args.map(t => t._1).mkString(".")} ${if (args != Nil) "." else ""}"""
-                + s"""$id ${args.map(t => t._1).mkString(" ")}"""
+                val consTail =  s"""$id ${args.map(t => t._1).mkString(" ")}"""
                 val consBody =
-                  parseAll(LINE, cons)
+                  parseAll(LINE, cons+consTail)
                   match {
                     case Success(term, _) => term
                     case x                => System.err.println("Couldn't parse " + x); sys.error("hej")
