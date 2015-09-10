@@ -3,6 +3,9 @@
  */
 package it.vigtig.frase.spectest
 
+import java.lang.Integer
+
+import it.vigtig.lambda.ParserTest._
 import org.scalacheck.Gen
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
@@ -25,15 +28,16 @@ class BasicRecursion extends PropSpec
     }
   }
 
+  val FIB_DEF =
+    """
+  fib = n . (<= n 2) (1) ((+ (fib (- n 2)) (fib (- n 1))))""".stripMargin
+
   def fib(n: Int): Int = if (n < 2) n else fib(n - 1) + fib(n - 2)
-  val FIB_FUNC = 
-"""
-fib = n . (<= n 1) (n) ((+ (fib (- n 2)) (fib (- n 1))))
-"""
+
   
   property("Fibonacci sequence") {
-    forAll(Gen.choose(1, 15)) {
-      (n: Int) => parseProgramTest(FIB_FUNC + s"\nfib $n")(_ shouldBe Integer(fib(n)))
+    forAll(Gen.choose(1, 6)) {
+      (n: Int) => parseProgramTest(FIB_DEF + s"\nfib $n")(_ shouldBe Integer(fib(n)))
     }
   }
   

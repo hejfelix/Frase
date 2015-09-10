@@ -75,10 +75,10 @@ trait ParserLike
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 
-  lazy val EMPTYLINE = EOL ^^ { _ => Empty }
+  lazy val EMPTYLINE = (EOL | " ") ^^ { _ => Empty }
 
   lazy val EOF: PParser[String] = """\z""".r ^^ identity
-  lazy val EOL: PParser[String] = """\n""".r ^^ identity
+  lazy val EOL: PParser[String] = (sys.props("line.separator") | "\r\n" | "\\n".r) ^^ identity
 
   lazy val LINE: PParser[Term] = (SET_DEF | NAMED | TERM) <~ (EOL | EOF)
 

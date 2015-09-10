@@ -43,10 +43,10 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   }
 
   def interpret(t: Term)(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Term =
-    fixPoint(t)(x => evalStep(x)(context))
+    fixPoint(t)( x => evalStep(x)(context))
 
   def evalStep(t:Term)(context:Map[Term,List[Term]]) =
-    fixPoint(t)(t => reducer(fixPoint(t)(x => lookup(x)(context))))
+    lookup(fixPoint(t)(t => reducer(t)))(context)
 
 
   def show[T](t: T): T = {
@@ -60,20 +60,24 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val candidate = Nil
         val ap = applicant(t)
         val headers = context(ap).map(header)
-        val as:List[Term] = args(t)
-        println("Applicant: "+applicant(t) + "args: "+as)
-        //println("Arguments: "+as)
-        //println("Header: "+headers)
-        val substitutions = headers.map(x => unifyLists(x,as))
-        //println("Substitutions: "+substitutions)
-        val candidates = (context(ap),substitutions).zipped.filter((a,b) => b.isDefined)
-        //println("candidates: "+candidates)
+        val as:List[Term] = args(t).reverse
+//        println("chead: "+context(ap).head+"  "+body)
+//        println("UNIFICATION: "+unify(context(ap).head,body))
+//        println("Applicant: "+applicant(t) + "args: "+as)
+//        println("Arguments: "+as)
+//        println("Header: "+headers)
+        val substitutions = headers.map(x =>  unifyLists(x,as))
+       //println("Substitutions: "+substitutions)
+//        println("Context: "+context(ap))
+       val candidates = (context(ap),substitutions).zipped.filter((a,b) => b.isDefined)
+       //println("candidates: "+candidates)
         if (candidates._1 != Nil) {
           val newBody = stripHeader(candidates._1.head)
-          println("NewBody: "+newBody)
+//          println("NewBody: "+prettyStr(newBody))
+//          println("With Substitution: "+candidates._2.head.get)
           val substitutions = candidates._2.head.get
           val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
-          println("result: "+prettyStr(res))
+//          println("  = "+prettyStr(res))
           res
         } else
           Applic(lookup(f)(context), body)
@@ -82,9 +86,8 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
 
   def args(t:Term):List[Term] = t match {
-    case Id(_) => Nil
-    case Applic(left,right) => args(left)++args(right)
-    case _ => List(t)
+    case Applic(x,y) => y :: args(x)
+    case _ => Nil
   }
   def applicant(t:Term):Term = transform({
     case Applic(left,right) => applicant(left)
@@ -114,11 +117,11 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   def builtIns: PartialFunction[Term, Term] = {
     case App(App(Id("=="), a), b)                    => Bit(a == b)
     case App(App(Id("<="), Integer(a)), Integer(b))  => Bit(a <= b)
+    case App(App(Bit(p), yes), no)                   => if (p) yes else no
     case App(App(Id("*"), Integer(x)), Integer(y))   => Integer(x * y)
     case App(App(Id("+"), Integer(x)), Integer(y))   => Integer(x + y)
     case App(App(Id("+"), Floating(x)), Floating(y)) => Floating(x + y)
     case App(App(Id("-"), Integer(x)), Integer(y))   => Integer(x - y)
-    case App(App(Bit(p), yes), no)                   => if (p) yes else no
     case App(App(Id("%"), Integer(a)), Integer(b))   => Integer(a % b)
   }
 
