@@ -34,7 +34,7 @@ trait ParserLike
     """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
 
   lazy val SET: PParser[String] =
-    """[A-Z][a-z]*""".r ^^ identity
+    """[A-Z][a-zA-Z]*""".r ^^ identity
 
   lazy val SET_DEF: PParser[SetType] =
     ("""set""".r ~> SET ~ """[a-z]""".r.* <~ """=""".r) ~ SET_DEF_RHS ^^ {
