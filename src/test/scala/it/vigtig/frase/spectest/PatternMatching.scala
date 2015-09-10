@@ -1,10 +1,9 @@
 package it.vigtig.frase.spectest
 
 import it.vigtig.lambda.{InterpreterLike, ParserLike}
+import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-
-import org.scalatest.Matchers.convertToAnyShouldWrapper
 
 /**
  * Created by Hargreaves on 05/09/15.

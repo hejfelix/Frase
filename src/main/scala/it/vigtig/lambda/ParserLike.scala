@@ -8,9 +8,9 @@ import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
  */
 
 trait ParserLike
-    extends RegexParsers
-    with PackratParsers
-    with ASTLike {
+  extends RegexParsers
+  with PackratParsers
+  with ASTLike {
 
   type PParser[T] = PackratParser[T]
 
@@ -23,12 +23,10 @@ trait ParserLike
   }
 
   lazy val INTEGER: PParser[Integer] =
-    """-?\d+""".r ^^
-      { i => Integer(i.toInt) }
+    """-?\d+""".r ^^ { i => Integer(i.toInt) }
 
   lazy val FLOAT: PParser[Floating] =
-    """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^
-      { f => Floating(f.toFloat) }
+    """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ { f => Floating(f.toFloat) }
 
   lazy val VARIABLE: PParser[String] =
     """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
@@ -47,20 +45,18 @@ trait ParserLike
       case i ~ is => i :: is
     }
 
-  lazy val LIST:PParser[Term] =
-    "[" ~> TERM ~ ("," ~> TERM).* <~ "]" ^^
-  {
-    case head ~ tail => listToCons(head :: tail)
-  }
+  lazy val LIST: PParser[Term] =
+    "[" ~> TERM ~ ("," ~> TERM).* <~ "]" ^^ {
+      case head ~ tail => listToCons(head :: tail)
+    }
 
-  def listToCons(xs:List[Term]):Term = xs match
-  {
-    case Nil => SetId("Nil")
-    case x :: xs => Applic(Applic(SetId("Cons"),x),listToCons(xs))
+  def listToCons(xs: List[Term]): Term = xs match {
+    case Nil     => SetId("Nil")
+    case x :: xs => Applic(Applic(SetId("Cons"), x), listToCons(xs))
   }
 
   lazy val SET_INSTANCE: PParser[ConstructorDef] =
-    SET ~  SET_ARGS.? ^^ {
+    SET ~ SET_ARGS.? ^^ {
       case name ~ Some(variables) => ConstructorDef(Id(name), variables)
       case name ~ None            => ConstructorDef(Id(name), Nil)
     }
@@ -83,8 +79,7 @@ trait ParserLike
   lazy val LINE: PParser[Term] = (SET_DEF | NAMED | TERM) <~ (EOL | EOF)
 
   lazy val NAMED: PParser[Named] =
-    ID ~ ("=" ~> TERM) ^^
-      { case id ~ body => Named(id, body) }
+    ID ~ ("=" ~> TERM) ^^ { case id ~ body => Named(id, body) }
 
   lazy val TERM: PParser[Term] = LIST | LABSTR | APP | ATOM | PEXPR
 
@@ -94,12 +89,10 @@ trait ParserLike
     VARIABLE ^^ Id
 
   lazy val LABSTR: PParser[Abstr] =
-    TERM ~ "." ~ TERM ^^
-      { case id ~ _ ~ term => Abstr(id, term) }
+    TERM ~ "." ~ TERM ^^ { case id ~ _ ~ term => Abstr(id, term) }
 
   lazy val APP: PParser[Term] =
-    TERM ~ (PEXPR | ATOM) ^^
-      { case t1 ~ t2 => Applic(t1, t2) }
+    TERM ~ (PEXPR | ATOM) ^^ { case t1 ~ t2 => Applic(t1, t2) }
 
 }
 

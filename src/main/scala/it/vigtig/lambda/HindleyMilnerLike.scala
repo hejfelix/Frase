@@ -4,25 +4,30 @@ package it.vigtig.lambda
  * @author Hargreaves
  */
 trait HindleyMilnerLike extends ASTLike {
-  
+
   abstract trait Type
+
   abstract trait TMono extends Type
+
   abstract trait TPoly extends Type
 
   case class TInst(name: String) extends TMono
+
   case class TVar(name: String) extends TMono
+
   case class TPolyInst(name: String, args: Type*) extends TPoly
 
   case class TFunc(in: Type, out: Type) extends TPoly
+
   case class TFunc2(a: Type, b: Type, out: Type) extends TPoly
 
-  def prettyType(t:Type):String = t match {
-    case TFunc(in,out) => s"${prettyType(in)} -> ${prettyType(out)}"
-    case TVar(x) => x
-    case TInst(x) =>  x
-    case _ => t.toString
+  def prettyType(t: Type): String = t match {
+    case TFunc(in, out) => s"${prettyType(in)} -> ${prettyType(out)}"
+    case TVar(x)        => x
+    case TInst(x)       => x
+    case _              => t.toString
   }
-  
+
   def newTyper = {
     var nextVar = 'a'
     W(Map[Term, Type]().withDefault { t =>
@@ -42,10 +47,10 @@ trait HindleyMilnerLike extends ASTLike {
     case Bit(_)              => TInst("Bool")
     case Floating(_)         => TInst("Float")
     case SetId(sid)          => TInst(sid)
-    case Applic(Id("+"), x)  => val t=W(context)(x);TFunc(t,t)
-    case Applic(Id("-"), x)  => val t=W(context)(x);TFunc(t,t)
-    case Applic(Id("<="), x) => val t=W(context)(x);TFunc(t, TInst("Bool"))
-    case Applic(Bit(p),x)    => val t=W(context)(x);TFunc(t, t)
+    case Applic(Id("+"), x)  => val t = W(context)(x); TFunc(t, t)
+    case Applic(Id("-"), x)  => val t = W(context)(x); TFunc(t, t)
+    case Applic(Id("<="), x) => val t = W(context)(x); TFunc(t, TInst("Bool"))
+    case Applic(Bit(p), x)   => val t = W(context)(x); TFunc(t, t)
   }
 
   private def W(context: Map[Term, Type]): PartialFunction[Term, Type] =
@@ -58,27 +63,27 @@ trait HindleyMilnerLike extends ASTLike {
         val idTyp = W(context)(id)
         W(context + (id -> idTyp))(body)
 
-      case a@Applic(Abstr(i,e),t) => 
+      case a@Applic(Abstr(i, e), t) =>
         val iType = W(context)(i)
         val tType = W(context)(t)
-        val eType = W(context+(i -> min(tType, iType)))(e)
-        val result = eType match{
-          case TFunc(in,out) => out
-          case _ => eType
+        val eType = W(context + (i -> min(tType, iType)))(e)
+        val result = eType match {
+          case TFunc(in, out) => out
+          case _              => eType
         }
         result
-        
+
       case term@Applic(a, t) =>
         val tType = W(context)(t)
-        val aType = W(context+(t -> tType))(a)
-        val result =aType match {
-          case TFunc(in,out) => 
-            if(in!=tType && !in.isInstanceOf[TVar])
-              System.err.println(in+" != "+tType+" in "+prettyStr(term))
+        val aType = W(context + (t -> tType))(a)
+        val result = aType match {
+          case TFunc(in, out) =>
+            if (in != tType && !in.isInstanceOf[TVar])
+              System.err.println(in + " != " + tType + " in " + prettyStr(term))
             out
-          case _ => aType
+          case _              => aType
         }
-        if(aType==TInst("Bool"))
+        if (aType == TInst("Bool"))
           tType
         else
           result

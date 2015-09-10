@@ -43,9 +43,9 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   }
 
   def interpret(t: Term)(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Term =
-    fixPoint(t)( x => evalStep(x)(context))
+    fixPoint(t)(x => evalStep(x)(context))
 
-  def evalStep(t:Term)(context:Map[Term,List[Term]]) =
+  def evalStep(t: Term)(context: Map[Term, List[Term]]) =
     lookup(fixPoint(t)(t => reducer(t)))(context)
 
 
@@ -60,38 +60,39 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val candidate = Nil
         val ap = applicant(t)
         val headers = context(ap).map(header)
-        val as:List[Term] = args(t).reverse
-//        println("chead: "+context(ap).head+"  "+body)
-//        println("UNIFICATION: "+unify(context(ap).head,body))
-//        println("Applicant: "+applicant(t) + "args: "+as)
-//        println("Arguments: "+as)
-//        println("Header: "+headers)
-        val substitutions = headers.map(x =>  unifyLists(x,as))
-       //println("Substitutions: "+substitutions)
-//        println("Context: "+context(ap))
-       val candidates = (context(ap),substitutions).zipped.filter((a,b) => b.isDefined)
-       //println("candidates: "+candidates)
+        val as: List[Term] = args(t).reverse
+        //        println("chead: "+context(ap).head+"  "+body)
+        //        println("UNIFICATION: "+unify(context(ap).head,body))
+        //        println("Applicant: "+applicant(t) + "args: "+as)
+        //        println("Arguments: "+as)
+        //        println("Header: "+headers)
+        val substitutions = headers.map(x => unifyLists(x, as))
+        //println("Substitutions: "+substitutions)
+        //        println("Context: "+context(ap))
+        val candidates = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
+        //println("candidates: "+candidates)
         if (candidates._1 != Nil) {
           val newBody = stripHeader(candidates._1.head)
-//          println("NewBody: "+prettyStr(newBody))
-//          println("With Substitution: "+candidates._2.head.get)
+          //          println("NewBody: "+prettyStr(newBody))
+          //          println("With Substitution: "+candidates._2.head.get)
           val substitutions = candidates._2.head.get
           val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
-//          println("  = "+prettyStr(res))
+          //          println("  = "+prettyStr(res))
           res
         } else
           Applic(lookup(f)(context), body)
-      case Applic(x,y) => Applic(lookup(x)(context),lookup(y)(context))
+      case Applic(x, y)                                      => Applic(lookup(x)(context), lookup(y)(context))
     })(t)
 
 
-  def args(t:Term):List[Term] = t match {
-    case Applic(x,y) => y :: args(x)
-    case _ => Nil
+  def args(t: Term): List[Term] = t match {
+    case Applic(x, y) => y :: args(x)
+    case _            => Nil
   }
-  def applicant(t:Term):Term = transform({
-    case Applic(left,right) => applicant(left)
-    case Id(_) => t
+
+  def applicant(t: Term): Term = transform({
+    case Applic(left, right) => applicant(left)
+    case Id(_)               => t
   })(t)
 
   def transform(f: PartialFunction[Term, Term]): PartialFunction[Term, Term] = f orElse {
