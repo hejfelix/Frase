@@ -72,10 +72,10 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val candidates = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
         //println("candidates: "+candidates)
         if (candidates._1 != Nil) {
-          val newBody = stripHeader(candidates._1.head)
+          val newBody = stripHeader(candidates._1.headOption.getOrElse(Empty))
           //          println("NewBody: "+prettyStr(newBody))
           //          println("With Substitution: "+candidates._2.head.get)
-          val substitutions = candidates._2.head.get
+          val substitutions = candidates._2.head.getOrElse(Map())
           val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
           //          println("  = "+prettyStr(res))
           res

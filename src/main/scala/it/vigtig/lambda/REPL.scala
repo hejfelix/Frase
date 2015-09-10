@@ -60,7 +60,7 @@ object REPL
 
         loop(combine(context, listToMap(definition)))
 
-      case err: NoSuccess => println(err)
+      case err => println(err)
     }
 
   }
