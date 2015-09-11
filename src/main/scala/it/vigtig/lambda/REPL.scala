@@ -48,12 +48,12 @@ object REPL
 
         println()
         println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")
-        println(s"AST:          $expr")
-        println(s"context:      $context")
+//        println(s"AST:          $expr")
+//        println(s"context:      $context")
         val evalTime = time {
           val ast = interpret(expr)(context)
           println("Evaluated:    " + prettyStr(ast))
-          println("Evaluated(AST): " + ast)
+//          println("Evaluated(AST): " + ast)
         }
         println(s"time:         $evalTime ms")
         println()
