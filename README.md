@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/hejfelix/Frase.svg?branch=master)](https://travis-ci.org/hejfelix/Frase)  [![Join the chat at https://gitter.im/hejfelix/Frase](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hejfelix/Frase?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/hejfelix/Frase.svg?branch=master)](https://travis-ci.org/hejfelix/Frase) [![Codacy Badge](https://api.codacy.com/project/badge/5ac7eafc7a5d4f638d6ce89cdabe318c)](https://www.codacy.com/app/hejfelix/Frase)  [![Join the chat at https://gitter.im/hejfelix/Frase](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hejfelix/Frase?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Frase
 
