@@ -4,76 +4,26 @@
 
 Frase is a programming language
 
-
-
 ```haskell
-Frase>double = x . + x x
-added "double" to context
+Frase>map = f . Nil . Nil
+added "map" to context
 
-Parsed:  double = x . (+ x) (x)
-AST: Named(Id(double),Abstr(Id(x),Applic(Applic(Id(+),Id(x)),Id(x))))
-Evaluated: double = x . (+ x) (x)
+Parsed:       map = f .  .  : b -> Nil
+Evaluated:    map = f .  . 
+time:         3 ms
 
-Frase>myValue = 21
-added "myValue" to context
+Frase>map = f . (Cons x xs) . Cons (f x) (map f xs)
+added "map" to context
 
-Parsed:  myValue = 21
-AST: Named(Id(myValue),Integer(21))
-Evaluated: myValue = 21
+Parsed:       map = f . [x,xs] . [f x,(map f) (xs)] : b -> Cons
+Evaluated:    map = f . [x,xs] . [f x]
+time:         11 ms
 
-Frase>double myValue
+Frase>map (+ 1) ([1,2,3,4])
 
-Parsed:  double myValue
-AST: Applic(Id(double),Id(myValue))
-Evaluated: 42
-
-Frase>true yes no
-
-Parsed:  ((true) (yes)) (no)
-AST: Applic(Applic(Bit(true),Id(yes)),Id(no))
-Evaluated: yes
-
-Frase>false yes no
-
-Parsed:  ((false) (yes)) (no)
-AST: Applic(Applic(Bit(false),Id(yes)),Id(no))
-Evaluated: no
-
-Frase>
-```
-
-
-```haskell
-Frase>fac = n . (<= n 1) (1) (* (n) (fac (- n 1)))
-added "fac" to context
-
-Parsed:  fac = n . (((<= n) (1)) (1)) ((* n) (fac (- n) (1)))
-AST: Named(Id(fac),Abstr(Id(n),Applic(Applic(Applic(Applic(Id(<=),Id(n)),Integer(1)),Integer(1)),Applic(Applic(Id(*),Id(n)),Applic(Id(fac),Applic(Applic(Id(-),Id(n)),Integer(1)))))))
-Evaluated: fac = n . (((<= n) (1)) (1)) ((* n) (fac (- n) (1)))
-
-Frase>fac 0
-
-Parsed:  fac 0
-AST: Applic(Id(fac),Integer(0))
-Evaluated: 1
-
-Frase>fac 3
-
-Parsed:  fac 3
-AST: Applic(Id(fac),Integer(3))
-Evaluated: 6
-
-Frase>fac 4
-
-Parsed:  fac 4
-AST: Applic(Id(fac),Integer(4))
-Evaluated: 24
-
-Frase>fac 5
-
-Parsed:  fac 5
-AST: Applic(Id(fac),Integer(5))
-Evaluated: 120
+Parsed:       (map + 1) ([1,2,3,4]) : a
+Evaluated:    [2,3,4,5]
+time:         9 ms
 
 Frase>
 ```
