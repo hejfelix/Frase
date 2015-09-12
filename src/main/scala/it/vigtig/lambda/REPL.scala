@@ -11,25 +11,25 @@ object REPL
 
   def main(args: Array[String]) = loop()
 
-  def first[A,B](t:(A,B)) = t match {
-    case (x,_) => x
+  def first[A, B](t: (A, B)) = t match {
+    case (x, _) => x
   }
-  def second[A,B](t:(A,B)) = t match {
-    case (_,x) => x
+
+  def second[A, B](t: (A, B)) = t match {
+    case (_, x) => x
+  }
+
+  def time(b: => Unit): Long = {
+    val t = System.currentTimeMillis()
+    b
+    System.currentTimeMillis() - t
   }
 
   def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Unit = {
 
-    def time(b: => Unit): Long = {
-      val t = System.currentTimeMillis()
-      b
-      System.currentTimeMillis() - t
-    }
-
     val exprSrc = io.StdIn.readLine("Frase>")
     parseAll(LINE, exprSrc) match {
       case Success(expr, _) =>
-
 
         val definition: List[(Term, Term)] = expr match {
           case Named(id, body)                =>
@@ -40,31 +40,24 @@ object REPL
             cons map {
               case ConstructorDef(Id(id), args) =>
                 val cons = s"""${args.map(first).mkString(".")} ${if (args != Nil) "." else ""}"""
-                val consTail =  s"""$id ${args.map(first).mkString(" ")}"""
-                val consBody =
-                  parseAll(LINE, cons+consTail)
-                  match {
-                    case Success(term, _) => term
-                    case x                => System.err.println("Couldn't parse " + x); sys.error("hej")
-                  }
+                val consTail = s"""$id ${args.map(first).mkString(" ")}"""
+                val consBody = parseAll(LINE, cons + consTail)
+                match {
+                  case Success(term, _) => term
+                  case x                => System.err.println("Couldn't parse " + x); sys.error("hej")
+                }
                 Id(id) -> consBody
             }
           case _                              => Nil
         }
 
-
         println()
         println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")
-//        println(s"AST:          $expr")
-//        println(s"context:      $context")
         val evalTime = time {
-          val ast = interpret(expr)(context)
-          println("Evaluated:    " + prettyStr(ast))
-//          println("Evaluated(AST): " + ast)
+          println("Evaluated:    " + prettyStr(interpret(expr)(context)))
         }
         println(s"time:         $evalTime ms")
         println()
-
         loop(combine(context, listToMap(definition)))
 
       case err => println(err)

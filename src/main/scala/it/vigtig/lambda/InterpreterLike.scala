@@ -7,7 +7,11 @@ package it.vigtig.lambda
 trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
   def listToMap(l: List[(Term, Term)]) =
-    l.foldLeft(Map[Term, List[Term]]())((map, m) => map + (m._1 -> (m._2 :: map.getOrElse(m._1, Nil))))
+    l.foldLeft(Map[Term, List[Term]]())(comb)
+
+  def comb(m:Map[Term,List[Term]],t:(Term,Term)) = t match {
+    case (a,b) => m + (a -> (b :: m.getOrElse(a,Nil)))
+  }
 
   def interpretProgram(program: String): Option[List[Term]] = {
 
@@ -61,23 +65,15 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         val ap = applicant(t)
         val headers = context(ap).map(header)
         val as: List[Term] = args(t).reverse
-        //        println("chead: "+context(ap).head+"  "+body)
-        //        println("UNIFICATION: "+unify(context(ap).head,body))
-        //        println("Applicant: "+applicant(t) + "args: "+as)
-        //        println("Arguments: "+as)
-        //        println("Header: "+headers)
+
         val substitutions = headers.map(x => unifyLists(x, as))
-        //println("Substitutions: "+substitutions)
-        //        println("Context: "+context(ap))
-        val candidates = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
-        //println("candidates: "+candidates)
-        if (candidates._1 != Nil) {
-          val newBody = stripHeader(candidates._1.headOption.getOrElse(Empty))
-          //          println("NewBody: "+prettyStr(newBody))
-          //          println("With Substitution: "+candidates._2.head.get)
-          val substitutions = candidates._2.head.getOrElse(Map())
+
+        val (terms, maybeTermToTerms) = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
+
+        if (terms!= Nil) {
+          val newBody = stripHeader(terms.headOption.getOrElse(Empty))
+          val substitutions = maybeTermToTerms.head.getOrElse(Map())
           val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
-          //          println("  = "+prettyStr(res))
           res
         } else
           Applic(lookup(f)(context), body)
