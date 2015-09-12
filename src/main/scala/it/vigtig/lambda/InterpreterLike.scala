@@ -9,8 +9,8 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   def listToMap(l: List[(Term, Term)]) =
     l.foldLeft(Map[Term, List[Term]]())(comb)
 
-  def comb(m:Map[Term,List[Term]],t:(Term,Term)) = t match {
-    case (a,b) => m + (a -> (b :: m.getOrElse(a,Nil)))
+  def comb(m: Map[Term, List[Term]], t: (Term, Term)) = t match {
+    case (a, b) => m + (a -> (b :: m.getOrElse(a, Nil)))
   }
 
   def interpretProgram(program: String): Option[List[Term]] = {
@@ -68,16 +68,19 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
 
         val substitutions = headers.map(x => unifyLists(x, as))
 
-        val (terms, maybeTermToTerms) = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
+        val (terms, subs) = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
 
-        if (terms!= Nil) {
-          val newBody = stripHeader(terms.headOption.getOrElse(Empty))
-          val substitutions = maybeTermToTerms.head.getOrElse(Map())
-          val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
-          res
-        } else
-          Applic(lookup(f)(context), body)
-      case Applic(x, y)                                      => Applic(lookup(x)(context), lookup(y)(context))
+        terms match {
+          case x :: xs =>
+            val newBody = stripHeader(x)
+            val maybeSubs = for(x<- subs.headOption; y<- x) yield y
+            val substitutions = maybeSubs.getOrElse(Map())
+            val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
+            res
+          case Nil     => Applic(lookup(f)(context), body)
+        }
+
+      case Applic(x, y) => Applic(lookup(x)(context), lookup(y)(context))
     })(t)
 
 
