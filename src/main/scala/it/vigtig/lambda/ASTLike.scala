@@ -33,6 +33,7 @@ trait ASTLike extends AST {
   case class ConstructorDef(id: Id, args: List[(String, String)]) extends Term
 
   def prettyList(t:Term):List[String] = t match {
+    case Applic(Applic(SetId("Cons"),head),Id(x)) => List(prettyStr(head)+"|"+x)
     case Applic(Applic(SetId("Cons"),head),tail) => prettyStr(head) :: prettyList(tail)
     case SetId("Nil") => Nil
     case x => List(prettyStr(x))

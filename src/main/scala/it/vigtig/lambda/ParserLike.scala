@@ -67,7 +67,7 @@ trait ParserLike
       case v1 ~ v1t ~ None       => List((v1, v1t))
     }
 
-  lazy val ATOM: PParser[Atom] = BIT | INTEGER | FLOAT | ID | (SET ^^ SetId)
+  lazy val ATOM: PParser[Term] = LIST | BIT | INTEGER | FLOAT | ID | (SET ^^ SetId)
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 

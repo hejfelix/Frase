@@ -11,6 +11,13 @@ object REPL
 
   def main(args: Array[String]) = loop()
 
+  def first[A,B](t:(A,B)) = t match {
+    case (x,_) => x
+  }
+  def second[A,B](t:(A,B)) = t match {
+    case (_,x) => x
+  }
+
   def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Unit = {
 
     def time(b: => Unit): Long = {
@@ -32,8 +39,8 @@ object REPL
             println("added constructor(s) to context:")
             cons map {
               case ConstructorDef(Id(id), args) =>
-                val cons = s"""${args.map(t => t._1).mkString(".")} ${if (args != Nil) "." else ""}"""
-                val consTail =  s"""$id ${args.map(t => t._1).mkString(" ")}"""
+                val cons = s"""${args.map(first).mkString(".")} ${if (args != Nil) "." else ""}"""
+                val consTail =  s"""$id ${args.map(first).mkString(" ")}"""
                 val consBody =
                   parseAll(LINE, cons+consTail)
                   match {
