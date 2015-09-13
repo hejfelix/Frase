@@ -61,7 +61,6 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
   def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
     transform({
       case Applic(f, body) if context.contains(applicant(t)) =>
-        val candidate = Nil
         val ap = applicant(t)
         val headers = context(ap).map(header)
         val as: List[Term] = args(t).reverse
@@ -73,7 +72,7 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
         terms match {
           case x :: xs =>
             val newBody = stripHeader(x)
-            val maybeSubs = for(x<- subs.headOption; y<- x) yield y
+            val maybeSubs = for (x <- subs.headOption; y <- x) yield y
             val substitutions = maybeSubs.getOrElse(Map())
             val res = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
             res

@@ -17,7 +17,7 @@ with GeneratorDrivenPropertyChecks {
 
   def parseProgramTest(l: String)(b: Term => Unit) = {
     interpretProgram(l) match {
-      case Some(ts) => ts.filter(_ != Empty).map(t => b(interpret(t)()))
+      case Some(ts) => ts.filter(_ != Empty).foreach(t => b(interpret(t)()))
       case _ => sys.error("Error interpreting program")
     }
   }

@@ -60,7 +60,7 @@ object UnificationTest extends UnificationLike with App with ParserLike {
 
   println(func.get)
 
-  println
+  println()
   println("header: " + header(func.get))
   println()
   println("unified header: " + unify(header(func.get).head, x.get))
