@@ -72,11 +72,74 @@ with GeneratorDrivenPropertyChecks {
     val tpe2 = TPolyInst("Dude",TInst("float"),TInst("int"))
     val tpe3 = TPolyInst("Dude",TVar("b"),TVar("c"))
 
+    val singletonType = TPolyInst("Thing")
+
     assert(moreGeneralOrEqual(tpe1,tpe2,Nil))
     assert(moreGeneralOrEqual(tpe3,tpe1,Nil))
     assert(moreGeneralOrEqual(tpe3,tpe2,Nil))
 
+
+    assert(moreGeneralOrEqual(tpe1,tpe1,Nil))
+    assert(moreGeneralOrEqual(tpe2,tpe2,Nil))
+    assert(moreGeneralOrEqual(tpe3,tpe3,Nil))
+
+    assert(moreGeneralOrEqual(singletonType,singletonType,Nil))
+
   }
+
+
+  property("Unification") {
+
+    val tpe1 = TPolyInst("Dude",TVar("a"),TInst("int"))
+    val tpe2 = TPolyInst("Dude",TInst("float"),TInst("int"))
+    val tpe3 = TPolyInst("Dude",TVar("b"),TVar("c"))
+
+    val tpe4 = TPolyInst("Func",TVar("a"),TVar("a"))
+    val tpe5 = TPolyInst("Func",TInst("Int"),TVar("a"))
+
+    val singletonType = TPolyInst("Thing")
+
+    unify(tpe1,tpe2) shouldBe TPolyInst("Dude",TInst("float"),TInst("int"))
+    unify(tpe1,tpe1) shouldBe tpe1
+    unify(tpe1,tpe3) shouldBe tpe1
+
+
+    unify(tpe4,tpe5) shouldBe TPolyInst("Func",TInst("Int"),TInst("Int"))
+  }
+
+  property("W2 test") {
+
+    def newVariableGenerator = {
+      var nextVar = 'a'
+      () => {
+        val v = nextVar
+        nextVar = (nextVar + 1).toChar
+        ""+v
+      }
+    }
+
+    val integer = Integer(42)
+    val float = Floating(42f)
+    val bit = Bit(true)
+
+    w2(integer,Nil,newVariableGenerator) shouldBe TInst("Int")
+    w2(float,Nil,newVariableGenerator) shouldBe TInst("Float")
+    w2(bit,Nil,newVariableGenerator) shouldBe TInst("Bool")
+
+    w2(Id("x"),Nil,newVariableGenerator) shouldBe TVar("a")
+
+    w2(Abstr(Id("x"),Id("y")),Nil,newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("b"))
+
+    val application = Applic(Abstr(Id("x"),Id("x")),Integer(42))
+
+    val identity = Abstr(Id("x"),Id("x"))
+
+    w2(identity,Nil,newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("a"))
+
+    w2(application,Nil,newVariableGenerator) shouldBe TInst("Int")
+
+  }
+
 
 
 
