@@ -25,7 +25,7 @@ object REPL
     System.currentTimeMillis() - t
   }
 
-  def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Unit = {
+  def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil),nextVar:String = "a"): Unit = {
 
     val exprSrc = io.StdIn.readLine("Frase>")
     parseAll(LINE, exprSrc) match {
@@ -51,14 +51,15 @@ object REPL
           case _                              => Nil
         }
 
+        val (typeOfExpression,nextVariable) = w2(expr,Map(),nextVar)
         println()
-        println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(newTyper(expr))}")
+        println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpression)}")
         val evalTime = time {
           println("Evaluated:    " + prettyStr(interpret(expr)(context)))
         }
         println(s"time:         $evalTime ms")
         println()
-        loop(combine(context, listToMap(definition)))
+        loop(combine(context, listToMap(definition)),nextVariable)
 
       case err => println(err)
     }

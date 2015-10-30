@@ -17,7 +17,9 @@ with GeneratorDrivenPropertyChecks {
 
   def typeCheck(l: String) = {
     parseAll(LINE, l) match {
-      case Success(ast, _) => newTyper(ast)
+      case Success(ast, _) =>
+        val (tpe,_) = w2(ast,Map(),"a")
+        tpe
       case pr => fail("Term failed to parse" + pr)
     }
   }

@@ -142,12 +142,9 @@ trait HindleyMilnerLike extends ASTLike {
         TPolyInst(name, args map (t => inst(t, newVar)): _*)
     }
 
-  def newTyper = {
-    var nextVar = "a"
+  def newTyper(next:String = "a") = {
     (e:Term) => {
-      val (t,next) = w2(e,Map(),nextVar)
-      nextVar = next
-      t
+      w2(e,Map(),next)
     }
   }
 
