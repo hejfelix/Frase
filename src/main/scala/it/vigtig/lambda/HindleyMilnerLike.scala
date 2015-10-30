@@ -24,6 +24,7 @@ trait HindleyMilnerLike extends ASTLike {
   type Context = List[(Term,Type)]
 
   def prettyType(t: Type): String = t match {
+    case TPolyInst(name,args @ _*) => s"""$name ${args.map(prettyType).mkString(" ")}"""
     case TFunc(in, out) => s"${prettyType(in)} -> ${prettyType(out)}"
     case TVar(x)        => x
     case TInst(x)       => x
@@ -81,8 +82,8 @@ trait HindleyMilnerLike extends ASTLike {
       case (TVar(_),TVar(_)) => a
 
       //Assign inst to var
-      case (TVar(_),TInst(_)) => b
-      case (TInst(_),TVar(_)) => a
+      case (TVar(_),_) => b
+      case (_,TVar(_)) => a
 
       //Instances unify syntactically
       case (TInst(x),TInst(y)) => if(x!=y) TFail(a+" != "+b) else a
@@ -161,11 +162,16 @@ trait HindleyMilnerLike extends ASTLike {
    */
   def newTyper = {
     var nextVar = 'a'
-    W(Map[Term, Type]().withDefault { t =>
+    (e:Term) => w2(e,Nil, () => {
       val v = nextVar
-      nextVar = (nextVar + 1).toChar
-      TVar("" + v)
+      nextVar = (nextVar +1).toChar
+      ""+v
     })
+//    W(Map[Term, Type]().withDefault { t =>
+//      val v = nextVar
+//      nextVar = (nextVar + 1).toChar
+//      TVar("" + v)
+//    })
   }
 
   def min(a: Type, b: Type) = a match {

@@ -23,19 +23,12 @@ with GeneratorDrivenPropertyChecks {
   }
 
   property("Identity has identical input and output types") {
-    forAll {
-      (id: String) =>
-        typeCheck(s"$id . $id") shouldBe TFunc(TVar("a"), TVar("a"))
-    }
+    typeCheck("x . x") shouldBe TPolyInst("Func",TVar("a"), TVar("a"))
+
   }
 
   property("Constant function has different input and output types") {
-    forAll {
-      (a: String, b: String) =>
-        whenever(a != b) {
-          typeCheck(s"$a . $b") shouldBe TFunc(TVar("a"), TVar("b"))
-        }
-    }
+       typeCheck("x . y") shouldBe TPolyInst("Func",TVar("a"), TVar("b"))
   }
 
   property("TInst < TVar") {
