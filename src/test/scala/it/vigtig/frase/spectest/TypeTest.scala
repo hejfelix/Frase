@@ -100,34 +100,25 @@ with GeneratorDrivenPropertyChecks {
 
   property("W2 test") {
 
-    def newVariableGenerator = {
-      var nextVar = 'a'
-      () => {
-        val v = nextVar
-        nextVar = (nextVar + 1).toChar
-        ""+v
-      }
-    }
-
     val integer = Integer(42)
     val float = Floating(42f)
     val bit = Bit(true)
 
-    w2(integer,Map(),newVariableGenerator) shouldBe TInst("Int")
-    w2(float,Map(),newVariableGenerator) shouldBe TInst("Float")
-    w2(bit,Map(),newVariableGenerator) shouldBe TInst("Bool")
+    w2(integer,Map(),"a") shouldBe (TInst("Int"),"a")
+    w2(float,Map(),"a") shouldBe (TInst("Float"),"a")
+    w2(bit,Map(),"a") shouldBe (TInst("Bool"),"a")
 
-    w2(Id("x"),Map(),newVariableGenerator) shouldBe TVar("a")
+    w2(Id("x"),Map(),"a") shouldBe (TVar("a"),"b")
 
-    w2(Abstr(Id("x"),Id("y")),Map(),newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("b"))
+    w2(Abstr(Id("x"),Id("y")),Map(),"a") shouldBe (TPolyInst("Func",TVar("a"),TVar("b")),"c")
 
     val application = Applic(Abstr(Id("x"),Id("x")),Integer(42))
 
     val identity = Abstr(Id("x"),Id("x"))
 
-    w2(identity,Map(),newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("a"))
+    w2(identity,Map(),"a") shouldBe (TPolyInst("Func",TVar("a"),TVar("a")),"b")
 
-    w2(application,Map(),newVariableGenerator) shouldBe TInst("Int")
+    w2(application,Map(),"a") shouldBe (TInst("Int"),"c")
 
   }
 

@@ -108,28 +108,30 @@ trait HindleyMilnerLike extends ASTLike {
   }
 
 
+  def incrementVar(s:String):String = ""+(s.charAt(0)+1).toChar
+
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Algorithm_W
    */
-  def w2(e: Term, ctx: Context, newVar: () => String): Type = e match {
-    case Integer(_)                       => TInst("Int")
-    case Bit(_)                           => TInst("Bool")
-    case Floating(_)                      => TInst("Float")
-    case Named(_, body)                   => w2(body, ctx, newVar)
-    case Id(_) if (ctx.contains(e))       => ctx(e)
-    case Id(_)                            => TVar(newVar())
+  def w2(e: Term, ctx: Context, nextVar: String): (Type,String) = e match {
+    case Integer(_)                       => (TInst("Int"),nextVar)
+    case Bit(_)                           => (TInst("Bool"),nextVar)
+    case Floating(_)                      => (TInst("Float"),nextVar)
+    case Named(_, body)                   => w2(body, ctx, nextVar)
+    case Id(_) if (ctx.contains(e))       => (ctx(e),nextVar)
+    case Id(_)                            => (TVar(nextVar),incrementVar(nextVar))
     case Applic(e0, e1)                   =>
-      val tauPrime = TVar(newVar())
-      val tau0 = w2(e0, ctx, newVar)
-      val tau1 = w2(e1, ctx, newVar)
+      val tauPrime = TVar(nextVar)
+      val (tau0,next) = w2(e0, ctx, incrementVar(nextVar))
+      val (tau1,next2) = w2(e1, ctx, next)
       //Does tau0 unify with tau1 -> tauPrime?
       val TPolyInst(_, _, out) = unify(tau0, TPolyInst("Func", tau1, tauPrime))
-      out
+      (out,next2)
     case Abstr(id, e)                     =>
-      val tau = TVar(newVar())
-      val tauPrime = w2(e, ctx + (id -> tau) , newVar)
-      TPolyInst("Func", tau, tauPrime)
-    case _                                => TFail("")
+      val tau = TVar(nextVar)
+      val (tauPrime,next) = w2(e, ctx + (id -> tau) , incrementVar(nextVar))
+      (TPolyInst("Func", tau, tauPrime),next)
+    case _                                => (TFail(""),nextVar)
   }
 
   def inst(sigma: Type, newVar: () => String): Type =
@@ -141,12 +143,12 @@ trait HindleyMilnerLike extends ASTLike {
     }
 
   def newTyper = {
-    var nextVar = 'a'
-    (e: Term) => w2(e, Map(), () => {
-      val v = nextVar
-      nextVar = (nextVar + 1).toChar
-      "" + v
-    })
+    var nextVar = "a"
+    (e:Term) => {
+      val (t,next) = w2(e,Map(),nextVar)
+      nextVar = next
+      t
+    }
   }
 
 
