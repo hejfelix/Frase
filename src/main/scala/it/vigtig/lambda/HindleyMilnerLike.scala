@@ -21,12 +21,56 @@ trait HindleyMilnerLike extends ASTLike {
 
   case class TFunc(in: Type, out: Type) extends TPoly
 
+  type Context = List[(Atom,Type)]
+
   def prettyType(t: Type): String = t match {
     case TFunc(in, out) => s"${prettyType(in)} -> ${prettyType(out)}"
     case TVar(x)        => x
     case TInst(x)       => x
     case _              => t.toString
   }
+
+  /*
+  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Free_type_variables
+   */
+  def freeVars(t:Type):Set[Type] = t match {
+    case TVar(_) => Set(t)
+    case TInst(_) => Set()
+    case TPolyInst(_,args @ _ *) => args map freeVars reduce (_++_)
+  }
+
+  /*
+  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
+   */
+  def freeVars(ctx:Context):Set[Type] =
+    ctx map {
+      case (variable,tpe) => freeVars(tpe)
+    } reduce (_++_)
+
+  /*
+  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
+   */
+  def freeInContext(alpha:Type,ctx:Context) =
+    ctx exists {
+      case (variable,tpe) => alpha==tpe
+    }
+
+  /*
+  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Polymorphic_type_order
+   */
+    def moreGeneralOrEqual(a:Type,b:Type,ctx:Context):Boolean = (a,b) match
+    {
+      case (TVar(a),_) => true
+      case (TInst(x),TInst(y)) => x == y
+      case (a:TPolyInst,b:TPolyInst) =>
+
+        a.name==b.name &&
+          (a.args,b.args)
+            .zipped
+            .map(moreGeneralOrEqual(_,_,ctx))
+            .foldLeft(true)(_&&_)
+
+    }
 
   def newTyper = {
     var nextVar = 'a'

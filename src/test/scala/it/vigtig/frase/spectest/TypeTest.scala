@@ -39,7 +39,7 @@ with GeneratorDrivenPropertyChecks {
   }
 
   property("TInst < TVar") {
-    min(TInst("foo"), TVar("bar")).shouldBe(TInst("foo"))
+    min(TInst("foo"), TVar("bar")) shouldBe TInst("foo")
   }
 
   property("Known types") {
@@ -47,5 +47,37 @@ with GeneratorDrivenPropertyChecks {
     typeCheck("true") shouldBe TInst("Bool")
     typeCheck(".2f") shouldBe TInst("Float")
   }
+
+  property("Free Type Variables") {
+
+
+    freeVars(TPolyInst("dude",TVar("a"),TVar("b"),TInst("c"),TVar("d"))) shouldBe Set(TVar("a"),TVar("b"),TVar("d"))
+
+    val ctx = List(
+      (Id("a"),TInst("sometype")),
+      (Id("b"),TVar("someOtherType")),
+      (Id("c"),TPolyInst("dude",TVar("a"),TVar("b"),TInst("c"),TVar("d")))
+    )
+
+    val expected = Set(TVar("a"),TVar("b"),TVar("d"),TVar("someOtherType"))
+
+    freeVars(ctx) shouldBe expected
+
+  }
+
+
+  property("Specialization") {
+
+    val tpe1 = TPolyInst("Dude",TVar("a"),TInst("int"))
+    val tpe2 = TPolyInst("Dude",TInst("float"),TInst("int"))
+    val tpe3 = TPolyInst("Dude",TVar("b"),TVar("c"))
+
+    assert(moreGeneralOrEqual(tpe1,tpe2,Nil))
+    assert(moreGeneralOrEqual(tpe3,tpe1,Nil))
+    assert(moreGeneralOrEqual(tpe3,tpe2,Nil))
+
+  }
+
+
 
 }
