@@ -31,9 +31,6 @@ with GeneratorDrivenPropertyChecks {
        typeCheck("x . y") shouldBe TPolyInst("Func",TVar("a"), TVar("b"))
   }
 
-  property("TInst < TVar") {
-    min(TInst("foo"), TVar("bar")) shouldBe TInst("foo")
-  }
 
   property("Known types") {
     typeCheck("42") shouldBe TInst("Int")
@@ -46,10 +43,10 @@ with GeneratorDrivenPropertyChecks {
 
     freeVars(TPolyInst("dude",TVar("a"),TVar("b"),TInst("c"),TVar("d"))) shouldBe Set(TVar("a"),TVar("b"),TVar("d"))
 
-    val ctx = List(
-      (Id("a"),TInst("sometype")),
-      (Id("b"),TVar("someOtherType")),
-      (Id("c"),TPolyInst("dude",TVar("a"),TVar("b"),TInst("c"),TVar("d")))
+    val ctx: Map[Term, Type] = Map(
+      Id("a") -> TInst("sometype"),
+      Id("b") -> TVar("someOtherType"),
+      Id("c") -> TPolyInst("dude",TVar("a"),TVar("b"),TInst("c"),TVar("d"))
     )
 
     val expected = Set(TVar("a"),TVar("b"),TVar("d"),TVar("someOtherType"))
@@ -67,16 +64,16 @@ with GeneratorDrivenPropertyChecks {
 
     val singletonType = TPolyInst("Thing")
 
-    assert(moreGeneralOrEqual(tpe1,tpe2,Nil))
-    assert(moreGeneralOrEqual(tpe3,tpe1,Nil))
-    assert(moreGeneralOrEqual(tpe3,tpe2,Nil))
+    assert(moreGeneralOrEqual(tpe1,tpe2,Map()))
+    assert(moreGeneralOrEqual(tpe3,tpe1,Map()))
+    assert(moreGeneralOrEqual(tpe3,tpe2,Map()))
 
 
-    assert(moreGeneralOrEqual(tpe1,tpe1,Nil))
-    assert(moreGeneralOrEqual(tpe2,tpe2,Nil))
-    assert(moreGeneralOrEqual(tpe3,tpe3,Nil))
+    assert(moreGeneralOrEqual(tpe1,tpe1,Map()))
+    assert(moreGeneralOrEqual(tpe2,tpe2,Map()))
+    assert(moreGeneralOrEqual(tpe3,tpe3,Map()))
 
-    assert(moreGeneralOrEqual(singletonType,singletonType,Nil))
+    assert(moreGeneralOrEqual(singletonType,singletonType,Map()))
 
   }
 
@@ -96,6 +93,7 @@ with GeneratorDrivenPropertyChecks {
     unify(tpe1,tpe1) shouldBe tpe1
     unify(tpe1,tpe3) shouldBe tpe1
 
+    unify(singletonType,singletonType) shouldBe singletonType
 
     unify(tpe4,tpe5) shouldBe TPolyInst("Func",TInst("Int"),TInst("Int"))
   }
@@ -115,21 +113,21 @@ with GeneratorDrivenPropertyChecks {
     val float = Floating(42f)
     val bit = Bit(true)
 
-    w2(integer,Nil,newVariableGenerator) shouldBe TInst("Int")
-    w2(float,Nil,newVariableGenerator) shouldBe TInst("Float")
-    w2(bit,Nil,newVariableGenerator) shouldBe TInst("Bool")
+    w2(integer,Map(),newVariableGenerator) shouldBe TInst("Int")
+    w2(float,Map(),newVariableGenerator) shouldBe TInst("Float")
+    w2(bit,Map(),newVariableGenerator) shouldBe TInst("Bool")
 
-    w2(Id("x"),Nil,newVariableGenerator) shouldBe TVar("a")
+    w2(Id("x"),Map(),newVariableGenerator) shouldBe TVar("a")
 
-    w2(Abstr(Id("x"),Id("y")),Nil,newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("b"))
+    w2(Abstr(Id("x"),Id("y")),Map(),newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("b"))
 
     val application = Applic(Abstr(Id("x"),Id("x")),Integer(42))
 
     val identity = Abstr(Id("x"),Id("x"))
 
-    w2(identity,Nil,newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("a"))
+    w2(identity,Map(),newVariableGenerator) shouldBe TPolyInst("Func",TVar("a"),TVar("a"))
 
-    w2(application,Nil,newVariableGenerator) shouldBe TInst("Int")
+    w2(application,Map(),newVariableGenerator) shouldBe TInst("Int")
 
   }
 
