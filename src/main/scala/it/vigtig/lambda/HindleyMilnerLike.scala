@@ -5,6 +5,8 @@ package it.vigtig.lambda
  */
 trait HindleyMilnerLike extends ASTLike {
 
+  val FUNC: String = "Func"
+
   abstract trait Type
 
   abstract trait TMono extends Type
@@ -87,18 +89,19 @@ trait HindleyMilnerLike extends ASTLike {
     case (TInst(x), TInst(y)) => if (x != y) TFail(a + " != " + b) else a
 
     //Polytypes unify if type arguments have same length and unify pairwise
-    case (a: TPolyInst, b: TPolyInst) =>
-      if (a.name != b.name)
-        TFail("name mismatch: " + a.name + " != " + b.name)
-      else if (a.args.length != b.args.length)
-        TFail("arg length mismatch: " + a.args.length + "!=" + b.args.length)
-      else {
-        val substitutions = (a.args, b.args).zipped.map(unifySub).toMap
-        val newArgs = (a.args, b.args).zipped
-          .map(unify)
-          .map(x => substitutions.getOrElse(x, x))
-        TPolyInst(a.name, newArgs: _*)
-      }
+    case (a: TPolyInst, b: TPolyInst) if a.name != b.name               => TFail(s"name mismatch: $a.name != $b.name")
+    case (a: TPolyInst, b: TPolyInst) if a.args.length != b.args.length => TFail(s"arg length mismatch: $a.args.length != $b.args.length")
+    case (a: TPolyInst, b: TPolyInst)                                   =>
+      val substitutions = (a.args, b.args)
+        .zipped
+        .map(unifySub)
+        .toMap
+
+      val newArgs = (a.args, b.args)
+        .zipped
+        .map(unify)
+        .map(x => substitutions.getOrElse(x, x))
+      TPolyInst(a.name, newArgs: _*)
   }
 
   def unifySub(a: Type, b: Type): (Type, Type) = (a, b) match {
@@ -108,30 +111,34 @@ trait HindleyMilnerLike extends ASTLike {
   }
 
 
-  def incrementVar(s:String):String = ""+(s.charAt(0)+1).toChar
+  def incrementVar(s: String): String = "" + (s.charAt(0) + 1).toChar
+
+  val knownTypes: PartialFunction[Term, Type] = {
+    case Integer(_)  => TInst("Int")
+    case Bit(_)      => TInst("Bool")
+    case Floating(_) => TInst("Float")
+  }
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Algorithm_W
    */
-  def w2(e: Term, ctx: Context, nextVar: String): (Type,String) = e match {
-    case Integer(_)                       => (TInst("Int"),nextVar)
-    case Bit(_)                           => (TInst("Bool"),nextVar)
-    case Floating(_)                      => (TInst("Float"),nextVar)
-    case Named(_, body)                   => w2(body, ctx, nextVar)
-    case Id(_) if (ctx.contains(e))       => (ctx(e),nextVar)
-    case Id(_)                            => (TVar(nextVar),incrementVar(nextVar))
-    case Applic(e0, e1)                   =>
+  def w2(e: Term, ctx: Context, nextVar: String): (Type, String) = e match {
+    case _ if knownTypes.isDefinedAt(e) => (knownTypes(e), nextVar)
+    case Named(_, body)                 => w2(body, ctx, nextVar)
+    case Id(_) if (ctx.contains(e))     => (ctx(e), nextVar)
+    case Id(_)                          => (TVar(nextVar), incrementVar(nextVar))
+    case Applic(e0, e1)                 =>
       val tauPrime = TVar(nextVar)
-      val (tau0,next) = w2(e0, ctx, incrementVar(nextVar))
-      val (tau1,next2) = w2(e1, ctx, next)
+      val (tau0, next) = w2(e0, ctx, incrementVar(nextVar))
+      val (tau1, next2) = w2(e1, ctx, next)
       //Does tau0 unify with tau1 -> tauPrime?
-      val TPolyInst(_, _, out) = unify(tau0, TPolyInst("Func", tau1, tauPrime))
-      (out,next2)
-    case Abstr(id, e)                     =>
-      val tau = TVar(nextVar)
-      val (tauPrime,next) = w2(e, ctx + (id -> tau) , incrementVar(nextVar))
-      (TPolyInst("Func", tau, tauPrime),next)
-    case _                                => (TFail(""),nextVar)
+      val TPolyInst(_, _, out) = unify(tau0, TPolyInst(FUNC, tau1, tauPrime))
+      (out, next2)
+    case Abstr(id, e)                   =>
+      val (tau,next) = w2(id,ctx,nextVar)
+      val (tauPrime, next2) = w2(e, ctx + (id -> tau), next)
+      (TPolyInst(FUNC, tau, tauPrime), next2)
+    case _                              => (TFail(""), nextVar)
   }
 
   def inst(sigma: Type, newVar: () => String): Type =
@@ -142,9 +149,9 @@ trait HindleyMilnerLike extends ASTLike {
         TPolyInst(name, args map (t => inst(t, newVar)): _*)
     }
 
-  def newTyper(next:String = "a") = {
-    (e:Term) => {
-      w2(e,Map(),next)
+  def newTyper(next: String = "a") = {
+    (e: Term) => {
+      w2(e, Map(), next)
     }
   }
 

@@ -25,7 +25,9 @@ object REPL
     System.currentTimeMillis() - t
   }
 
-  def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil),nextVar:String = "a"): Unit = {
+  def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil),
+           typeContext: Map[Term,Type] = Map(),
+           nextVar:String = "a"): Unit = {
 
     val exprSrc = io.StdIn.readLine("Frase>")
     parseAll(LINE, exprSrc) match {
@@ -51,15 +53,29 @@ object REPL
           case _                              => Nil
         }
 
-        val (typeOfExpression,nextVariable) = w2(expr,Map(),nextVar)
+        val (typeOfExpression,nextVariable) = w2(expr,typeContext,nextVar)
+
+        val namedType:Map[Term,Type] = expr match {
+          case Named(id,body) =>
+            if(typeContext.contains(id))
+              Map(id -> unify(typeOfExpression,typeContext(id)))
+            else
+              Map(id -> typeOfExpression)
+          case _ => Map()
+        }
+
         println()
-        println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpression)}")
+        val typeOfExpr = if(namedType.isEmpty) typeOfExpression else namedType.values.head
+        println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
         val evalTime = time {
           println("Evaluated:    " + prettyStr(interpret(expr)(context)))
         }
         println(s"time:         $evalTime ms")
         println()
-        loop(combine(context, listToMap(definition)),nextVariable)
+
+
+
+        loop(combine(context, listToMap(definition)),typeContext ++ namedType,nextVariable)
 
       case err => println(err)
     }

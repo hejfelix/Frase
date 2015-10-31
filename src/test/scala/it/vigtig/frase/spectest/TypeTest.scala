@@ -25,12 +25,11 @@ with GeneratorDrivenPropertyChecks {
   }
 
   property("Identity has identical input and output types") {
-    typeCheck("x . x") shouldBe TPolyInst("Func",TVar("a"), TVar("a"))
-
+    typeCheck("x . x") shouldBe TPolyInst(FUNC,TVar("a"), TVar("a"))
   }
 
   property("Constant function has different input and output types") {
-       typeCheck("x . y") shouldBe TPolyInst("Func",TVar("a"), TVar("b"))
+       typeCheck("x . y") shouldBe TPolyInst(FUNC,TVar("a"), TVar("b"))
   }
 
 
@@ -86,8 +85,8 @@ with GeneratorDrivenPropertyChecks {
     val tpe2 = TPolyInst("Dude",TInst("float"),TInst("int"))
     val tpe3 = TPolyInst("Dude",TVar("b"),TVar("c"))
 
-    val tpe4 = TPolyInst("Func",TVar("a"),TVar("a"))
-    val tpe5 = TPolyInst("Func",TInst("Int"),TVar("a"))
+    val tpe4 = TPolyInst(FUNC,TVar("a"),TVar("a"))
+    val tpe5 = TPolyInst(FUNC,TInst("Int"),TVar("a"))
 
     val singletonType = TPolyInst("Thing")
 
@@ -97,8 +96,9 @@ with GeneratorDrivenPropertyChecks {
 
     unify(singletonType,singletonType) shouldBe singletonType
 
-    unify(tpe4,tpe5) shouldBe TPolyInst("Func",TInst("Int"),TInst("Int"))
+    unify(tpe4,tpe5) shouldBe TPolyInst(FUNC,TInst("Int"),TInst("Int"))
   }
+
 
   property("W2 test") {
 
@@ -112,13 +112,13 @@ with GeneratorDrivenPropertyChecks {
 
     w2(Id("x"),Map(),"a") shouldBe (TVar("a"),"b")
 
-    w2(Abstr(Id("x"),Id("y")),Map(),"a") shouldBe (TPolyInst("Func",TVar("a"),TVar("b")),"c")
+    w2(Abstr(Id("x"),Id("y")),Map(),"a") shouldBe (TPolyInst(FUNC,TVar("a"),TVar("b")),"c")
 
     val application = Applic(Abstr(Id("x"),Id("x")),Integer(42))
 
     val identity = Abstr(Id("x"),Id("x"))
 
-    w2(identity,Map(),"a") shouldBe (TPolyInst("Func",TVar("a"),TVar("a")),"b")
+    w2(identity,Map(),"a") shouldBe (TPolyInst(FUNC,TVar("a"),TVar("a")),"b")
 
     w2(application,Map(),"a") shouldBe (TInst("Int"),"c")
 
