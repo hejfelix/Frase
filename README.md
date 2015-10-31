@@ -11,6 +11,7 @@ Current language features count:
 * Pattern Matching
 * Named terms
 * Yet Another Hindlye Milner Type System (YAHMTS)
+* (Very) Early stages of Algebraic Data Types
 
 Technical details:
 
