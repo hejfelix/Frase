@@ -4,6 +4,19 @@
 
 Frase is a programming language
 
+Current language features count:
+
+* Basic lambda calculus
+* Recursion
+* Pattern Matching
+* Named terms
+* Yet Another Hindlye Milner Type System (YAHMTS)
+
+Technical details:
+
+* Prototype of Interpreter (implemented in Scala, works directly on AST)
+* Read Evaluate Print Loop (REPL) with term naming
+
 ```haskell
 Frase>fib = 0 . 1
 added "fib" to context
