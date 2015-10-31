@@ -18,7 +18,7 @@ with GeneratorDrivenPropertyChecks {
   def typeCheck(l: String) = {
     parseAll(LINE, l) match {
       case Success(ast, _) =>
-        val (tpe,_) = w2(ast,Map(),"a")
+        val (tpe,_,_) = w2(ast,Map(),"a")
         tpe
       case pr => fail("Term failed to parse" + pr)
     }
@@ -79,6 +79,8 @@ with GeneratorDrivenPropertyChecks {
   }
 
 
+  def unifyType(tpe1:Type,tpe2:Type) = unify(tpe1,tpe2,Map())._1
+
   property("Unification") {
 
     val tpe1 = TPolyInst("Dude",TVar("a"),TInst("int"))
@@ -90,13 +92,13 @@ with GeneratorDrivenPropertyChecks {
 
     val singletonType = TPolyInst("Thing")
 
-    unify(tpe1,tpe2) shouldBe TPolyInst("Dude",TInst("float"),TInst("int"))
-    unify(tpe1,tpe1) shouldBe tpe1
-    unify(tpe1,tpe3) shouldBe tpe1
+    unifyType(tpe1,tpe2) shouldBe TPolyInst("Dude",TInst("float"),TInst("int"))
+    unifyType(tpe1,tpe1) shouldBe tpe1
+    unifyType(tpe1,tpe3) shouldBe tpe1
 
-    unify(singletonType,singletonType) shouldBe singletonType
+    unifyType(singletonType,singletonType) shouldBe singletonType
 
-    unify(tpe4,tpe5) shouldBe TPolyInst(FUNC,TInst("Int"),TInst("Int"))
+    unifyType(tpe4,tpe5) shouldBe TPolyInst(FUNC,TInst("Int"),TInst("Int"))
   }
 
 
@@ -106,21 +108,32 @@ with GeneratorDrivenPropertyChecks {
     val float = Floating(42f)
     val bit = Bit(true)
 
-    w2(integer,Map(),"a") shouldBe (TInst("Int"),"a")
-    w2(float,Map(),"a") shouldBe (TInst("Float"),"a")
-    w2(bit,Map(),"a") shouldBe (TInst("Bool"),"a")
+    w2(integer,Map(),"a") shouldBe (TInst("Int"),"a",Map())
+    w2(float,Map(),"a") shouldBe (TInst("Float"),"a",Map())
+    w2(bit,Map(),"a") shouldBe (TInst("Bool"),"a",Map())
 
-    w2(Id("x"),Map(),"a") shouldBe (TVar("a"),"b")
+    w2(Id("x"),Map(),"a") shouldBe (TVar("a"),"b",Map(Id("x") -> TVar("a")))
 
-    w2(Abstr(Id("x"),Id("y")),Map(),"a") shouldBe (TPolyInst(FUNC,TVar("a"),TVar("b")),"c")
+    w2(Abstr(Id("x"),Id("y")),Map(),"a") match {
+      case (tpe,next,_) =>
+        tpe shouldBe TPolyInst(FUNC,TVar("a"),TVar("b"))
+        next shouldBe "c"
+    }
 
     val application = Applic(Abstr(Id("x"),Id("x")),Integer(42))
 
     val identity = Abstr(Id("x"),Id("x"))
 
-    w2(identity,Map(),"a") shouldBe (TPolyInst(FUNC,TVar("a"),TVar("a")),"b")
-
-    w2(application,Map(),"a") shouldBe (TInst("Int"),"c")
+    w2(identity,Map(),"a") match {
+      case (tpe,next,_) =>
+        tpe shouldBe TPolyInst(FUNC,TVar("a"),TVar("a"))
+        next shouldBe "b"
+    }
+    w2(application,Map(),"a") match {
+      case (tpe,next,_) =>
+        tpe shouldBe TInst("Int")
+        next shouldBe "c"
+    }
 
   }
 

@@ -53,12 +53,12 @@ object REPL
           case _                              => Nil
         }
 
-        val (typeOfExpression,nextVariable) = w2(expr,typeContext,nextVar)
+        val (typeOfExpression,nextVariable,newTypeCtx) = w2(expr,typeContext,nextVar)
 
         val namedType:Map[Term,Type] = expr match {
           case Named(id,body) =>
             if(typeContext.contains(id))
-              Map(id -> unify(typeOfExpression,typeContext(id)))
+              Map(id -> unify(typeOfExpression,typeContext(id),newTypeCtx)._1)
             else
               Map(id -> typeOfExpression)
           case _ => Map()
@@ -74,8 +74,8 @@ object REPL
         println()
 
 
-
-        loop(combine(context, listToMap(definition)),typeContext ++ namedType,nextVariable)
+        println("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2)).mkString("\n"))
+        loop(combine(context, listToMap(definition)),newTypeCtx ++ namedType,nextVariable)
 
       case err => println(err)
     }
@@ -83,5 +83,7 @@ object REPL
   }
 
   def combine(a: Map[Term, List[Term]], b: Map[Term, List[Term]]) =
-    (a.keys ++ b.keys).map(i => i -> (a.getOrElse(i, Nil) ++ b.getOrElse(i, Nil))).toMap
+    (a.keys ++ b.keys)
+      .map(i => i -> (a.getOrElse(i, Nil) ++ b.getOrElse(i, Nil)))
+      .toMap
 }
