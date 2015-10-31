@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Frase by hejfelix</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/hejfelix/Frase">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/hejfelix/Frase/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/hejfelix/Frase/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Frase</h1>
+          <p>Frase is a programming language</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/hejfelix">hejfelix</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <p><a href="https://travis-ci.org/hejfelix/Frase"><img src="https://travis-ci.org/hejfelix/Frase.svg?branch=master" alt="Build Status"></a> <a href="https://www.codacy.com/app/hejfelix/Frase"><img src="https://api.codacy.com/project/badge/5ac7eafc7a5d4f638d6ce89cdabe318c" alt="Codacy Badge"></a>  <a href="https://gitter.im/hejfelix/Frase?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/Join%20Chat.svg" alt="Join the chat at https://gitter.im/hejfelix/Frase"></a></p>
+
+<h1>
+<a id="frase" class="anchor" href="#frase" aria-hidden="true"><span class="octicon octicon-link"></span></a>Frase</h1>
+
+<p>Frase is a programming language</p>
+
+<p>Current language features count:</p>
+
+<ul>
+<li>Basic lambda calculus</li>
+<li>Recursion</li>
+<li>Pattern Matching</li>
+<li>Named terms</li>
+<li>Yet Another Hindlye Milner Type System (YAHMTS)</li>
+<li>(Very) Early stages of Algebraic Data Types</li>
+</ul>
+
+<p>Technical details:</p>
+
+<ul>
+<li>Prototype of Interpreter (implemented in Scala, works directly on AST)</li>
+<li>Read Evaluate Print Loop (REPL) with term naming</li>
+</ul>
+
+<div class="highlight highlight-source-haskell"><pre><span class="pl-c1">Frase</span>&gt;fib = <span class="pl-c1">0</span> . <span class="pl-c1">1</span>
+added <span class="pl-s"><span class="pl-pds">"</span>fib<span class="pl-pds">"</span></span> to context
+
+<span class="pl-c1">Parsed</span>:       fib = <span class="pl-c1">0</span> . <span class="pl-c1">1</span> : <span class="pl-c1">Func</span> <span class="pl-c1">Int</span> <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    fib = <span class="pl-c1">0</span> . <span class="pl-c1">1</span>
+time:         <span class="pl-c1">5</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib = n . * n (fib (- n <span class="pl-c1">1</span>))
+added <span class="pl-s"><span class="pl-pds">"</span>fib<span class="pl-pds">"</span></span> to context
+
+<span class="pl-c1">Parsed</span>:       fib = n . (* n) (fib (- n) (<span class="pl-c1">1</span>)) : <span class="pl-c1">Func</span> <span class="pl-c1">Int</span> <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    fib = n . (* n) (fib (- n) (<span class="pl-c1">1</span>))
+time:         <span class="pl-c1">5</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib <span class="pl-c1">1</span>
+
+<span class="pl-c1">Parsed</span>:       fib <span class="pl-c1">1</span> : <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    <span class="pl-c1">1</span>
+time:         <span class="pl-c1">4</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib <span class="pl-c1">2</span>
+
+<span class="pl-c1">Parsed</span>:       fib <span class="pl-c1">2</span> : <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    <span class="pl-c1">2</span>
+time:         <span class="pl-c1">1</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib <span class="pl-c1">3</span>
+
+<span class="pl-c1">Parsed</span>:       fib <span class="pl-c1">3</span> : <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    <span class="pl-c1">6</span>
+time:         <span class="pl-c1">3</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib <span class="pl-c1">4</span>
+
+<span class="pl-c1">Parsed</span>:       fib <span class="pl-c1">4</span> : <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    <span class="pl-c1">24</span>
+time:         <span class="pl-c1">3</span> ms
+
+<span class="pl-c1">Frase</span>&gt;fib <span class="pl-c1">5</span>
+
+<span class="pl-c1">Parsed</span>:       fib <span class="pl-c1">5</span> : <span class="pl-c1">Int</span>
+<span class="pl-c1">Evaluated</span>:    <span class="pl-c1">120</span>
+time:         <span class="pl-c1">3</span> ms
+
+<span class="pl-c1">Frase</span>&gt;</pre></div>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
