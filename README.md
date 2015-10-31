@@ -4,26 +4,64 @@
 
 Frase is a programming language
 
+Current language features count:
+
+* Basic lambda calculus
+* Recursion
+* Pattern Matching
+* Named terms
+* Yet Another Hindlye Milner Type System (YAHMTS)
+* (Very) Early stages of Algebraic Data Types
+
+Technical details:
+
+* Prototype of Interpreter (implemented in Scala, works directly on AST)
+* Read Evaluate Print Loop (REPL) with term naming
+
 ```haskell
-Frase>map = f . Nil . Nil
-added "map" to context
-
-Parsed:       map = f .  .  : b -> Nil
-Evaluated:    map = f .  . 
+Frase>fib = 0 . 1
+added "fib" to context
+ 
+Parsed:       fib = 0 . 1 : Func Int Int
+Evaluated:    fib = 0 . 1
+time:         5 ms
+ 
+Frase>fib = n . * n (fib (- n 1))
+added "fib" to context
+ 
+Parsed:       fib = n . (* n) (fib (- n) (1)) : Func Int Int
+Evaluated:    fib = n . (* n) (fib (- n) (1))
+time:         5 ms
+ 
+Frase>fib 1
+ 
+Parsed:       fib 1 : Int
+Evaluated:    1
+time:         4 ms
+ 
+Frase>fib 2
+ 
+Parsed:       fib 2 : Int
+Evaluated:    2
+time:         1 ms
+ 
+Frase>fib 3
+ 
+Parsed:       fib 3 : Int
+Evaluated:    6
 time:         3 ms
-
-Frase>map = f . (Cons x xs) . Cons (f x) (map f xs)
-added "map" to context
-
-Parsed:       map = f . [x,xs] . [f x,(map f) (xs)] : b -> Cons
-Evaluated:    map = f . [x,xs] . [f x]
-time:         11 ms
-
-Frase>map (+ 1) ([1,2,3,4])
-
-Parsed:       (map + 1) ([1,2,3,4]) : a
-Evaluated:    [2,3,4,5]
-time:         9 ms
-
+ 
+Frase>fib 4
+ 
+Parsed:       fib 4 : Int
+Evaluated:    24
+time:         3 ms
+ 
+Frase>fib 5
+ 
+Parsed:       fib 5 : Int
+Evaluated:    120
+time:         3 ms
+ 
 Frase>
 ```
