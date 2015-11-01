@@ -34,7 +34,7 @@ trait HindleyMilnerLike extends ASTLike {
     case _                        => t.toString
   }
 
-  val VERBOSE = false
+  val VERBOSE = true
   def log(s:String) = if(VERBOSE) println(s)
 
   /*
@@ -120,7 +120,7 @@ trait HindleyMilnerLike extends ASTLike {
 
 //      log(s"pairs:  ${pairs.mkString}")
 //      log(s"old args:   ${a.args}    new args:  ${newArgs}")
-//      log(s"""Unified variables:   ${substitutions.map( x => prettyType(x._1) +"/"+prettyType(x._2)).mkString("  ")}""")
+      log(s"""Unified variables:   ${substitutions.map( x => prettyType(x._1) +"/"+prettyType(x._2)).mkString("  ")}""")
       (TPolyInst(a.name, newArgs: _*),unifyInContext(ctx,substitutions))
   }
 
@@ -141,6 +141,7 @@ trait HindleyMilnerLike extends ASTLike {
     (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), incrementVar(nextVar))
   }
 
+  val A = Applic
   val knownTypes: PartialFunction[(Term, String, Context), (Type, String, Context)] = {
     case (Integer(_), next, ctx)  => (TInst("Int"), next, ctx)
     case (Bit(_), next, ctx)      => (TInst("Bool"), next, ctx)
@@ -151,6 +152,10 @@ trait HindleyMilnerLike extends ASTLike {
     case (Id("-"), next, ctx)     =>
       val argt = TVar(next)
       (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), incrementVar(next), ctx)
+    case (A(A(A(Id("<="),x),y),z),next,ctx) =>
+      w2(z,ctx,next)
+    case (A(A(A(A(Id("<="),x),y),z),zz),next,ctx) =>
+          w2(z,ctx,next)
     case (Id("<="), next, ctx)    =>
       val tvar = TVar(next)
       val (bool, next2) = boolType(incrementVar(next))
@@ -174,7 +179,7 @@ trait HindleyMilnerLike extends ASTLike {
       val (tau1, next2,ctx3) = w2(e1, ctx2, next)
       //Does tau0 unify with tau1 -> tauPrime?
       val (TPolyInst(_, _, out),newCtx) = unify(tau0, TPolyInst(FUNC, tau1, tauPrime),ctx3)
-      log(s"[App] ${prettyStr(e)} : ${prettyType(out)}    with e0 ${prettyStr(e0)} : ${prettyType(tau0)} and e1 ${prettyStr(e1)}  : ${prettyType(tau1)}")
+      log(s"[App] ${prettyStr(e)} : ${prettyType(out)}    with e0 ${prettyStr(e0)} : ${prettyType(tau0)} and e1 ${prettyStr(e1)}  : ${prettyType(tau1)}    verdict: ${prettyStr(e) -> prettyType(out)}")
       (out, next2,newCtx+(e -> out))
     case Abstr(id, e)                                   =>
       val (tau, next,ctx2) = w2(id, ctx, nextVar)
