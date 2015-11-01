@@ -94,6 +94,7 @@ with GeneratorDrivenPropertyChecks {
 
     unifyType(tpe1,tpe2) shouldBe TPolyInst("Dude",TInst("float"),TInst("int"))
     unifyType(tpe1,tpe1) shouldBe tpe1
+
     unifyType(tpe1,tpe3) shouldBe tpe1
 
     unifyType(singletonType,singletonType) shouldBe singletonType

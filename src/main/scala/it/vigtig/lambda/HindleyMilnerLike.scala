@@ -34,6 +34,9 @@ trait HindleyMilnerLike extends ASTLike {
     case _                        => t.toString
   }
 
+  val VERBOSE = false
+  def log(s:String) = if(VERBOSE) println(s)
+
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Free_type_variables
   */
@@ -104,18 +107,29 @@ trait HindleyMilnerLike extends ASTLike {
         .map(unifySub)
         .toMap
 
-      val newArgs = (a.args, b.args)
+
+
+      //log(s"a.args: ${a.args.mkString}  b.args: ${b.args.mkString}")
+
+      val pairs = (a.args,b.args)
         .zipped
-        .map((x,y) =>  unify(x,y,ctx)._1)
+        .map( (x,y) => unify(x,y,ctx)._1)
+
+      val newArgs = pairs
         .map(x => substitutions.getOrElse(x, x))
 
-      println(s"""Unified variables:   ${substitutions.map( x => prettyType(x._1) +"/"+prettyType(x._2)).mkString("  ")}""")
+//      log(s"pairs:  ${pairs.mkString}")
+//      log(s"old args:   ${a.args}    new args:  ${newArgs}")
+//      log(s"""Unified variables:   ${substitutions.map( x => prettyType(x._1) +"/"+prettyType(x._2)).mkString("  ")}""")
       (TPolyInst(a.name, newArgs: _*),unifyInContext(ctx,substitutions))
   }
 
   def unifySub(a: Type, b: Type): (Type, Type) = (a, b) match {
-    case (TVar(_), _) => a -> b
-    case (_, TVar(_)) => b -> a
+    case (TVar(_),TVar(_)) if a==b => (TFail(""), TFail(""))
+    case (TInst(_),TVar(_)) => b -> a
+    case (TVar(_),TInst(_)) => a -> b
+    case (TVar(_), _) => b -> a
+    case (_, TVar(_)) => a -> b
     case _                   => (TFail(""), TFail(""))
   }
 
@@ -152,7 +166,7 @@ trait HindleyMilnerLike extends ASTLike {
     case Id(_) if (ctx.contains(e))                     => (ctx(e),nextVar,ctx)
 
     case Id(_)                                          =>
-      println(s"[Var] ${prettyStr(e)} : ${prettyType(TVar(nextVar))}")
+      log(s"[Var] ${prettyStr(e)} : ${prettyType(TVar(nextVar))}")
       (TVar(nextVar), incrementVar(nextVar), ctx + (e -> TVar(nextVar)))
     case Applic(e0, e1)                                 =>
       val tauPrime = TVar(nextVar)
@@ -160,13 +174,13 @@ trait HindleyMilnerLike extends ASTLike {
       val (tau1, next2,ctx3) = w2(e1, ctx2, next)
       //Does tau0 unify with tau1 -> tauPrime?
       val (TPolyInst(_, _, out),newCtx) = unify(tau0, TPolyInst(FUNC, tau1, tauPrime),ctx3)
-      println(s"[App] ${prettyStr(e)} : ${prettyType(out)}    with e0 ${prettyStr(e0)} : ${prettyType(tau0)} and e1 ${prettyStr(e1)}  : ${prettyType(tau1)}")
+      log(s"[App] ${prettyStr(e)} : ${prettyType(out)}    with e0 ${prettyStr(e0)} : ${prettyType(tau0)} and e1 ${prettyStr(e1)}  : ${prettyType(tau1)}")
       (out, next2,newCtx+(e -> out))
     case Abstr(id, e)                                   =>
       val (tau, next,ctx2) = w2(id, ctx, nextVar)
       val (tauPrime, next2,ctx3) = w2(e, ctx2, next)
       val res = TPolyInst(FUNC, tau, tauPrime)
-      println(s"[Abstr] ${prettyStr(e)} : ${prettyType(res)}")
+      log(s"[Abstr] ${prettyStr(e)} : ${prettyType(res)}")
       (res, next2, ctx3 + (e -> res))
     case _                                              => (TFail(""), nextVar,ctx)
   }
@@ -184,7 +198,7 @@ trait HindleyMilnerLike extends ASTLike {
             {case (variable,index) => variable -> TVar(incrementVar(variable.name,index+1))}
             .toMap
 
-        println(s"MAP $map from $sigma")
+        log(s"MAP $map from $sigma")
       (TPolyInst(name,args.map(x => map.getOrElse(x,x)): _*),incrementVar(next,args.length))
     }
 
