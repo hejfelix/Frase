@@ -19,47 +19,47 @@ Technical details:
 * Read Evaluate Print Loop (REPL) with term naming
 
 ```haskell
-Frase>fib = 0 . 1
-added "fib" to context
+Frase>fac = 0 . 1
+added "fac" to context
  
-Parsed:       fib = 0 . 1 : Func Int Int
-Evaluated:    fib = 0 . 1
+Parsed:       fac = 0 . 1 : Func Int Int
+Evaluated:    fac = 0 . 1
 time:         5 ms
  
-Frase>fib = n . * n (fib (- n 1))
-added "fib" to context
+Frase>fac = n . * n (fac (- n 1))
+added "fac" to context
  
-Parsed:       fib = n . (* n) (fib (- n) (1)) : Func Int Int
-Evaluated:    fib = n . (* n) (fib (- n) (1))
+Parsed:       fac = n . (* n) (fac (- n) (1)) : Func Int Int
+Evaluated:    fac = n . (* n) (fac (- n) (1))
 time:         5 ms
  
-Frase>fib 1
+Frase>fac 1
  
-Parsed:       fib 1 : Int
+Parsed:       fac 1 : Int
 Evaluated:    1
 time:         4 ms
  
-Frase>fib 2
+Frase>fac 2
  
-Parsed:       fib 2 : Int
+Parsed:       fac 2 : Int
 Evaluated:    2
 time:         1 ms
  
-Frase>fib 3
+Frase>fac 3
  
-Parsed:       fib 3 : Int
+Parsed:       fac 3 : Int
 Evaluated:    6
 time:         3 ms
  
-Frase>fib 4
+Frase>fac 4
  
-Parsed:       fib 4 : Int
+Parsed:       fac 4 : Int
 Evaluated:    24
 time:         3 ms
  
-Frase>fib 5
+Frase>fac 5
  
-Parsed:       fib 5 : Int
+Parsed:       fac 5 : Int
 Evaluated:    120
 time:         3 ms
  
