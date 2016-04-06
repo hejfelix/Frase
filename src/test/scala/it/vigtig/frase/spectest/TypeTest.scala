@@ -130,6 +130,7 @@ with GeneratorDrivenPropertyChecks {
         tpe shouldBe TPolyInst(FUNC,TVar("a"),TVar("a"))
         next shouldBe "b"
     }
+
     w2(application,Map(),"a") match {
       case (tpe,next,_) =>
         tpe shouldBe TInst("Int")

@@ -1,5 +1,7 @@
 package it.vigtig.lambda
 
+import scala.annotation.tailrec
+
 /**
  * @author Hargreaves
  */
@@ -19,12 +21,14 @@ object REPL
     case (_, x) => x
   }
 
-  def time(b: => Unit): Long = {
+  def time[T](b: => T): (Long,T) = {
     val t = System.currentTimeMillis()
-    b
-    System.currentTimeMillis() - t
+    val result = b
+    (System.currentTimeMillis() - t,result)
   }
 
+  //Not that we're going to, but let's not run out of stack
+  @tailrec
   def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil),
            typeContext: Map[Term,Type] = Map(),
            nextVar:String = "a"): Unit = {
@@ -67,15 +71,20 @@ object REPL
         println()
         val typeOfExpr = if(namedType.isEmpty) typeOfExpression else namedType.values.head
         println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
-        val evalTime = time {
-          println("Evaluated:    " + prettyStr(interpret(expr)(context)))
+
+        val (evalTime,result) = time { interpret(expr)(context) }
+
+        typeOfExpr match {
+          case TFail(err) =>
+            println("Type error: "+err)
+            loop(context,typeContext,nextVariable)
+          case tpe =>
+            println("Evaluated:    " +prettyStr(result))
+            println(s"time:         $evalTime ms")
+            println()
+            println("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2)).mkString("\n"))
+            loop(combine(context, listToMap(definition)),newTypeCtx ++ namedType,nextVariable)
         }
-        println(s"time:         $evalTime ms")
-        println()
-
-
-        println("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2)).mkString("\n"))
-        loop(combine(context, listToMap(definition)),newTypeCtx ++ namedType,nextVariable)
 
       case err => println(err)
     }
