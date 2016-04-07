@@ -43,11 +43,9 @@ rev = (Cons x xs) . a . (rev (xs) (Cons x a))
     parseProgramTest(LIST_DEF+s"\ntail (Cons 42 Nil)")(_ shouldBe SetId("Nil"))
   }
 
-
   property("size Nil should be 0") {
     parseProgramTest(LIST_DEF+s"\nsize Nil")(_ shouldBe Integer(0))
   }
-
 
   property("Size") {
     parseProgramTest(LIST_DEF+s"\nsize (Cons 42 (Cons 1337 (Cons 9000 Nil)))")(_ shouldBe Integer(3))

@@ -163,7 +163,9 @@ trait HindleyMilnerLike extends
 
   val knownTypes:PartialFunction[(Term, String, Context), (Type, String, Context)] = {
     case (Integer(_), next, ctx)                        => (TInst("Int"), next, ctx)
-    case (Bit(_), next, ctx)                            => (TInst("Bool"), next, ctx)
+    case (Bit(_), next, ctx)                            =>
+      val (bool, next2) = boolType(next)
+      (bool,next2,ctx)
     case (Floating(_), next, ctx)                       => (TInst("Float"), next, ctx)
     case (Id("*"), next, ctx)                           =>
       //a -> a -> a
@@ -180,9 +182,6 @@ trait HindleyMilnerLike extends
 
       //if/else branching
     case (A(A(Bit(_), y), z), next, ctx)                =>
-      unifyWithContext(y, z, next, ctx)
-
-    case (A(A(A(Id("<="), x), y), z), next, ctx)        =>
       unifyWithContext(y, z, next, ctx)
 
     case (Id("<="), next, ctx)                          =>

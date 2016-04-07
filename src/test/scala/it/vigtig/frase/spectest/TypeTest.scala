@@ -35,7 +35,7 @@ with GeneratorDrivenPropertyChecks {
 
   property("Known types") {
     typeCheck("42") shouldBe TInst("Int")
-    typeCheck("true") shouldBe TInst("Bool")
+    typeCheck("true") shouldBe TPolyInst(FUNC,TVar("a"), TPolyInst(FUNC,TVar("a"), TVar("a")))
     typeCheck(".2f") shouldBe TInst("Float")
   }
 
@@ -111,7 +111,7 @@ with GeneratorDrivenPropertyChecks {
 
     w2(integer,Map(),"a") shouldBe (TInst("Int"),"a",Map())
     w2(float,Map(),"a") shouldBe (TInst("Float"),"a",Map())
-    w2(bit,Map(),"a") shouldBe (TInst("Bool"),"a",Map())
+    w2(bit,Map(),"a") shouldBe ((TPolyInst(FUNC,TVar("a"), TPolyInst(FUNC,TVar("a"), TVar("a"))),"b",Map()))
 
     w2(Id("x"),Map(),"a") shouldBe (TVar("a"),"b",Map(Id("x") -> TVar("a")))
 
