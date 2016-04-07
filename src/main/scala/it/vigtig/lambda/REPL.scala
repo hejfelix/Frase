@@ -82,7 +82,7 @@ object REPL
             println("Evaluated:    " +prettyStr(result))
             println(s"time:         $evalTime ms")
             println()
-            println("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2)).mkString("\n"))
+//            println("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2)).mkString("\n"))
             loop(combine(context, listToMap(definition)),newTypeCtx ++ namedType,nextVariable)
         }
 
