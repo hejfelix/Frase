@@ -118,6 +118,8 @@ trait HindleyMilnerLike extends
         .map(unifySub)
         .toMap
 
+      val sub2 = substitutions.mapValues(x => subInType(x,substitutions))
+      val ctx2 = ctx.mapValues(x => subInType(x,substitutions))
       //log(s"a.args: ${a.args.mkString}  b.args: ${b.args.mkString}")
 
       val pairs = (a.args, b.args)
@@ -125,19 +127,31 @@ trait HindleyMilnerLike extends
         .map((x, y) => unify(x, y, ctx)._1)
 
       val newArgs = pairs
-        .map(x => substitutions.getOrElse(x, x))
+        .map(x => subInType(x,substitutions))
 
-//      log(s"${a.args}   ${b.args}")
-//      log(s"${prettyType(a)}   ${prettyType(b)}")
-//            log(s"pairs:  ${pairs.map(prettyType)}")
-//            log(s"old args:   ${a.args.map(prettyType)}    new args:  ${newArgs.map(prettyType)}")
-//      log(
-//           s"""Unified variables:   ${
-//             substitutions.map(x => prettyType(x._1) + "/" + prettyType(x._2))
-//               .mkString("  ")
-//           }"""
-//         )
-      (TPolyInst(a.name, newArgs:_*), unifyInContext(ctx, substitutions))
+//      println("Substitutions: "+sub2.mkString(", "))
+//      println("NewArgs: "+newArgs.mkString(", "))
+
+      //      log(s"${a.args}   ${b.args}")
+      //      log(s"${prettyType(a)}   ${prettyType(b)}")
+      //            log(s"pairs:  ${pairs.map(prettyType)}")
+      //            log(s"old args:   ${a.args.map(prettyType)}    new args:  ${newArgs.map(prettyType)}")
+      //      log(
+      //           s"""Unified variables:   ${
+      //             substitutions.map(x => prettyType(x._1) + "/" + prettyType(x._2))
+      //               .mkString("  ")
+      //           }"""
+      //         )
+      val unifiedContext:Context = unifyInContext(ctx2, sub2)
+
+      (TPolyInst(a.name, newArgs:_*), unifiedContext)
+    case _                                                            => (TFail(s"$a could not unify with $b"), ctx)
+  }
+
+  def subInType(t:Type,subs:Map[Type,Type]):Type = t match {
+    case tp:TPolyInst =>TPolyInst(tp.name,tp.args.map(x => subInType(x,subs)):_*)
+    case x:TVar if subs.contains(x) => subs(x)
+    case x => x
   }
 
   def unifySub(a:Type, b:Type):(Type, Type) = (a, b) match {
@@ -162,35 +176,36 @@ trait HindleyMilnerLike extends
   val A = Applic
 
   val knownTypes:PartialFunction[(Term, String, Context), (Type, String, Context)] = {
-    case (Integer(_), next, ctx)                        => (TInst("Int"), next, ctx)
-    case (Bit(_), next, ctx)                            =>
+    case (Integer(_), next, ctx)  => (TInst("Int"), next, ctx)
+    case (Bit(_), next, ctx)      =>
       val (bool, next2) = boolType(next)
-      (bool,next2,ctx)
-    case (Floating(_), next, ctx)                       => (TInst("Float"), next, ctx)
-    case (Id("*"), next, ctx)                           =>
+      (bool, next2, ctx)
+    case (Floating(_), next, ctx) => (TInst("Float"), next, ctx)
+    case (Id("*"), next, ctx)     =>
       //a -> a -> a
       val argt = TVar(next)
       (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), nextId(next), ctx)
 
-    case (Id("+"), next, ctx)                           =>
+    case (Id("+"), next, ctx) =>
       val argt = TVar(next)
       (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), nextId(next), ctx)
 
-    case (Id("-"), next, ctx)                           =>
+    case (Id("-"), next, ctx) =>
       val argt = TVar(next)
       (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), nextId(next), ctx)
 
-      //if/else branching
-    case (A(A(Bit(_), y), z), next, ctx)                =>
+    //if/else branching
+    case (A(A(Bit(_), y), z), next, ctx) =>
       unifyWithContext(y, z, next, ctx)
 
-    case (Id("<="), next, ctx)                          =>
+    case (Id("<="), next, ctx) =>
       val tvar = TVar(next)
       val (bool, next2) = boolType(nextId(next))
       (TPolyInst(FUNC, tvar, TPolyInst(FUNC, tvar, bool)), nextId(next2), ctx)
   }
 
   def unifyWithContext(y:Term, z:Term, next:String, ctx:Context):(Type, String, Context) = {
+
     val (yt, idPlus, ctx2) = w2(y, ctx, next)
     val (zt, idPlusPlus, ctx3) = w2(z, ctx2, idPlus)
     val (commonBranchType, ctx4) = unify(yt, zt, ctx3)
@@ -202,41 +217,58 @@ trait HindleyMilnerLike extends
      */
   def w2(e:Term, ctx:Context, nextVar:String):(Type, String, Context) = e match {
     case _ if knownTypes.isDefinedAt((e, nextVar, ctx)) => knownTypes((e, nextVar, ctx))
-    case Named(_, body)                                 => w2(body, ctx, nextVar)
+    case Named(name, body)                                 =>
+      val (bodyType,next2,newContext) = w2(body, ctx, nextVar)
+      (newContext.getOrElse(name,TFail("Couldn't determine type of "+name)),next2,newContext)
     case Id(_) if (ctx.contains(e))                     => (ctx(e), nextVar, ctx)
 
     case Id(_)          =>
       log(s"[Var] ${prettyStr(e) } : ${prettyType(TVar(nextVar)) }")
       (TVar(nextVar), nextId(nextVar), ctx + (e -> TVar(nextVar)))
+
     case Applic(e0, e1) =>
       val tauPrime = TVar(nextVar)
       val (tau0, next, ctx2) = w2(e0, ctx, nextId(nextVar))
       val (tau1, next2, ctx3) = w2(e1, ctx2, next)
+
       //Does tau0 unify with tau1 -> tauPrime?
-      val (TPolyInst(_, _, out), newCtx) = unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3)
-      log("[App] " +
-          prettyStr(e) +
-          " : " +
-          prettyType(out) +
-          " with e0 " +
-          prettyStr(e0) +
-          " : " +
-          prettyType(tau0) +
-          " and e1 " +
-          prettyStr(e1) +
-          "  : " +
-          prettyType(tau1) +
-          " ----  verdict: " +
-          (prettyStr(e) -> prettyType(out))
-         )
-      (out, next2, newCtx + (e -> out))
-    case Abstr(id, e)   =>
+      unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3) match {
+        case (TPolyInst(_, _, out), newCtx) =>
+          log("[App] " +
+              prettyStr(e) +
+              " : " +
+              prettyType(out) +
+              " with e0 " +
+              prettyStr(e0) +
+              " : " +
+              prettyType(tau0) +
+              " and e1 " +
+              prettyStr(e1) +
+              "  : " +
+              prettyType(tau1) +
+              "      ----  verdict: " +
+              (prettyStr(e) -> prettyType(out))
+             )
+          (out, next2, newCtx + (e -> out))
+        case (TFail(x), _)                  => (TFail(x), next, ctx)
+      }
+
+    case Abstr(id, e) =>
       val (tau, next, ctx2) = w2(id, ctx, nextVar)
       val (tauPrime, next2, ctx3) = w2(e, ctx2, next)
       val res = TPolyInst(FUNC, tau, tauPrime)
-      log(s"[Abstr] ${prettyStr(e) } : ${prettyType(res) }")
-      (res, next2, ctx3 + (e -> res))
-    case _              => (TFail(""), nextVar, ctx)
+      if(isFailed(tau) || isFailed(tauPrime) || isFailed(res)){
+        (TFail("Type check failed"),next,ctx)
+      } else {
+        log(s"[Abstr] ${prettyStr(e) } : ${prettyType(res) }")
+        (res, next2, ctx3 + (e -> res))
+      }
+    case _            => (TFail(""), nextVar, ctx)
+  }
+
+  def isFailed(t:Type) = t match {
+    case TFail(_) => true
+    case _ => false
   }
 
   def inst(sigma:Type, next:String):(Type, String) =

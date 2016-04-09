@@ -70,15 +70,16 @@ object REPL
 
         println()
         val typeOfExpr = if(namedType.isEmpty) typeOfExpression else namedType.values.head
-        println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
 
         val (evalTime,result) = time { interpret(expr)(context) }
 
         typeOfExpr match {
           case TFail(err) =>
+            println(s"Parsed:       ${prettyStr(expr)}")
             println("Type error: "+err)
             loop(context,typeContext,nextVariable)
           case tpe =>
+            println(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
             println("Evaluated:    " +prettyStr(result))
             println(s"time:         $evalTime ms")
             println()
