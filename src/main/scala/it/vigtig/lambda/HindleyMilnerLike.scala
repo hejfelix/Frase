@@ -6,57 +6,56 @@ package it.vigtig.lambda
 trait HindleyMilnerLike extends
   ASTLike {
 
-  val FUNC:String = "Func"
+  val FUNC: String = "Func"
 
-  abstract trait Type
+  trait Type
 
-  abstract trait TMono extends
+  trait TMono extends
     Type
 
-  abstract trait TPoly extends
+  trait TPoly extends
     Type
 
-  case class TFail(str:String) extends Type
+  case class TFail(str: String) extends Type
 
-  case class TInst(name:String) extends TMono
+  case class TInst(name: String) extends TMono
 
-  case class TVar(name:String) extends TMono
+  case class TVar(name: String) extends TMono
 
-  case class TPolyInst(name:String, args:Type*) extends TPoly
+  case class TPolyInst(name: String, args: Type*) extends TPoly
 
-  case class TFunc(in:Type, out:Type) extends TPoly
+  case class TFunc(in: Type, out: Type) extends TPoly
 
   type Context = Map[Term, Type]
 
-  def prettyType(t:Type):String = t match {
-    case TPolyInst(FUNC, args@_*) => s"""${args.map(prettyType).mkString(" -> ") }"""
-    case TPolyInst(name, args@_*) => s"""$name ${args.map(prettyType).mkString(" ") }"""
-    case TFunc(in, out)           => s"${prettyType(in) } -> ${prettyType(out) }"
-    case TVar(x)                  => x
-    case TInst(x)                 => x
-    case _                        => t.toString
+  def prettyType(t: Type): String = t match {
+    case TPolyInst(FUNC, args@_*) => s"""${args.map(prettyType).mkString(" -> ")}"""
+    case TPolyInst(name, args@_*) => s"""$name ${args.map(prettyType).mkString(" ")}"""
+    case TFunc(in, out) => s"${prettyType(in)} -> ${prettyType(out)}"
+    case TVar(x) => x
+    case TInst(x) => x
+    case _ => t.toString
   }
 
+  val VERBOSE = true
 
-  val VERBOSE = false
-
-  def log(s:String) = if (VERBOSE) {
+  def log(s: String) = if (VERBOSE) {
     println(s)
   }
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Free_type_variables
   */
-  def freeVars(t:Type):Set[Type] = t match {
-    case TVar(_)                => Set(t)
-    case TInst(_)               => Set()
+  def freeVars(t: Type): Set[Type] = t match {
+    case TVar(_) => Set(t)
+    case TInst(_) => Set()
     case TPolyInst(_, args@_ *) => args map freeVars reduce (_ ++ _)
   }
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
   */
-  def freeVars(ctx:Context):Set[Type] =
+  def freeVars(ctx: Context): Set[Type] =
     ctx map {
       case (variable, tpe) => freeVars(tpe)
     } reduce (_ ++ _)
@@ -64,7 +63,7 @@ trait HindleyMilnerLike extends
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
   */
-  def freeInContext(alpha:Type, ctx:Context) =
+  def freeInContext(alpha: Type, ctx: Context) =
     ctx exists {
       case (variable, tpe) => alpha == tpe
     }
@@ -72,10 +71,10 @@ trait HindleyMilnerLike extends
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Polymorphic_type_order
   */
-  def moreGeneralOrEqual(a:Type, b:Type, ctx:Context):Boolean = (a, b) match {
-    case (TVar(a), _)               => true
-    case (TInst(x), TInst(y))       => x == y
-    case (a:TPolyInst, b:TPolyInst) =>
+  def moreGeneralOrEqual(a: Type, b: Type, ctx: Context): Boolean = (a, b) match {
+    case (TVar(a), _) => true
+    case (TInst(x), TInst(y)) => x == y
+    case (a: TPolyInst, b: TPolyInst) =>
 
       a.name == b.name &&
       (a.args, b.args)
@@ -86,13 +85,13 @@ trait HindleyMilnerLike extends
   }
 
 
-  def unifyInContext(ctx:Context, map:Map[Type, Type]) =
+  def unifyInContext(ctx: Context, map: Map[Type, Type]) =
     ctx.mapValues(tpe => map.getOrElse(tpe, tpe))
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Degrees_of_freedom_instantiating_the_rules
    */
-  def unify(a:Type, b:Type, ctx:Context):(Type, Context) = (a, b) match {
+  def unify(a: Type, b: Type, ctx: Context): (Type, Context) = (a, b) match {
     //Both variables
     case (TVar(_), TVar(_)) => (a, unifyInContext(ctx, Map(b -> a)))
 
@@ -108,66 +107,53 @@ trait HindleyMilnerLike extends
     }
 
     //Polytypes unify if type arguments have same length and unify pairwise
-    case (a:TPolyInst, b:TPolyInst) if a.name != b.name               =>
-      (TFail(s"name mismatch: ${a.name } != ${b.name }"), ctx)
-    case (a:TPolyInst, b:TPolyInst) if a.args.length != b.args.length =>
-      (TFail(s"arg length mismatch: ${a.args.length } != ${b.args.length }"), ctx)
-    case (a:TPolyInst, b:TPolyInst)                                   =>
-      val substitutions:Map[Type, Type] = (a.args, b.args)
+    case (a: TPolyInst, b: TPolyInst) if a.name != b.name =>
+      (TFail(s"name mismatch: ${a.name} != ${b.name}"), ctx)
+    case (a: TPolyInst, b: TPolyInst) if a.args.length != b.args.length =>
+      (TFail(s"arg length mismatch: ${a.args.length} != ${b.args.length}"), ctx)
+    case (a: TPolyInst, b: TPolyInst) =>
+      val substitutions: Map[Type, Type] = (a.args, b.args)
         .zipped
         .map(unifySub)
         .toMap
 
-      val sub2 = substitutions.mapValues(x => subInType(x,substitutions))
-      val ctx2 = ctx.mapValues(x => subInType(x,substitutions))
-      //log(s"a.args: ${a.args.mkString}  b.args: ${b.args.mkString}")
+      val sub2 = substitutions.mapValues(x => subInType(x, substitutions))
+      val ctx2 = ctx.mapValues(x => subInType(x, substitutions))
 
       val pairs = (a.args, b.args)
         .zipped
         .map((x, y) => unify(x, y, ctx)._1)
 
       val newArgs = pairs
-        .map(x => subInType(x,substitutions))
+        .map(x => subInType(x, substitutions))
 
-//      println("Substitutions: "+sub2.mkString(", "))
-//      println("NewArgs: "+newArgs.mkString(", "))
 
-      //      log(s"${a.args}   ${b.args}")
-      //      log(s"${prettyType(a)}   ${prettyType(b)}")
-      //            log(s"pairs:  ${pairs.map(prettyType)}")
-      //            log(s"old args:   ${a.args.map(prettyType)}    new args:  ${newArgs.map(prettyType)}")
-      //      log(
-      //           s"""Unified variables:   ${
-      //             substitutions.map(x => prettyType(x._1) + "/" + prettyType(x._2))
-      //               .mkString("  ")
-      //           }"""
-      //         )
-      val unifiedContext:Context = unifyInContext(ctx2, sub2)
+      val unifiedContext: Context = unifyInContext(ctx2, sub2)
 
-      (TPolyInst(a.name, newArgs:_*), unifiedContext)
-    case _                                                            => (TFail(s"$a could not unify with $b"), ctx)
+      (TPolyInst(a.name, newArgs: _*), unifiedContext)
+    case _ => (TFail(s"$a could not unify with $b"), ctx)
   }
 
-  def subInType(t:Type,subs:Map[Type,Type]):Type = t match {
-    case tp:TPolyInst =>TPolyInst(tp.name,tp.args.map(x => subInType(x,subs)):_*)
-    case x:TVar if subs.contains(x) => subs(x)
+  def subInType(t: Type, subs: Map[Type, Type]): Type = t match {
+    case tp: TPolyInst => TPolyInst(tp.name, tp.args.map(x => subInType(x, subs)): _*)
+    case x: TVar if subs.contains(x) => subs(x)
     case x => x
   }
 
-  def unifySub(a:Type, b:Type):(Type, Type) = (a, b) match {
+  def unifySub(a: Type, b: Type): (Type, Type) = (a, b) match {
     case (TVar(_), TVar(_)) if a == b => (TFail(""), TFail(""))
-    case (TVar(_), TVar(_))           => b -> a
-    case (TInst(_), TVar(_))          => b -> a
-    case (TVar(_), TInst(_))          => a -> b
-    case (TVar(_), _)                 => a -> b
-    case (_, TVar(_))                 => b -> a
-    case _                            => (TFail(""), TFail(""))
+    case (TVar(_), TVar(_)) => b -> a
+    case (TInst(_), TVar(_)) => b -> a
+    case (TVar(_), TInst(_)) => a -> b
+    case (TVar(_), _) => a -> b
+    case (_, TVar(_)) => b -> a
+    case _ => (TFail(""), TFail(""))
   }
 
 
-  def nextId(s:String, inc:Int = 1):String = "" + (s.charAt(0) + inc).toChar
+  def nextId(s: String, inc: Int = 1): String = "" + (s.charAt(0) + inc).toChar
 
-  def boolType(nextVar:String) = {
+  def boolType(nextVar: String) = {
 
     val argt = TVar(nextVar)
     (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), nextId(nextVar))
@@ -175,13 +161,13 @@ trait HindleyMilnerLike extends
 
   val A = Applic
 
-  val knownTypes:PartialFunction[(Term, String, Context), (Type, String, Context)] = {
-    case (Integer(_), next, ctx)  => (TInst("Int"), next, ctx)
-    case (Bit(_), next, ctx)      =>
+  val knownTypes: PartialFunction[(Term, String, Context), (Type, String, Context)] = {
+    case (Integer(_), next, ctx) => (TInst("Int"), next, ctx)
+    case (Bit(_), next, ctx) =>
       val (bool, next2) = boolType(next)
       (bool, next2, ctx)
     case (Floating(_), next, ctx) => (TInst("Float"), next, ctx)
-    case (Id("*"), next, ctx)     =>
+    case (Id("*"), next, ctx) =>
       //a -> a -> a
       val argt = TVar(next)
       (TPolyInst(FUNC, argt, TPolyInst(FUNC, argt, argt)), nextId(next), ctx)
@@ -204,7 +190,7 @@ trait HindleyMilnerLike extends
       (TPolyInst(FUNC, tvar, TPolyInst(FUNC, tvar, bool)), nextId(next2), ctx)
   }
 
-  def unifyWithContext(y:Term, z:Term, next:String, ctx:Context):(Type, String, Context) = {
+  def unifyWithContext(y: Term, z: Term, next: String, ctx: Context): (Type, String, Context) = {
 
     val (yt, idPlus, ctx2) = w2(y, ctx, next)
     val (zt, idPlusPlus, ctx3) = w2(z, ctx2, idPlus)
@@ -215,15 +201,15 @@ trait HindleyMilnerLike extends
   /*
     https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Algorithm_W
      */
-  def w2(e:Term, ctx:Context, nextVar:String):(Type, String, Context) = e match {
+  def w2(e: Term, ctx: Context, nextVar: String): (Type, String, Context) = e match {
     case _ if knownTypes.isDefinedAt((e, nextVar, ctx)) => knownTypes((e, nextVar, ctx))
-    case Named(name, body)                                 =>
-      val (bodyType,next2,newContext) = w2(body, ctx, nextVar)
-      (newContext.getOrElse(name,TFail("Couldn't determine type of "+name)),next2,newContext)
-    case Id(_) if (ctx.contains(e))                     => (ctx(e), nextVar, ctx)
+    case Named(name, body) =>
+      val (bodyType, next2, newContext) = w2(body, ctx, nextVar)
+      (newContext.getOrElse(name, bodyType), next2, newContext)
+    case Id(_) if (ctx.contains(e)) => (ctx(e), nextVar, ctx)
 
-    case Id(_)          =>
-      log(s"[Var] ${prettyStr(e) } : ${prettyType(TVar(nextVar)) }")
+    case Id(_) =>
+      log(s"[Var] ${prettyStr(e)} : ${prettyType(TVar(nextVar))}")
       (TVar(nextVar), nextId(nextVar), ctx + (e -> TVar(nextVar)))
 
     case Applic(e0, e1) =>
@@ -234,61 +220,59 @@ trait HindleyMilnerLike extends
       //Does tau0 unify with tau1 -> tauPrime?
       unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3) match {
         case (TPolyInst(_, _, out), newCtx) =>
-          log("[App] " +
-              prettyStr(e) +
-              " : " +
-              prettyType(out) +
-              " with e0 " +
-              prettyStr(e0) +
-              " : " +
-              prettyType(tau0) +
-              " and e1 " +
-              prettyStr(e1) +
-              "  : " +
-              prettyType(tau1) +
-              "      ----  verdict: " +
-              (prettyStr(e) -> prettyType(out))
-             )
+
+          val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s"
+            .format(prettyStr(e),
+                    prettyType(out),
+                    prettyStr(e0),
+                    prettyType(tau0),
+                    prettyStr(e1),
+                    prettyType(tau1),
+                    (prettyStr(e) -> prettyType(out))
+                   )
+
+          log(logText)
+
           (out, next2, newCtx + (e -> out))
-        case (TFail(x), _)                  => (TFail(x), next, ctx)
+        case (TFail(x), _) => (TFail(x), next, ctx)
       }
 
     case Abstr(id, e) =>
       val (tau, next, ctx2) = w2(id, ctx, nextVar)
       val (tauPrime, next2, ctx3) = w2(e, ctx2, next)
       val res = TPolyInst(FUNC, tau, tauPrime)
-      if(isFailed(tau) || isFailed(tauPrime) || isFailed(res)){
-        (TFail("Type check failed"),next,ctx)
+      if (isFailed(tau) || isFailed(tauPrime) || isFailed(res)) {
+        (TFail("Type check failed"), next, ctx)
       } else {
-        log(s"[Abstr] ${prettyStr(e) } : ${prettyType(res) }")
+        log(s"[Abstr] ${prettyStr(e)} : ${prettyType(res)}")
         (res, next2, ctx3 + (e -> res))
       }
-    case _            => (TFail(""), nextVar, ctx)
+    case _ => (TFail(""), nextVar, ctx)
   }
 
-  def isFailed(t:Type) = t match {
+  def isFailed(t: Type) = t match {
     case TFail(_) => true
     case _ => false
   }
 
-  def inst(sigma:Type, next:String):(Type, String) =
+  def inst(sigma: Type, next: String): (Type, String) =
     sigma match {
-      case TInst(_)                 => (sigma, next)
-      case TVar(_)                  => (TVar(next), nextId(next))
+      case TInst(_) => (sigma, next)
+      case TVar(_) => (TVar(next), nextId(next))
       case TPolyInst(name, args@_*) =>
         val varargs = (args collect { case TVar(x) => TVar(x) }).distinct
-        val map:Map[Type, TVar] =
+        val map: Map[Type, TVar] =
           varargs
             .zipWithIndex
             .map { case (variable, index) => variable -> TVar(nextId(variable.name, index + 1)) }
             .toMap
 
         log(s"MAP $map from $sigma")
-        (TPolyInst(name, args.map(x => map.getOrElse(x, x)):_*), nextId(next, args.length))
+        (TPolyInst(name, args.map(x => map.getOrElse(x, x)): _*), nextId(next, args.length))
     }
 
-  def newTyper(next:String = "a") = {
-    (e:Term) => {
+  def newTyper(next: String = "a") = {
+    (e: Term) => {
       w2(e, Map(), next)
     }
   }

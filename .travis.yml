@@ -5,6 +5,13 @@ jdk:
   - oraclejdk8
 
 
+script:
+  - export CODACY_PROJECT_TOKEN=8b28cb32200f483b9b0b9688c8b99c5d
+  - sbt clean coverage test
+  - sbt coverageReport
+  - sbt coverageAggregate
+  - sbt codacyCoverage
+
 notifications:
   email:
     - hejfelix@gmail.com
