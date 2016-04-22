@@ -75,13 +75,10 @@ trait HindleyMilnerLike extends
     case (TVar(a), _) => true
     case (TInst(x), TInst(y)) => x == y
     case (a: TPolyInst, b: TPolyInst) =>
-
       a.name == b.name &&
       (a.args, b.args)
         .zipped
-        .map(moreGeneralOrEqual(_, _, ctx))
-        .foldLeft(true)(_ && _)
-
+        .forall(moreGeneralOrEqual(_, _, ctx))
   }
 
 

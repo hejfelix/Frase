@@ -12,10 +12,8 @@ trait UnificationLike extends ASTLike {
     case (x: Id, y: Id) if x == y     => Some(Map())
     case (x: Id, y)                   => Some(Map(x -> y))
     case (x, y: Id)                   => Some(Map(y -> x))
-    case (Abstr(a, b), Applic(x, y))  => maybeUnion(unify(a, Applic(x, y)), unify(b, y))
     case (Applic(a, b), Applic(x, y)) => maybeUnion(unify(a, x), unify(b, y))
     case (Abstr(a, b), Abstr(x, y))   => maybeUnion(unify(a, x), unify(b, y))
-    case (Abstr(a, b), x)             => unify(a, x)
     case (x, y) if x == y             => Some(Map())
     case _                            => None
   }
@@ -43,25 +41,4 @@ trait UnificationLike extends ASTLike {
 
 abstract trait Unification extends AST {
   def unify(a: Term, b: Term): Map[Id, Term]
-}
-
-object UnificationTest extends UnificationLike with App with ParserLike {
-
-  val x = parseAll(LINE, "Cons 42 (Cons 1337 Nil)")
-  val y = parseAll(LINE, "Cons x xs")
-
-  val func = parseAll(LINE, "head = (Cons x xs) . x")
-
-  println("x:" + x.get)
-  println("y:" + y.get)
-  println()
-  println(unify(x.get, y.get))
-
-
-  println(func.get)
-
-  println()
-  println("header: " + header(func.get))
-  println()
-  println("unified header: " + unify(header(func.get).head, x.get))
 }
