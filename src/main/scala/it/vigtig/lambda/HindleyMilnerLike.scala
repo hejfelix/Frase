@@ -16,6 +16,8 @@ trait HindleyMilnerLike extends
   trait TPoly extends
     Type
 
+  case object TUndefined extends Type
+
   case class TFail(str: String) extends Type
 
   case class TInst(name: String) extends TMono

@@ -134,5 +134,22 @@ class HindleyMilnerLikeSpec
     }
   }
 
+  behavior of "prettyType"
+
+  it should "pretty print polytypes" in {
+    prettyType(TPolyInst(FUNC,TVar("a"),TVar("b"))) shouldBe "a -> b"
+    prettyType(TPolyInst("D",TVar("a"),TVar("b"))) shouldBe "D a b"
+    prettyType(TFunc(TVar("a"),TVar("b"))) shouldBe "a -> b"
+  }
+
+  it should "print type variables and type instances" in {
+    prettyType(TVar("x")) shouldBe "x"
+    prettyType(TInst("Int")) shouldBe "Int"
+  }
+
+  it should "handle undefined input" in {
+    prettyType(TUndefined) shouldBe "TUndefined"
+  }
+
 
 }
