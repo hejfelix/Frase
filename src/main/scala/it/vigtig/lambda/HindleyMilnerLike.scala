@@ -188,7 +188,7 @@ trait HindleyMilnerLike extends
     case (Id("<="), next, ctx) =>
       val tvar = TVar(next)
       val (bool, next2) = boolType(nextId(next))
-      (TPolyInst(FUNC, tvar, TPolyInst(FUNC, tvar, bool)), nextId(next2), ctx)
+      (TPolyInst(FUNC, tvar, TPolyInst(FUNC, tvar, bool)), next2, ctx)
   }
 
   def unifyWithContext(y: Term, z: Term, next: String, ctx: Context): (Type, String, Context) = {
