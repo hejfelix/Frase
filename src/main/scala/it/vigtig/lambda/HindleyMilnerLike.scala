@@ -146,8 +146,6 @@ trait HindleyMilnerLike extends
     case (TVar(_), TVar(_)) => b -> a
     case (TInst(_), TVar(_)) => b -> a
     case (TVar(_), TInst(_)) => a -> b
-    case (TVar(_), _) => a -> b
-    case (_, TVar(_)) => b -> a
     case _ => (TFail(""), TFail(""))
   }
 
@@ -265,9 +263,10 @@ trait HindleyMilnerLike extends
         val map: Map[Type, TVar] =
           varargs
             .zipWithIndex
-            .map { case (variable, index) => variable -> TVar(nextId(variable.name, index + 1)) }
+            .map { case (variable, index) => variable -> TVar(nextId(next, index + 1)) }
             .toMap
 
+        log(varargs.zipWithIndex.mkString(","))
         log(s"MAP $map from $sigma")
         (TPolyInst(name, args.map(x => map.getOrElse(x, x)): _*), nextId(next, args.length))
     }

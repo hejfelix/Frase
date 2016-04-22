@@ -109,4 +109,30 @@ class HindleyMilnerLikeSpec
     }
   }
 
+  it should "fail to infer type of abstractions with failed subterms" in {
+    w2(Abstr(Id("x"),Applic(Integer(1),Integer(2))),Map.empty,"a") shouldBe (TFail("Type check failed"),"b",EMPTY)
+  }
+
+  it should "fail on undefined input" in {
+    w2(ConstructorDef(Id("x"),Nil),Map.empty,"a") shouldBe (TFail(""),"a",EMPTY)
+  }
+
+  behavior of "type instantiator"
+
+  it should "instantiate variables correctly" in {
+    inst(TInst("x"),"a") shouldBe (TInst("x"),"a")
+    inst(TVar("x"),"a") shouldBe (TVar("a"),"b")
+    inst(TPolyInst("F",TVar("a"),TVar("b")),"a") shouldBe (TPolyInst("F",TVar("b"),TVar("c")),"c")
+  }
+
+
+  "newTyper" should "be just another typer" in {
+    val typer = newTyper("a")
+    typer(Named(Id("hej"),Integer(42))) should matchPattern
+    {
+      case (TInst("Int"),"a",EMPTY) =>
+    }
+  }
+
+
 }
