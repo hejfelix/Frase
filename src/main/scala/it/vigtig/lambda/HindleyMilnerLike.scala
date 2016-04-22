@@ -60,13 +60,13 @@ trait HindleyMilnerLike extends
       case (variable, tpe) => freeVars(tpe)
     } reduce (_ ++ _)
 
-  /*
-  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
-  */
-  def freeInContext(alpha: Type, ctx: Context) =
-    ctx exists {
-      case (variable, tpe) => alpha == tpe
-    }
+//  /*
+//  https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Context_and_typing
+//  */
+//  def freeInContext(alpha: Type, ctx: Context) =
+//    ctx exists {
+//      case (variable, tpe) => alpha == tpe
+//    }
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Polymorphic_type_order
@@ -114,7 +114,11 @@ trait HindleyMilnerLike extends
         .map(unifySub)
         .toMap
 
-      val sub2 = substitutions.mapValues(x => subInType(x, substitutions))
+      //We don't use mapValues because it's not strict
+      val sub2 =
+        substitutions.map{ case (k,v) => k -> subInType(v, substitutions) }
+
+
       val ctx2 = ctx.mapValues(x => subInType(x, substitutions))
 
       val pairs = (a.args, b.args)
