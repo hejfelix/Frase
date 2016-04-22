@@ -53,11 +53,6 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
     lookup(fixPoint(t)(t => reducer(t)))(context)
 
 
-  def show[T](t: T): T = {
-    println(t)
-    t
-  }
-
   def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
     transform({
       case Applic(f, body) if context.contains(applicant(t)) =>
@@ -101,14 +96,6 @@ trait InterpreterLike extends ParserLike with ASTLike with UnificationLike {
     case s@SetType(_, _, _) => s
     case Empty              => Empty
     case a: Atom            => a
-  }
-
-  def size(t: Term): Int = t match {
-    case Id(_)           => 1
-    case Named(id, body) => 1 + size(id) + size(body)
-    case Applic(t, y)    => 1 + size(t) + size(y)
-    case Abstr(a, b)     => 1 + size(a) + size(b)
-    case _               => 1
   }
 
   val App = Applic

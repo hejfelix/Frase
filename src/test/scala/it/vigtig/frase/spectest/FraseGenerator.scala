@@ -4,12 +4,12 @@
 package it.vigtig.frase.spectest
 
 import it.vigtig.lambda.{InterpreterLike, ParserLike}
-import org.scalatest.Matchers.convertToAnyShouldWrapper
-import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{Matchers, PropSpec}
 
 class FraseGenerator extends PropSpec
 with InterpreterLike
+with Matchers
 with ParserLike
 with ASTGenerators
 with GeneratorDrivenPropertyChecks {
@@ -17,7 +17,7 @@ with GeneratorDrivenPropertyChecks {
   property("Ids are leaves") {
     forAll {
       (id: Id) =>
-        size(id) shouldEqual 1
+        id should matchPattern { case Id(_) => }
     }
   }
 

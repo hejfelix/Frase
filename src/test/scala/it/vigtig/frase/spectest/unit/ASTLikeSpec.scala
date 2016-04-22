@@ -22,6 +22,14 @@ class ASTLikeSpec  extends FlatSpec
     prettyStr(Applic(Applic(SetId("Cons"),Integer(1)),Integer(2))) shouldBe "[1,2]"
     prettyStr(SetId("Nil")) shouldBe ""
     prettyStr(ConstructorDef(Id("x"),List("a" -> "b"))) shouldBe "x (a,b)"
+    prettyStr(SetType(Id("D"),List(Id("a")),List(ConstructorDef(Id("S"),List("b"->"c"))))) shouldBe "set D Id(a) = S (b,c)"
+    prettyStr(Applic(Id("x"),Integer(42))) shouldBe "x 42"
+    prettyStr(Abstr(Id("x"),Id("x"))) shouldBe "x . x"
+    prettyStr(Abstr(SetId("D"),Integer(42))) shouldBe "D . 42"
+    prettyStr(Named(Id("x"),Id("x"))) shouldBe "x = x"
+    prettyStr(Empty) shouldBe "< >"
+    prettyStr(Floating(.2f)) shouldBe "0.2"
+    prettyStr(Bit(true)) shouldBe "true"
   }
 
 
