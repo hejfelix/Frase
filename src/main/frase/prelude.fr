@@ -1,0 +1,4 @@
+set List a = Nil or Cons head:a,tail:List
+length = Nil . 0
+length = (Cons head tail) . + 1 (length tail)
+:exit

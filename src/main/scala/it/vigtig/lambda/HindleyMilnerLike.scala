@@ -209,6 +209,8 @@ trait HindleyMilnerLike extends
       (newContext.getOrElse(name, bodyType), next2, newContext)
     case Id(_) if (ctx.contains(e)) => (ctx(e), nextVar, ctx)
 
+    case SetId(id) if(ctx.contains(e)) => (ctx(e),nextVar,ctx)
+
     case Id(_) =>
       log(s"[Var] ${prettyStr(e)} : ${prettyType(TVar(nextVar))}")
       (TVar(nextVar), nextId(nextVar), ctx + (e -> TVar(nextVar)))
