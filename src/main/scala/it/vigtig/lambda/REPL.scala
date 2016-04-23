@@ -58,11 +58,9 @@ object REPL
                   match
                   {
                     case Success(term, _) => term
-                    case x => System.err.println("Couldn't parse " + x); sys.error("hej")
                   }
                   Id(id) -> consBody
               }
-            case _ => Nil
           }
 
           val (typeOfExpression, nextVariable, newTypeCtx) = w2(expr, typeContext, nextVar)

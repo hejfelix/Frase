@@ -17,7 +17,7 @@ class REPLSpec
   {
     val testProgram =
       "fib = n . (<= n 2) (1) ((+ (fib (- n 2)) (fib (- n 1))))" +
-      "\nset Foo = Bar or Baz" +
+      "\nset List a = Nil or Cons head:a,tail:List" +
       "\nfac = 0 . 1" +
       "\nfac = n . * n (fac (- n 1))" +
       "\n:exit\n"
@@ -36,7 +36,21 @@ class REPLSpec
       }
     }
 
+  }
 
+  it should "throw InvalidProgramException on syntax errors" in
+  {
+    val testProgram =
+      ".."
+
+    val in = new ByteArrayInputStream(testProgram.getBytes)
+    Console.withIn(in)
+    {
+      intercept[InvalidProgramException]
+        {
+          REPL.main(Array.empty)
+        }
+    }
   }
 
 }

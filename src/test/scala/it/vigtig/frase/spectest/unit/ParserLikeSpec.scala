@@ -15,6 +15,7 @@ class ParserLikeSpec
       case Success(terms,_) =>
         terms should contain (Applic(Applic(SetId("Cons"),Integer(1)),Applic(Applic(SetId("Cons"),Integer(2)),Applic
                                                   (Applic(SetId("Cons"),Integer(3)),SetId("Nil")))))
+      case _ => fail("couldn't parse list")
     }
   }
 

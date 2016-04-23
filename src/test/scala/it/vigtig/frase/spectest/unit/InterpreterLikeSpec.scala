@@ -45,5 +45,13 @@ class InterpreterLikeSpec
     transform({case Empty => Empty})(Named(Id("x"),Id("y"))) shouldBe (Named(Id("x"),Id("y")))
   }
 
+  "freeVars" should "determine the free variables in any term" in {
+    freeVars(Id("x")) should contain (Id("x"))
+    freeVars(Abstr(Id("x"),Id("x"))) shouldBe empty
+    freeVars(Abstr(Id("x"),Id("y"))) should contain (Id("y"))
+    freeVars(Applic(Id("x"),Id("y"))) should contain allOf(Id("x"),Id("y"))
+    freeVars(Empty) shouldBe empty
+    freeVars(Named(Id("name"),Id("x"))) should contain (Id("x"))
+  }
 
 }
