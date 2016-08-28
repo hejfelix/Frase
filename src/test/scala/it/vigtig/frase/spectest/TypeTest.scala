@@ -2,8 +2,11 @@ package it.vigtig.frase.spectest
 
 import it.vigtig.lambda.{HindleyMilnerLike, InterpreterLike, ParserLike}
 import org.scalatest.Matchers.convertToAnyShouldWrapper
-import org.scalatest.PropSpec
+import org.scalatest.{Matchers, PropSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+
+import scala.collection.immutable.Stream.cons
+import scala.collection.mutable.ArrayBuffer
 
 class TypeTest
     extends PropSpec
@@ -11,7 +14,8 @@ class TypeTest
     with ParserLike
     with HindleyMilnerLike
     with ASTGenerators
-    with GeneratorDrivenPropertyChecks {
+    with GeneratorDrivenPropertyChecks
+    with Matchers {
 
   private val INTType: TInst = TInst("Int")
 
@@ -26,6 +30,39 @@ class TypeTest
 
   private val aVar: TVar = TVar("a")
   private val bVar: TVar = TVar("b")
+  private val xVar: TVar = TVar("x")
+
+  property("`x -> List x -> List x` should unify with `Int -> a`") {
+    val listSetID: String = "List"
+    val left              = TPolyInst(FUNC, xVar, TPolyInst(listSetID, xVar), TPolyInst(listSetID, xVar))
+    val right             = TPolyInst(FUNC, INTType, aVar)
+    val (tpe,context) = unify(left,right,Map.empty)
+    println(s"${prettyType(tpe)}")
+    tpe shouldBe TPolyInst(FUNC, INTType, TPolyInst(listSetID, INTType), TPolyInst(listSetID, INTType))
+  }
+
+  property("Set type constructors unify with arguments") {
+    val listSetID: String = "List"
+    val consSetID: String = "Cons"
+    val nilSetID: String  = "Nil"
+
+    val nilConstructor: (SetId, TPolyInst) = SetId(nilSetID) -> TPolyInst(FUNC, TPolyInst(listSetID, xVar))
+    val consConstructor: (SetId, TPolyInst) = SetId(consSetID) -> TPolyInst(FUNC,
+                                                                            xVar,
+                                                                            TPolyInst(listSetID, xVar),
+                                                                            TPolyInst(listSetID, xVar))
+
+    val expected   = TPolyInst(FUNC, TPolyInst(listSetID, INTType), TPolyInst(listSetID, INTType))
+    val context    = Map[Term, Type](nilConstructor, consConstructor)
+    val magicNum   = 42
+    val termToType = Applic(SetId(consSetID), Integer(magicNum))
+
+    println(s"type of ${prettyStr(termToType)} should be ${prettyType(expected)}")
+
+    w2(termToType, context, "a") should matchPattern {
+      case (`expected`, _, _) =>
+    }
+  }
 
   property("Identity has identical input and output types") {
     typeCheck("x . x") shouldBe TPolyInst(FUNC, aVar, aVar)

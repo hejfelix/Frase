@@ -35,6 +35,15 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
 
   case class InvalidProgramException(message: String) extends Exception
 
+  def parseType(str: String): Type = parseAll(LINE, str) match {
+    case Success(expr, _) =>
+      expr match {
+        case Id(x)                         => TVar(x)
+        case Applic(SetId(set), Id(varId)) => TPolyInst(set, TVar(varId))
+      }
+    case _ => TFail(s"Could not parse type in: $str")
+  }
+
   //scalastyle:off
   //for cyclomatic complexity
 
@@ -45,7 +54,9 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
            nextVar: String = "a",
            input: => String = io.StdIn.readLine("Frase>")): Map[Term, List[Term]] = {
 
-    logger.info("CURRENT TYPE CONTEXT: " + typeContext)
+    logger.info("CURRENT TYPE CONTEXT: " + typeContext.map(kvp => kvp._1 -> prettyType(kvp._2)).mkString(",  "))
+
+    logger.info("CURRENT TYPE CONTEXT: " + typeContext.mkString("\n"))
 
     val exprSrc = input
     if (exprSrc == ":exit") {
@@ -68,12 +79,13 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
                     ""
                   }}"""
                   val consTail = s"""$id ${args.map(first).mkString(" ")}"""
+                  logger.info(s"all args: ${args.mkString}")
+                  logger.info(s"parsing: ${cons + consTail}")
                   val consBody = parseAll(LINE, cons + consTail) match {
                     case Success(term, _) => term
                     case _                => Empty
                   }
-                  logger.info(("constructor: " + Id(id) -> prettyStr(consBody)).toString)
-                  logger.info(("constructor: " + Id(id) -> prettyStr(consBody)).toString)
+                  logger.info(("constructor: " + Id(id) -> consBody).toString)
 
                   Id(id) -> consBody
               }
@@ -85,7 +97,7 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
               cons map {
                 case ConstructorDef(Id(id), args) =>
                   val varTypes  = vars.map(x => TVar(x.id): Type)
-                  val argTypes  = args.map(x => TVar(x._2): Type)
+                  val argTypes  = args.map(_._2).map(parseType)
                   val out: Type = TPolyInst(setId, varTypes: _*)
                   SetId(id) -> TPolyInst(FUNC, argTypes :+ out: _*)
               }

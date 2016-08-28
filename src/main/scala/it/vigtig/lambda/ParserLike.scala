@@ -57,8 +57,13 @@ trait ParserLike extends RegexParsers with PackratParsers with ASTLike {
       case name ~ None            => ConstructorDef(Id(name), Nil)
     }
 
+  lazy val SET_WITH_ARGS: PParser[String] =
+    (SET ~ VARIABLE.?) ^^ {
+      case set ~ Some(rest) => set + " " + rest
+    }
+
   lazy val SET_ARGS: PParser[List[(String, String)]] =
-    (VARIABLE <~ ":") ~ (SET | VARIABLE) ~ ("," ~> SET_ARGS).? ^^ {
+    (VARIABLE <~ ":") ~ (SET_WITH_ARGS | VARIABLE) ~ ("," ~> SET_ARGS).? ^^ {
       case v1 ~ v1t ~ Some(rest) => (v1, v1t) :: rest
       case v1 ~ v1t ~ None       => List((v1, v1t))
     }
