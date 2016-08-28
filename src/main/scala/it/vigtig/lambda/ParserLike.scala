@@ -3,17 +3,9 @@ package it.vigtig.lambda
 import scala.language.postfixOps
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
-/**
- * @author Hargreaves
- */
-
-trait ParserLike
-  extends RegexParsers
-  with PackratParsers
-  with ASTLike {
+trait ParserLike extends RegexParsers with PackratParsers with ASTLike {
 
   type PParser[T] = PackratParser[T]
-
 
   override val whiteSpace = """[ ]+""".r
 
@@ -23,10 +15,14 @@ trait ParserLike
   }
 
   lazy val INTEGER: PParser[Integer] =
-    """-?\d+""".r ^^ { i => Integer(i.toInt) }
+    """-?\d+""".r ^^ { i =>
+      Integer(i.toInt)
+    }
 
   lazy val FLOAT: PParser[Floating] =
-    """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ { f => Floating(f.toFloat) }
+    """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ { f =>
+      Floating(f.toFloat)
+    }
 
   lazy val VARIABLE: PParser[String] =
     """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ identity
@@ -71,7 +67,9 @@ trait ParserLike
 
   lazy val PRGM: PParser[List[Term]] = (LINE | EMPTYLINE).*
 
-  lazy val EMPTYLINE = (EOL | " ") ^^ { _ => Empty }
+  lazy val EMPTYLINE = (EOL | " ") ^^ { _ =>
+    Empty
+  }
 
   lazy val EOF: PParser[String] = """\z""".r ^^ identity
   lazy val EOL: PParser[String] = (sys.props("line.separator") | "\r\n" | "\\n".r) ^^ identity
@@ -95,5 +93,3 @@ trait ParserLike
     TERM ~ (PEXPR | ATOM) ^^ { case t1 ~ t2 => Applic(t1, t2) }
 
 }
-
-

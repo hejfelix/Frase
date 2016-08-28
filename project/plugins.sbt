@@ -3,3 +3,5 @@ resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releas
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.5")
 
 addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.2.1")
+
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")

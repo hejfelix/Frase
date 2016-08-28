@@ -1,9 +1,6 @@
 package it.vigtig.lambda
 
-/**
- * @author Felix
- */
-abstract trait AST {
+trait AST {
   type Term
   type Id
   type Abstr
