@@ -7,22 +7,15 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
   val FUNC: String = "Func"
 
   trait Type
-
   trait TMono extends Type
-
   trait TPoly extends Type
 
   case object TUndefined extends Type
-
-  case class TFail(str: String) extends Type
-
-  case class TInst(name: String) extends TMono
-
-  case class TVar(name: String) extends TMono
-
+  case class TFail(str: String)                   extends Type
+  case class TInst(name: String)                  extends TMono
+  case class TVar(name: String)                   extends TMono
   case class TPolyInst(name: String, args: Type*) extends TPoly
-
-  case class TFunc(in: Type, out: Type) extends TPoly
+  case class TFunc(in: Type, out: Type)           extends TPoly
 
   type Context = Map[Term, Type]
 
@@ -242,8 +235,9 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       if (isFailed(tau) || isFailed(tauPrime)) {
         (TFail("Type check failed"), next, ctx)
       } else {
-        val fromType = if (!isFailed(tau)) tau else ctx3(id)
-        val toType   = if (!isFailed(tauPrime)) tauPrime else ctx3(e)
+        log(s"tau: $tau   tauPrime:$tauPrime")
+        val fromType = ctx3.getOrElse(id, tau)
+        val toType   = ctx3.getOrElse(e, tauPrime)
         val res      = TPolyInst(FUNC, fromType, toType)
         log(s"[Abstr] ${prettyStr(e)} : ${prettyType(res)}")
         (res, next2, ctx3 + (e -> res))
