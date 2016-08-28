@@ -117,9 +117,16 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
 
       val pairs = (a.args, b.args).zipped.map((x, y) => unify(x, y, ctx)._1)
 
-      val newArgs = pairs.map(x => subInType(x, substitutions))
+      val newArgs: Seq[Type] = pairs.map(x => subInType(x, substitutions))
+      log(s"arg lists: ${a.args}      ${b.args}")
+      log(s"substitutions: ${substitutions}")
+      log(s"sub2: ${sub2}")
+      log(s"unified types: ${pairs.mkString}")
+      log(s"newArgs: ${newArgs}")
 
       val unifiedContext: Context = unifyInContext(ctx2, sub2)
+      log(s"unifiedcontext: $unifiedContext")
+      log("")
 
       (TPolyInst(a.name, newArgs: _*), unifiedContext)
     case _ => (TFail(s"$a could not unify with $b"), ctx)
@@ -194,6 +201,7 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
   def w2(e: Term, ctx: Context, nextVar: String): (Type, String, Context) = e match {
     case _ if knownTypes.isDefinedAt((e, nextVar, ctx)) => knownTypes((e, nextVar, ctx))
     case Named(name, body) =>
+      log(s"[Named] $name = $body")
       val (bodyType, next2, newContext) = w2(body, ctx, nextVar)
       (newContext.getOrElse(name, bodyType), next2, newContext)
     case Id(_) if (ctx.contains(e)) => (ctx(e), nextVar, ctx)
@@ -208,10 +216,9 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       val tauPrime            = TVar(nextVar)
       val (tau0, next, ctx2)  = w2(e0, ctx, nextId(nextVar))
       val (tau1, next2, ctx3) = w2(e1, ctx2, next)
-
       //Does tau0 unify with tau1 -> tauPrime?
       unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3) match {
-        case (TPolyInst(_, _, out), newCtx) =>
+        case tt @ (TPolyInst(_, _, out), newCtx) =>
           val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s".format(
               prettyStr(e),
               prettyType(out),
@@ -222,6 +229,7 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
               (prettyStr(e) -> prettyType(out)))
 
           log(logText)
+          log(s"[APP] ctx: ${newCtx}")
 
           (out, next2, newCtx + (e -> out))
         case (TFail(x), _) => (TFail(x), next, ctx)
@@ -230,10 +238,13 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
     case Abstr(id, e) =>
       val (tau, next, ctx2)       = w2(id, ctx, nextVar)
       val (tauPrime, next2, ctx3) = w2(e, ctx2, next)
-      val res                     = TPolyInst(FUNC, tau, tauPrime)
-      if (isFailed(tau) || isFailed(tauPrime) || isFailed(res)) {
+      log(s"[ABSTR] ctx2:$ctx2   ctx3:$ctx3")
+      if (isFailed(tau) || isFailed(tauPrime)) {
         (TFail("Type check failed"), next, ctx)
       } else {
+        val fromType = if (!isFailed(tau)) tau else ctx3(id)
+        val toType   = if (!isFailed(tauPrime)) tauPrime else ctx3(e)
+        val res      = TPolyInst(FUNC, fromType, toType)
         log(s"[Abstr] ${prettyStr(e)} : ${prettyType(res)}")
         (res, next2, ctx3 + (e -> res))
       }

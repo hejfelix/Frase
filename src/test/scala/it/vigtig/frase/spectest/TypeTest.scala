@@ -15,7 +15,7 @@ with HindleyMilnerLike
 with ASTGenerators
 with GeneratorDrivenPropertyChecks {
 
-  def typeCheck(l: String) = {
+  def typeCheck(l: String): Type = {
     parseAll(LINE, l) match {
       case Success(ast, _) =>
         val (tpe,_,_) = w2(ast,Map(),"a")
