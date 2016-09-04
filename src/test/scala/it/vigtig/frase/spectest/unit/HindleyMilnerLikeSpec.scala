@@ -10,13 +10,13 @@ class HindleyMilnerLikeSpec extends FlatSpec with Matchers with HindleyMilnerLik
   val EMPTY = Map.empty
 
   it should "not unify type instances with different names" in {
-    unify(TInst("a"), TInst("b"), Map.empty) shouldBe (TFail("TInst(a) != TInst(b)"), Map.empty)
+    unify(TInst("a"), TInst("b"), Map.empty) shouldBe (TFail("TInst(a) != TInst(b)"), Map.empty, Map.empty)
   }
 
   it should "not unify polytypes with different names" in {
     val a = TPolyInst("A")
     val b = TPolyInst("B")
-    unify(a, b, Map.empty) shouldBe (TFail(s"name mismatch: ${a.name} != ${b.name}"), Map.empty)
+    unify(a, b, Map.empty) shouldBe (TFail(s"name mismatch: ${a.name} != ${b.name}"), Map.empty, Map.empty)
   }
 
 //  it should "not unify polytypes with different arities" in
@@ -29,7 +29,7 @@ class HindleyMilnerLikeSpec extends FlatSpec with Matchers with HindleyMilnerLik
   it should "not unify monotype instance with polytype instance" in {
     val a = TInst("Int")
     val b = TPolyInst("A")
-    unify(a, b, Map.empty) shouldBe (TFail(s"$a could not unify with $b"), Map.empty)
+    unify(a, b, Map.empty) shouldBe (TFail(s"$a could not unify with $b"), Map.empty, Map.empty)
   }
 
   it should "unify polytypes with same names" in {
@@ -38,7 +38,7 @@ class HindleyMilnerLikeSpec extends FlatSpec with Matchers with HindleyMilnerLik
     val b = TPolyInst("A", TVar("y"))
 
     unify(a, b, Map.empty) should matchPattern {
-      case (TPolyInst("A", TInst("x"), TNothing), EMPTY) =>
+      case (TPolyInst("A", TInst("x"), TNothing), EMPTY, _) =>
     }
   }
 
