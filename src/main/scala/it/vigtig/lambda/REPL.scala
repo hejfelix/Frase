@@ -39,7 +39,7 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
     case Success(expr, _) =>
       expr match {
         case Id(x)                         => TVar(x)
-        case Applic(SetId(set), Id(varId)) => TPolyInst(set, TVar(varId))
+        case Applic(SetId(set), Id(varId)) => TPolyInst(set, TVar(varId), TNothing)
       }
     case _ => TFail(s"Could not parse type in: $str")
   }
@@ -92,15 +92,15 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
             case term => Nil
           }
 
-          val setTypeDefs = expr match {
-            case SetType(Id(setId), vars, cons) =>
-              cons map {
-                case ConstructorDef(Id(id), args) =>
-                  val varTypes  = vars.map(x => TVar(x.id): Type)
-                  val argTypes  = args.map(_._2).map(parseType)
-                  val out: Type = TPolyInst(setId, varTypes: _*)
-                  SetId(id) -> TPolyInst(FUNC, argTypes :+ out: _*)
-              }
+          val setTypeDefs: List[(_root_.it.vigtig.lambda.REPL.SetId, _root_.it.vigtig.lambda.REPL.TPolyInst)] = expr match {
+//            case SetType(Id(setId), vars, cons) =>
+//              cons map {
+//                case ConstructorDef(Id(id), args) =>
+//                  val varTypes  = vars.map(x => TVar(x.id): Type)
+//                  val argTypes  = args.map(_._2).map(parseType)
+//                  val out: Type = TPolyInst(setId, varTypes: _*)
+//                  SetId(id) -> TPolyInst(FUNC, argTypes :+ out: _*)
+//              }
             case _ => Nil
           }
 

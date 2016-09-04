@@ -34,11 +34,11 @@ class TypeTest
 
   property("`x -> List x -> List x` should unify with `Int -> a`") {
     val listSetID: String = "List"
-    val left              = TPolyInst(FUNC, xVar, TPolyInst(listSetID, xVar), TPolyInst(listSetID, xVar))
+    val left              = TPolyInst(FUNC, xVar, TPolyInst(listSetID, xVar, TPolyInst(listSetID, xVar, TNothing)))
     val right             = TPolyInst(FUNC, INTType, aVar)
-    val (tpe,context) = unify(left,right,Map.empty)
-    println(s"${prettyType(tpe)}")
-    tpe shouldBe TPolyInst(FUNC, INTType, TPolyInst(listSetID, INTType), TPolyInst(listSetID, INTType))
+    val (tpe, context, _) = unify(left, right, Map.empty)
+    println(s"the type result: ${prettyType(tpe)}")
+    tpe shouldBe TPolyInst(FUNC, INTType, TPolyInst(listSetID, INTType, TPolyInst(listSetID, INTType, TNothing)))
   }
 
   property("Set type constructors unify with arguments") {
@@ -47,10 +47,10 @@ class TypeTest
     val nilSetID: String  = "Nil"
 
     val nilConstructor: (SetId, TPolyInst) = SetId(nilSetID) -> TPolyInst(FUNC, TPolyInst(listSetID, xVar))
-    val consConstructor: (SetId, TPolyInst) = SetId(consSetID) -> TPolyInst(FUNC,
-                                                                            xVar,
-                                                                            TPolyInst(listSetID, xVar),
-                                                                            TPolyInst(listSetID, xVar))
+    val consConstructor: (SetId, TPolyInst) = SetId(consSetID) -> TPolyInst(
+        FUNC,
+        xVar,
+        TPolyInst(listSetID, xVar, TPolyInst(listSetID, xVar)))
 
     val expected   = TPolyInst(FUNC, TPolyInst(listSetID, INTType), TPolyInst(listSetID, INTType))
     val context    = Map[Term, Type](nilConstructor, consConstructor)
@@ -84,12 +84,12 @@ class TypeTest
 
   property("Free Type Variables") {
 
-    freeVars(TPolyInst("dude", aVar, bVar, TInst("c"), TVar("d"))) shouldBe Set(aVar, bVar, TVar("d"))
+    freeVars(TPolyInst("dude", aVar, TFunc(bVar, TFunc(TInst("c"), TVar("d"))))) shouldBe Set(aVar, bVar, TVar("d"))
 
     val ctx: Map[Term, Type] = Map(
-        Id("a") -> TInst("sometype"),
-        Id("b") -> TVar("someOtherType"),
-        Id("c") -> TPolyInst("dude", aVar, bVar, TInst("c"), TVar("d"))
+      Id("a") -> TInst("sometype"),
+      Id("b") -> TVar("someOtherType"),
+      Id("c") -> TPolyInst("dude", aVar, TFunc(bVar, TFunc(TInst("c"), TVar("d"))))
     )
 
     val expected = Set(aVar, bVar, TVar("d"), TVar("someOtherType"))
@@ -104,7 +104,7 @@ class TypeTest
     val tpe2 = TPolyInst("Dude", TInst("float"), TInst("int"))
     val tpe3 = TPolyInst("Dude", bVar, TVar("c"))
 
-    val singletonType = TPolyInst("Thing")
+    val singletonType = TPolyInst("Thing", TNothing, TNothing)
 
     assert(moreGeneralOrEqual(tpe1, tpe2, Map()))
     assert(moreGeneralOrEqual(tpe3, tpe1, Map()))
@@ -129,7 +129,7 @@ class TypeTest
     val tpe4 = TPolyInst(FUNC, aVar, aVar)
     val tpe5 = TPolyInst(FUNC, INTType, aVar)
 
-    val singletonType = TPolyInst("Thing")
+    val singletonType = TPolyInst("Thing", TNothing, TNothing)
 
     unifyType(tpe1, tpe2) shouldBe TPolyInst("Dude", TInst("float"), INTType)
     unifyType(tpe1, tpe1) shouldBe tpe1
