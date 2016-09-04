@@ -66,6 +66,7 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Polymorphic_type_order
    */
   def moreGeneralOrEqual(a: Type, b: Type, ctx: Context): Boolean = (a, b) match {
+    case (TNothing, TNothing) => true
     case (TVar(a), _)         => true
     case (TInst(x), TInst(y)) => x == y
     case (a: TPolyInst, b: TPolyInst) =>
@@ -116,9 +117,9 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       case (a: TPolyInst, b: TPolyInst) if a.name != b.name =>
         (TFail(s"name mismatch: ${a.name} != ${b.name}"), ctx, assignments)
       case (a: TPolyInst, b: TPolyInst) =>
-        val (newInType, newCtx, newAss) = unify(a.in, b.in, ctx, assignments)
+        val (newInType, newCtx, newAss)      = unify(a.in, b.in, ctx, assignments)
         val (newOutType, finalCtx, finalAss) = unify(a.out, b.out, newCtx, newAss)
-        val expandedType = expandType(TPolyInst(a.name, newInType, newOutType), newAss ++ finalAss)
+        val expandedType                     = expandType(TPolyInst(a.name, newInType, newOutType), newAss ++ finalAss)
         (expandedType, finalCtx, finalAss)
 
 //      val substitutions: Map[Type, Type] = (a.args, b.args).zipped.map(unifySub).toMap
