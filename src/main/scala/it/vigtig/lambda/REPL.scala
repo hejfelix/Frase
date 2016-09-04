@@ -92,17 +92,24 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
             case term => Nil
           }
 
-          val setTypeDefs: List[(_root_.it.vigtig.lambda.REPL.SetId, _root_.it.vigtig.lambda.REPL.TPolyInst)] = expr match {
-//            case SetType(Id(setId), vars, cons) =>
-//              cons map {
-//                case ConstructorDef(Id(id), args) =>
-//                  val varTypes  = vars.map(x => TVar(x.id): Type)
-//                  val argTypes  = args.map(_._2).map(parseType)
-//                  val out: Type = TPolyInst(setId, varTypes: _*)
-//                  SetId(id) -> TPolyInst(FUNC, argTypes :+ out: _*)
-//              }
-            case _ => Nil
-          }
+          val setTypeDefs: List[(_root_.it.vigtig.lambda.REPL.SetId, _root_.it.vigtig.lambda.REPL.Type)] =
+            expr match {
+              case SetType(Id(setId), vars, cons) =>
+                cons map {
+                  case ConstructorDef(Id(id), args) =>
+                    val varTypes: List[REPL.Type] = vars.map(x => TVar(x.id): Type)
+                    val argTypes: List[REPL.Type] = args.map(_._2).map(parseType)
+                    println(s"set id: $id")
+                    println(varTypes)
+                    println(argTypes)
+                    val out: Type = TPolyInst(setId, varTypes.foldRight(TNothing: Type)((a, b) => TFunc(a, b)))
+                    println(s"expected out-type: ${prettyType(out)}")
+                    val arguments = argTypes.foldRight(out)((a, b) => TFunc(a, b))
+                    println(s"expected argument-types: ${prettyType(arguments)}")
+                    SetId(id) -> arguments
+                }
+              case _ => Nil
+            }
 
           val (typeOfExpression, nextVariable, newTypeCtx) = w2(expr, typeContext, nextVar)
           logger.info("AST: " + expr)

@@ -27,6 +27,7 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
   type Context = Map[Term, Type]
 
   def prettyType(t: Type): String = t match {
+    case TPolyInst(FUNC, in, TNothing) => s"${prettyType(in)}"
     case TPolyInst(name, in, TNothing) => s"$name ${prettyType(in)}"
     case TPolyInst(FUNC, in, out)      => s"${prettyType(in)} -> ${prettyType(out)}"
     case TPolyInst(name, in, out)      => s"""$name ${prettyType(in)} -> ${prettyType(out)}"""
@@ -119,9 +120,18 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       case (a: TPolyInst, b: TPolyInst) if a.name != b.name =>
         (TFail(s"name mismatch: ${a.name} != ${b.name}"), ctx, assignments)
       case (a: TPolyInst, b: TPolyInst) =>
+
+        println(s"poly unify with poly ${prettyType(a)}     ${prettyType(b)}")
+
         val (newInType, newCtx, newAss)      = unify(a.in, b.in, ctx, assignments)
         val (newOutType, finalCtx, finalAss) = unify(a.out, b.out, newCtx, newAss)
+
+        println(s"newass:  $newAss    finalAss $finalAss")
+
+        println(s" new intype: ${prettyType(newInType)}    new outtype:  ${newOutType}")
         val expandedType                     = expandType(TPolyInst(a.name, newInType, newOutType), newAss ++ finalAss)
+
+        println(s" expanded type ${prettyType(expandedType)}")
         (expandedType, finalCtx, finalAss)
 
 //      val substitutions: Map[Type, Type] = (a.args, b.args).zipped.map(unifySub).toMap
@@ -228,14 +238,21 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       (TVar(nextVar), nextId(nextVar), ctx + (e -> TVar(nextVar)))
 
     case Applic(e0, e1) =>
-      val tauPrime            = TVar(nextVar)
+      val tauPrime            = TVar(s"_$nextVar")
       val (tau0, next, ctx2)  = w2(e0, ctx, nextId(nextVar))
       val (tau1, next2, ctx3) = w2(e1, ctx2, next)
       //Does tau0 unify with tau1 -> tauPrime?
       unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3) match {
         case tt @ (TPolyInst(_, _, out), newCtx, _) =>
-          val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s"
-            .format(prettyStr(e), prettyType(out), e0, tau0, prettyStr(e1), prettyType(tau1), (prettyStr(e) -> out))
+          val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s".format(
+            prettyStr(e),
+            prettyType(out),
+            prettyStr(e0),
+            prettyType(tau0),
+            prettyStr(e1),
+            prettyType(tau1),
+            (prettyStr(e) ->
+              prettyType(out)))
 
           log(logText)
           log(s"[APP] ctx: ${newCtx}")
