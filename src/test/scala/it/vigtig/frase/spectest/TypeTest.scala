@@ -47,19 +47,18 @@ class TypeTest
     val nilSetID: String  = "Nil"
 
     val nilConstructor: (SetId, TPolyInst) = SetId(nilSetID) -> TPolyInst(FUNC, TPolyInst(listSetID, xVar))
-    val consConstructor: (SetId, TPolyInst) = SetId(consSetID) -> TPolyInst(
-        FUNC,
-        xVar,
-        TPolyInst(listSetID, xVar, TPolyInst(listSetID, xVar)))
+    val consConstructor: (SetId, TPoly) = SetId(consSetID) -> TFunc(xVar,
+                                                                    TFunc(TPolyInst(listSetID, xVar),
+                                                                          TPolyInst(listSetID, xVar)))
 
     val expected   = TPolyInst(FUNC, TPolyInst(listSetID, INTType), TPolyInst(listSetID, INTType))
     val context    = Map[Term, Type](nilConstructor, consConstructor)
     val magicNum   = 42
     val termToType = Applic(SetId(consSetID), Integer(magicNum))
 
-    println(s"type of ${prettyStr(termToType)} should be ${prettyType(expected)}")
+    val actual = w2(termToType, context, "a")
 
-    w2(termToType, context, "a") should matchPattern {
+    actual should matchPattern {
       case (`expected`, _, _) =>
     }
   }

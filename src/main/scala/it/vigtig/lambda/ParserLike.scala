@@ -60,6 +60,7 @@ trait ParserLike extends RegexParsers with PackratParsers with ASTLike {
   lazy val SET_WITH_ARGS: PParser[String] =
     (SET ~ VARIABLE.?) ^^ {
       case set ~ Some(rest) => set + " " + rest
+      case set ~ _ => set
     }
 
   lazy val SET_ARGS: PParser[List[(String, String)]] =

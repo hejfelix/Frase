@@ -20,17 +20,19 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
     def apply(name: String, in: Type): TPolyInst = TPolyInst(name, in, TNothing)
   }
   case class TPolyInst(name: String, in: Type, out: Type) extends TPoly
-  case class TFunc(in: Type, out: Type)                   extends TPoly
+  //scalastyle:off
+  def TFunc(in: Type, out: Type): TPolyInst = TPolyInst(FUNC, in, out)
+  //scalastyle:on
 
   type Context = Map[Term, Type]
 
   def prettyType(t: Type): String = t match {
-    case TPolyInst(FUNC, in, out) => s"${prettyType(in)} -> ${prettyType(out)}"
-    case TPolyInst(name, in, out) => s"""$name ${prettyType(in)} -> ${prettyType(out)}"""
-    case TFunc(in, out)           => s"${prettyType(in)} -> ${prettyType(out)}"
-    case TVar(x)                  => x
-    case TInst(x)                 => x
-    case _                        => t.toString
+    case TPolyInst(name, in, TNothing) => s"$name ${prettyType(in)}"
+    case TPolyInst(FUNC, in, out)      => s"${prettyType(in)} -> ${prettyType(out)}"
+    case TPolyInst(name, in, out)      => s"""$name ${prettyType(in)} -> ${prettyType(out)}"""
+    case TVar(x)                       => x
+    case TInst(x)                      => x
+    case _                             => t.toString
   }
 
   private def log(s: String): Unit =
@@ -232,14 +234,8 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       //Does tau0 unify with tau1 -> tauPrime?
       unify(tau0, TPolyInst(FUNC, tau1, tauPrime), ctx3) match {
         case tt @ (TPolyInst(_, _, out), newCtx, _) =>
-          val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s".format(
-            prettyStr(e),
-            prettyType(out),
-            prettyStr(e0),
-            prettyType(tau0),
-            prettyStr(e1),
-            prettyType(tau1),
-            (prettyStr(e) -> prettyType(out)))
+          val logText = "[App] %s : %s with e0 %s : %s and e1 %s  : %s      ----  verdict: %s"
+            .format(prettyStr(e), prettyType(out), e0, tau0, prettyStr(e1), prettyType(tau1), (prettyStr(e) -> out))
 
           log(logText)
           log(s"[APP] ctx: ${newCtx}")
