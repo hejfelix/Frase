@@ -54,10 +54,6 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
            nextVar: String = "a",
            input: => String = io.StdIn.readLine("Frase>")): Map[Term, List[Term]] = {
 
-    logger.info("CURRENT TYPE CONTEXT: " + typeContext.map(kvp => kvp._1 -> prettyType(kvp._2)).mkString(",  "))
-
-    logger.info("CURRENT TYPE CONTEXT: " + typeContext.mkString("\n"))
-
     val exprSrc = input
     if (exprSrc == ":exit") {
       context
@@ -79,8 +75,6 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
                     ""
                   }}"""
                   val consTail = s"""$id ${args.map(first).mkString(" ")}"""
-                  logger.info(s"all args: ${args.mkString}")
-                  logger.info(s"parsing: ${cons + consTail}")
                   val consBody = parseAll(LINE, cons + consTail) match {
                     case Success(term, _) => term
                     case _                => Empty
@@ -99,13 +93,8 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
                   case ConstructorDef(Id(id), args) =>
                     val varTypes: List[REPL.Type] = vars.map(x => TVar(x.id): Type)
                     val argTypes: List[REPL.Type] = args.map(_._2).map(parseType)
-                    println(s"set id: $id")
-                    println(varTypes)
-                    println(argTypes)
-                    val out: Type = TPolyInst(setId, varTypes.foldRight(TNothing: Type)((a, b) => TFunc(a, b)))
-                    println(s"expected out-type: ${prettyType(out)}")
-                    val arguments = argTypes.foldRight(out)((a, b) => TFunc(a, b))
-                    println(s"expected argument-types: ${prettyType(arguments)}")
+                    val out: Type                 = TPolyInst(setId, varTypes.foldRight(TNothing: Type)((a, b) => TFunc(a, b)))
+                    val arguments                 = argTypes.foldRight(out)((a, b) => TFunc(a, b))
                     SetId(id) -> arguments
                 }
               case _ => Nil

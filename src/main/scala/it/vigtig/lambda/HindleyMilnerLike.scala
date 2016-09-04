@@ -37,7 +37,7 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
   }
 
   private def log(s: String): Unit =
-    logger.info(s)
+    logger.debug(s)
 
   /*
   https://en.wikipedia.org/wiki/Hindley%E2%80%93Milner_type_system#Free_type_variables
@@ -120,50 +120,14 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
       case (a: TPolyInst, b: TPolyInst) if a.name != b.name =>
         (TFail(s"name mismatch: ${a.name} != ${b.name}"), ctx, assignments)
       case (a: TPolyInst, b: TPolyInst) =>
-
-        println(s"poly unify with poly ${prettyType(a)}     ${prettyType(b)}")
-
         val (newInType, newCtx, newAss)      = unify(a.in, b.in, ctx, assignments)
         val (newOutType, finalCtx, finalAss) = unify(a.out, b.out, newCtx, newAss)
-
-        println(s"newass:  $newAss    finalAss $finalAss")
-
-        println(s" new intype: ${prettyType(newInType)}    new outtype:  ${newOutType}")
         val expandedType                     = expandType(TPolyInst(a.name, newInType, newOutType), newAss ++ finalAss)
-
-        println(s" expanded type ${prettyType(expandedType)}")
         (expandedType, finalCtx, finalAss)
 
-//      val substitutions: Map[Type, Type] = (a.args, b.args).zipped.map(unifySub).toMap
-//
-//      //We don't use mapValues because it's not strict
-//      val sub2 = substitutions.map { case (k, v) => k -> subInType(v, substitutions) }
-//
-//      val ctx2 = ctx.mapValues(x => subInType(x, substitutions))
-//
-//      val pairs = (a.args, b.args).zipped.map((x, y) => unify(x, y, ctx)._1)
-//
-//      val newArgs: Seq[Type] = pairs.map(x => subInType(x, substitutions))
-//      log(s"arg lists: ${a.args}      ${b.args}")
-//      log(s"substitutions: ${substitutions}")
-//      log(s"sub2: ${sub2}")
-//      log(s"unified types: ${pairs.mkString}")
-//      log(s"newArgs: ${newArgs}")
-//
-//      val unifiedContext: Context = unifyInContext(ctx2, sub2)
-//      log(s"unifiedcontext: $unifiedContext")
-//      log("")
-//
-//      (TPolyInst(a.name, newArgs: _*), unifiedContext)
       case _ => (TFail(s"$a could not unify with $b"), ctx, assignments)
     }
   //scalastyle:on
-
-//  def subInType(t: Type, subs: Map[Type, Type]): Type = t match {
-//    case tp: TPolyInst               => TPolyInst(tp.name, tp.args.map(x => subInType(x, subs)): _*)
-//    case x: TVar if subs.contains(x) => subs(x)
-//    case x                           => x
-//  }
 
   def unifySub(a: Type, b: Type): (Type, Type) = (a, b) match {
     case (TVar(_), TVar(_)) if a == b => (TFail(""), TFail(""))
