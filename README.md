@@ -13,7 +13,7 @@ Current language features count:
 * Recursion
 * Pattern Matching
 * Named terms
-* Yet Another Hindlye Milner Type System (YAHMTS)
+* Yet Another Hindley Milner Type System (YAHMTS)
 * (Very) Early stages of Algebraic Data Types
 
 Technical details:
