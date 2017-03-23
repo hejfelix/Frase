@@ -1,11 +1,11 @@
 package it.vigtig.lambda
 
 /**
- * @author Hargreaves
- */
+  * @author Hargreaves
+  */
 trait ASTLike extends AST {
 
-  abstract trait Term
+  sealed trait Term
 
   case object Empty extends Term
 
@@ -15,7 +15,7 @@ trait ASTLike extends AST {
 
   case class Named(id: Id, body: Term) extends Term
 
-  abstract trait Atom extends Term
+  sealed trait Atom extends Term
 
   //"Normal Form", term cannot be reduced further
   case class Id(id: String) extends Atom
@@ -32,20 +32,20 @@ trait ASTLike extends AST {
 
   case class ConstructorDef(id: Id, args: List[(String, String)]) extends Term
 
-  def prettyList(t:Term):List[String] = t match {
-    case Applic(Applic(SetId("Cons"),head),Id(x)) => List(prettyStr(head)+"|"+x)
-    case Applic(Applic(SetId("Cons"),head),tail) => prettyStr(head) :: prettyList(tail)
-    case SetId("Nil") => Nil
-    case x => List(prettyStr(x))
+  def prettyList(t: Term): List[String] = t match {
+    case Applic(Applic(SetId("Cons"), head), Id(x)) => List(prettyStr(head) + "|" + x)
+    case Applic(Applic(SetId("Cons"), head), tail)  => prettyStr(head) :: prettyList(tail)
+    case SetId("Nil")                               => Nil
+    case x                                          => List(prettyStr(x))
   }
 
   def prettyStr(t: Term): String = t match {
-    case Applic(Applic(SetId("Cons"), head), tail) => "["+prettyList(t).mkString(",")+"]"
+    case Applic(Applic(SetId("Cons"), head), tail) => "[" + prettyList(t).mkString(",") + "]"
     case SetId("Nil")                              => ""
     case ConstructorDef(Id(id), args)              => s"$id ${args.mkString}"
     case SetId(sid)                                => sid
     case SetType(Id(id), vars, cons)               => s"set $id ${vars.mkString} = ${cons.map(prettyStr).mkString}"
-    case Applic(a@Id(_), b)                        => s"${prettyStr(a)} ${prettyStr(b)}"
+    case Applic(a @ Id(_), b)                      => s"${prettyStr(a)} ${prettyStr(b)}"
     case Applic(a, b)                              => s"(${prettyStr(a)}) (${prettyStr(b)})"
     case Abstr(Id(x), b)                           => s"$x . ${prettyStr(b)}"
     case Abstr(x, b)                               => s"${prettyStr(x)} . ${prettyStr(b)}"
