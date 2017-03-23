@@ -1,18 +1,16 @@
-lazy val root = (project in file(".")).
-  settings(
-    name := "Frase",
-    version := "0.1",
-    scalaVersion := "2.11.6"
-  )
-
-autoScalaLibrary := false
-
-libraryDependencies ++= Seq(
-   "junit" % "junit" % "4.8.1" % "test",
-   "org.scala-lang" % "scala-library" % "2.11.6",
-   "org.scala-lang" % "scala-reflect" % "2.11.6",
-   "org.scalacheck" %% "scalacheck" % "1.11.4" % "test",
-   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-   "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+lazy val root = (project in file(".")).settings(
+  name := "Frase",
+  version := "0.1",
+  scalaVersion := "2.12.1"
 )
 
+libraryDependencies ++= Seq(
+  //Scala libraries
+  "org.scalacheck"             %% "scalacheck"               % "1.11.4" % "test",
+  "org.scala-lang.modules"     %% "scala-parser-combinators" % "1.0.5",
+  "org.scalacheck"             %% "scalacheck"               % "1.13.5",
+  "org.scalatest"              %% "scalatest"                % "3.0.1" % "test",
+  "com.typesafe.scala-logging" %% "scala-logging"            % "3.5.0",
+  //Java libraries
+  "ch.qos.logback" % "logback-classic" % "1.1.7"
+)
