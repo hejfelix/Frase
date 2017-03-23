@@ -1,4 +1,11 @@
-set List a = Nil or Cons head:a,tail:List
-length = Nil . 0
-length = (Cons head tail) . + 1 (length tail)
-:exit
+set List a  = Nil or Cons head: a, tail: List a
+
+foldl       = Nil . z . f . z
+foldl       = (Cons head tail) . z . f . (f (head)) (foldl tail z f)
+
+map         = Nil . f . Nil
+map         = (Cons head tail) . f . Cons (f head) (map tail f)
+
+length      = xs . foldl xs 0 (x . y . + 1 y)
+sum         = xs . foldl xs 0 +
+product     = xs . foldl xs 1 *

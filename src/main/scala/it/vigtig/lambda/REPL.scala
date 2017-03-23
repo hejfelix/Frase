@@ -4,14 +4,21 @@ import com.typesafe.scalalogging.StrictLogging
 
 import scala.annotation.tailrec
 
-object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with ASTLike with StrictLogging {
+object REPL
+    extends ParserLike
+    with InterpreterLike
+    with HindleyMilnerLike
+    with ASTLike
+    with StrictLogging {
 
   def main(args: Array[String]): Unit = {
 
     if (args.length == 1) {
       val file = io.Source.fromFile(args(0)).getLines()
-      val std  = io.StdIn
-      val ctx  = loop(input = { file.next() })
+      val std = io.StdIn
+      val ctx = loop(input = {
+        if (file.hasNext) file.next() else io.StdIn.readLine("Frase>")
+      })
       loop()
     } else {
       loop()
@@ -28,7 +35,7 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
 
   def time[T](b: => T): (Long, T) = {
 
-    val t      = System.currentTimeMillis()
+    val t = System.currentTimeMillis()
     val result = b
     (System.currentTimeMillis() - t, result)
   }
@@ -38,8 +45,9 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
   def parseType(str: String): Type = parseAll(LINE, str) match {
     case Success(expr, _) =>
       expr match {
-        case Id(x)                         => TVar(x)
-        case Applic(SetId(set), Id(varId)) => TPolyInst(set, TVar(varId), TNothing)
+        case Id(x) => TVar(x)
+        case Applic(SetId(set), Id(varId)) =>
+          TPolyInst(set, TVar(varId), TNothing)
       }
     case _ => TFail(s"Could not parse type in: $str")
   }
@@ -52,11 +60,14 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
   def loop(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil),
            typeContext: Map[Term, Type] = Map(),
            nextVar: String = "a",
-           input: => String = io.StdIn.readLine("Frase>")): Map[Term, List[Term]] = {
+           input: => String = io.StdIn.readLine("Frase>"))
+    : Map[Term, List[Term]] = {
 
     val exprSrc = input
     if (exprSrc == ":exit") {
       context
+    } else if (exprSrc.trim == "") {
+      loop(context, typeContext, nextVar, input)
     } else {
       parseAll(LINE, exprSrc) match {
         case Success(expr, _) =>
@@ -68,17 +79,19 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
               logger.info("added constructor(s) to context:")
               cons map {
                 case ConstructorDef(Id(id), args) =>
-                  logger.info(s"NEW TYPE:  $id:$setId")
-                  val cons = s"""${args.map(first).mkString(".")} ${if (args != Nil) {
-                    "."
-                  } else {
-                    ""
-                  }}"""
+                  logger.info(s"NEW TYPE:  $id:$setId $vars")
+                  val cons =
+                    s"""${args.map(first).mkString(".")} ${if (args != Nil) {
+                      "."
+                    } else {
+                      ""
+                    }}"""
                   val consTail = s"""$id ${args.map(first).mkString(" ")}"""
                   val consBody = parseAll(LINE, cons + consTail) match {
                     case Success(term, _) => term
-                    case _                => Empty
+                    case _ => Empty
                   }
+                  logger.info(s"constructor expression: ${cons + consTail}")
                   logger.info(("constructor: " + Id(id) -> consBody).toString)
 
                   Id(id) -> consBody
@@ -86,27 +99,45 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
             case term => Nil
           }
 
-          val setTypeDefs: List[(_root_.it.vigtig.lambda.REPL.SetId, _root_.it.vigtig.lambda.REPL.Type)] =
+          val setTypeDefs: List[(_root_.it.vigtig.lambda.REPL.SetId,
+                                 _root_.it.vigtig.lambda.REPL.Type)] =
             expr match {
               case SetType(Id(setId), vars, cons) =>
                 cons map {
                   case ConstructorDef(Id(id), args) =>
-                    val varTypes: List[REPL.Type] = vars.map(x => TVar(x.id): Type)
-                    val argTypes: List[REPL.Type] = args.map(_._2).map(parseType)
-                    val out: Type                 = TPolyInst(setId, varTypes.foldRight(TNothing: Type)((a, b) => TFunc(a, b)))
-                    val arguments                 = argTypes.foldRight(out)((a, b) => TFunc(a, b))
+                    val varTypes: List[REPL.Type] =
+                      vars.map(x => TVar(x.id): Type)
+                    val argTypes: List[REPL.Type] =
+                      args.map(_._2).map(parseType)
+                    val out: Type =
+                      TPolyInst(setId,
+                                varTypes.foldRight(TNothing: Type)((a, b) =>
+                                  TFunc(a, b)))
+                    val arguments =
+                      argTypes.foldRight(out)((a, b) => TFunc(a, b))
+                    logger.info(
+                      s"The type of $id is: ${SetId(id) -> arguments}")
                     SetId(id) -> arguments
                 }
               case _ => Nil
             }
+          println(s"""new settypes:\n ${setTypeDefs.mkString("\n")}""")
 
-          val (typeOfExpression, nextVariable, newTypeCtx) = w2(expr, typeContext, nextVar)
+          println(s"""new settypes:\n ${setTypeDefs
+            .map(second)
+            .map(prettyType)
+            .mkString("\n")}""")
+
+          val (typeOfExpression, nextVariable, newTypeCtx) =
+            w2(expr, typeContext, nextVar)
           logger.info("AST: " + expr)
+          logger.info(s"new ctx: $typeOfExpression")
 
           val namedType: Map[Term, Type] = expr match {
             case Named(id, body) =>
               if (typeContext.contains(id)) {
-                Map(id -> unify(typeOfExpression, typeContext(id), newTypeCtx)._1)
+                Map(
+                  id -> unify(typeOfExpression, typeContext(id), newTypeCtx)._1)
               } else {
                 Map(id -> typeOfExpression)
               }
@@ -128,12 +159,11 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
               logger.info("Type error: " + err)
               loop(context, typeContext, nextVariable, input)
             case tpe =>
-              logger.info(s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
+              logger.info(
+                s"Parsed:       ${prettyStr(expr)} : ${prettyType(typeOfExpr)}")
               logger.info("Evaluated:    " + prettyStr(result))
               logger.info(s"time:         $evalTime ms")
               logger.info("")
-              //            logger.info("NEW TYPE CONTEXT: "+newTypeCtx.map(x => prettyStr(x._1)+" : "+prettyType(x._2))
-              // .mkString("\n"))
 
               loop(combine(context, listToMap(definition)),
                    newTypeCtx ++ namedType ++ setTypeDefs,
@@ -141,12 +171,16 @@ object REPL extends ParserLike with InterpreterLike with HindleyMilnerLike with 
                    input)
           }
 
-        case err => logger.info(err.toString); throw new InvalidProgramException(err.toString);
+        case err =>
+          logger.info(err.toString);
+          throw new InvalidProgramException(err.toString);
       }
 
     }
   }
 
   def combine(a: Map[Term, List[Term]], b: Map[Term, List[Term]]) =
-    (a.keys ++ b.keys).map(i => i -> (a.getOrElse(i, Nil) ++ b.getOrElse(i, Nil))).toMap
+    (a.keys ++ b.keys)
+      .map(i => i -> (a.getOrElse(i, Nil) ++ b.getOrElse(i, Nil)))
+      .toMap
 }

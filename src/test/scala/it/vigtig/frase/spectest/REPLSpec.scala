@@ -13,7 +13,7 @@ class REPLSpec extends FlatSpec with Matchers {
   it should "parse a simple program" in {
     val testProgram =
       "fib = n . (<= n 2) (1) ((+ (fib (- n 2)) (fib (- n 1))))" +
-        "\nset List a = Nil or Cons head:a,tail:List" +
+        "\nset List a  = Nil or Cons head: a, tail: List a" +
         "\nfac = 0 . 1" +
         "\nfac = n . * n (fac (- n 1))" +
         "\n:exit\n"

@@ -46,7 +46,6 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
     case TVar(_)               => Set(t)
     case TInst(_)              => Set()
     case TPolyInst(_, in, out) => freeVars(in) ++ freeVars(out)
-//      args map freeVars reduce (_ ++ _)
   }
 
   /*
@@ -256,15 +255,6 @@ trait HindleyMilnerLike extends ASTLike with StrictLogging {
         val (newInTypeInst, nextVar)   = inst(in, next)
         val (newOutTypeInst, finalVar) = inst(out, nextVar)
         (TPolyInst(name, newInTypeInst, newOutTypeInst), finalVar)
-//      case TPolyInst(name, args @ _ *) =>
-//        val varargs = (args collect { case TVar(x) => TVar(x) }).distinct
-//        val map: Map[Type, TVar] = varargs.zipWithIndex.map {
-//          case (variable, index) => variable -> TVar(nextId(next, index + 1))
-//        }.toMap
-//
-//        log(varargs.zipWithIndex.mkString(","))
-//        log(s"MAP $map from $sigma")
-//        (TPolyInst(name, args.map(x => map.getOrElse(x, x)): _*), nextId(next, args.length))
     }
 
   def newTyper(next: String = "a"): (Term) => (Type, String, Context) = { (e: Term) =>
