@@ -1,5 +1,6 @@
 package it.vigtig.lambda.syntax
 
+import it.vigtig.lambda.errors.{FraseError, GenericError}
 import it.vigtig.lambda.syntax.AST._
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
@@ -15,7 +16,7 @@ object AST {
       case Integer(i)                  => i.toString
       case Application(left, right)    => s"(${left.pretty}) ${right.pretty}"
       case LambdaAbstraction(id, body) => s"${id.pretty} . ${body.pretty}"
-      case Empty                         => ""
+      case Empty                       => ""
     }
 
   }
@@ -36,7 +37,6 @@ object AST {
 }
 
 object ParserExample extends App {
-  import it.vigtig.lambda.syntax.AST._
 
   val programString =
     """|x = 20
@@ -50,20 +50,20 @@ object ParserExample extends App {
 }
 
 trait Parser {
-  def parse(program: String): Either[String, List[Fragment]]
+  def parse(program: String): Either[FraseError, List[Fragment]]
 }
 
 case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratParsers {
 
   override type Elem = Token
 
-  def parse(program: String): Either[String, List[Fragment]] =
+  def parse(program: String): Either[FraseError, List[Fragment]] =
     lexer.tokenize(program).flatMap(parse)
 
-  private def parse(tokens: List[Token]): Either[String, List[Fragment]] = {
+  private def parse(tokens: List[Token]): Either[FraseError, List[Fragment]] = {
     val reader = new PackratReader(TokenReader(tokens))
     program(reader) match {
-      case NoSuccess(msg, _)  => Left(msg)
+      case NoSuccess(msg, _)  => Left(GenericError(msg))
       case Success(result, _) => Right(result)
     }
   }

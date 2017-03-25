@@ -1,9 +1,11 @@
 package it.vigtig.lambda.syntax
 
+import it.vigtig.lambda.errors.{FraseError, GenericError}
+
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
 trait Lexer {
-  def tokenize(program: String): Either[String, List[Token]]
+  def tokenize(program: String): Either[FraseError, List[Token]]
 }
 
 object Lexer {
@@ -45,7 +47,7 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
 
   def tokenize(program: String) = parse(tokenParser, program) match {
     case Success(tokens, _)   => Right(tokens)
-    case NoSuccess(result, _) => Left(result)
+    case NoSuccess(result, _) => Left(GenericError(result))
   }
 
   lazy val float: PackratParser[FLOAT]   = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ FLOAT

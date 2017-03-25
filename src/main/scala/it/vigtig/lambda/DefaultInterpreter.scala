@@ -1,13 +1,17 @@
 package it.vigtig.lambda
 
+import it.vigtig.lambda.errors.FraseError
+import it.vigtig.lambda.interpreter.LetTransformer
 import it.vigtig.lambda.syntax.AST._
 import it.vigtig.lambda.syntax.{AST, Parser}
 
 trait Interpreter {
-  def interpret(program: String): Either[String, Fragment]
+  def interpret(program: String): Either[FraseError, Fragment]
 }
 
-case class DefaultInterpreter(parser: Parser) extends Interpreter with UnificationLike {
+case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
+    extends Interpreter
+    with UnificationLike {
 
   def listToMap(l: List[(Term, Term)]) =
     l.foldLeft(Map[Term, List[Term]]())(comb)
@@ -16,39 +20,11 @@ case class DefaultInterpreter(parser: Parser) extends Interpreter with Unificati
     case (a, b) => m + (a -> (b :: m.getOrElse(a, Nil)))
   }
 
-  def interpret(program: String): Either[String, Fragment] =
+  def interpret(program: String): Either[FraseError, Term] =
     parser
       .parse(program)
-      .map(
-        fragments => fragments.map(interpret).head
-      )
-
-  //    parseAll(PRGM, program) match {
-//
-//      case Success(terms, _) =>
-//        val groups = terms.groupBy {
-//          case n: Named   => 'NAMED
-//          case n: SetType => 'SET
-//          case _          => 'EXPR
-//        }
-//
-//        val nameds   = groups.getOrElse('NAMED, Nil)
-//        val unnameds = groups.getOrElse('EXPR, Nil)
-//        val sets     = groups.getOrElse('SET, Nil)
-//
-//        val mappings: List[(Term, Term)] = nameds.map {
-//          case Named(a, b) => a -> b
-//        }
-//
-//        val dict: Map[Term, List[Term]] = listToMap(mappings.reverse)
-//
-//        Some(unnameds.map(t => {
-//          val res = interpret(t)(dict)
-//          interpret(res)()
-//        }))
-//
-//      case x => println(x); None
-//    }
+      .flatMap(letTransformer.transform)
+      .map(term => interpret(term)())
 
   def interpret(f: Fragment): Fragment = f match {
     case x @ Named(_, _) => x

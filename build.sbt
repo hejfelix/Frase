@@ -1,3 +1,5 @@
+import scala.languageFeature.experimental.macros
+
 lazy val root = (project in file(".")).settings(
   name := "Frase",
   version := "0.1",
@@ -14,3 +16,10 @@ libraryDependencies ++= Seq(
   //Java libraries
   "ch.qos.logback" % "logback-classic" % "1.1.7"
 )
+
+//Cats
+libraryDependencies ++= Seq(
+  "org.typelevel" %% "cats-macros",
+  "org.typelevel" %% "cats-kernel",
+  "org.typelevel" %% "cats-core"
+).map(_ % "0.9.0")
