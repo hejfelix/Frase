@@ -14,8 +14,8 @@ object AST {
       case Bool(b)                     => b.toString
       case Identifier(id)              => id
       case Integer(i)                  => i.toString
-      case Application(left, right)    => s"(${left.pretty}) ${right.pretty}"
-      case LambdaAbstraction(id, body) => s"${id.pretty} . ${body.pretty}"
+      case Application(left, right)    => s"(${left.pretty} ${right.pretty})"
+      case LambdaAbstraction(id, body) => s"${id.pretty} . (${body.pretty})"
       case Empty                       => ""
     }
 
@@ -60,6 +60,7 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
   def parse(program: String): Either[FraseError, List[Fragment]] =
     lexer.tokenize(program).flatMap(parse)
 
+
   private def parse(tokens: List[Token]): Either[FraseError, List[Fragment]] = {
     val reader = new PackratReader(TokenReader(tokens))
     program(reader) match {
@@ -84,7 +85,7 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
     case left ~ right => Application(left, right)
   }
 
-  private lazy val lambdaAbstraction = (identifier <~ (`.`)) ~ term ^^ {
+  private lazy val lambdaAbstraction = ( (identifier | terminal) <~ (`.`)) ~ term ^^ {
     case id ~ body => LambdaAbstraction(id, body)
   }
 

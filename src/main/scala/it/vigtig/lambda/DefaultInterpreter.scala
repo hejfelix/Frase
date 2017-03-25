@@ -20,11 +20,13 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
     case (a, b) => m + (a -> (b :: m.getOrElse(a, Nil)))
   }
 
+  def prettyTrace = debug.trace[Term, String](_.pretty) _
+
   def interpret(program: String): Either[FraseError, Term] =
     parser
       .parse(program)
       .flatMap(letTransformer.transform)
-      .map(term => interpret(term)())
+      .map(term => evalStep(term)())
 
   def interpret(f: Fragment): Fragment = f match {
     case x @ Named(_, _) => x
@@ -34,32 +36,8 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
   def interpret(t: Term)(context: Map[Term, List[Term]] = Map().withDefaultValue(Nil)): Term =
     fixPoint(t)(x => evalStep(x)(context))
 
-  def evalStep(t: Term)(context: Map[Term, List[Term]]): Term =
-    lookup(fixPoint(t)(t => reducer(t)))(context)
-
-  def lookup(t: Term)(context: Map[Term, List[Term]]): Term =
-    transform({
-      case Application(f, body) if context.contains(applicant(t)) =>
-        val ap             = applicant(t)
-        val headers        = context(ap).map(header)
-        val as: List[Term] = args(t).reverse
-
-        val substitutions = headers.map(x => unifyLists(x, as))
-
-        val (terms, subs) = (context(ap), substitutions).zipped.filter((a, b) => b.isDefined)
-
-        terms match {
-          case x :: xs =>
-            val newBody       = stripHeader(x)
-            val maybeSubs     = for (x <- subs.headOption; y <- x) yield y
-            val substitutions = maybeSubs.getOrElse(Map())
-            val res           = substitutions.foldLeft(newBody)((a, b) => substitute(a)(b))
-            res
-//          case Empty => Application(lookup(f)(context), body)
-        }
-
-      case Application(x, y) => Application(lookup(x)(context), lookup(y)(context))
-    })(t)
+  def evalStep(t: Term)(context: Map[Term, List[Term]] = Map.empty): Term =
+    fixPoint(t)(t => { println(t.pretty); reduce(t) })
 
   def args(t: Term): List[Term] = t match {
     case Application(x, y) => y :: args(x)
@@ -84,7 +62,10 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
 
   val App = Application
 
+  val yCombinator = Identifier("y")
   def builtIns: PartialFunction[Term, Term] = {
+    case App(`yCombinator`, f)                               => App(f, App(yCombinator, f))
+    case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => Application(body, yCombExp)
     case App(App(Identifier("=="), a), b)                    => Bool(a == b)
     case App(App(Identifier("<="), Integer(a)), Integer(b))  => Bool(a <= b)
     case App(App(Bool(p), yes), no)                          => if (p) yes else no
@@ -95,16 +76,20 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
     case App(App(Identifier("%"), Integer(a)), Integer(b))   => Integer(a % b)
   }
 
-  def reducer = {
+  def reduce = {
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
 //      case Named(id, body) =>
 //        val reduce: AST.Term = betaReduce(body)
 //        Named(id, reduce)
-      case Application(LambdaAbstraction(id: Identifier, body), rhs) => betaReduce(substitute(body)(id -> rhs))
-      case Application(t, y)                                         => Application(betaReduce(t), betaReduce(y))
-      case LambdaAbstraction(a, b)                                   => LambdaAbstraction(a, betaReduce(b))
-      case i @ Identifier(_)                                         => i
-      case t                                                         => t
+      case Application(LambdaAbstraction(id, body), rhs) if id == rhs => body
+      case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != yCombinator =>
+//        println(s"Beta reduce id: ${id.pretty}  body: ${body.pretty}   rhs: ${rhs.pretty}")
+//        println(s"     with result: ${betaReduce(substitute(body)(id -> rhs)).pretty}")
+        betaReduce(substitute(body)(id -> rhs))
+      case Application(t, y)       => Application(betaReduce(t), betaReduce(y))
+      case LambdaAbstraction(a, b) => LambdaAbstraction(a, betaReduce(b))
+      case i @ Identifier(_)       => i
+      case t                       => t
     }
     betaReduce
   }
