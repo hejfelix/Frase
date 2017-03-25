@@ -38,9 +38,6 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
           integer |
           float |
           period |
-          plus |
-          minus |
-          division |
           equals |
           comma |
           space |
@@ -55,8 +52,8 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
   }
 
   lazy val float: PackratParser[FLOAT]         = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ FLOAT
-  lazy val integer: PackratParser[FINTEGER]     = """-?\d+""".r ^^ FINTEGER
-  lazy val variable: PackratParser[FIDENTIFIER] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ FIDENTIFIER
+  lazy val integer: PackratParser[INTGR]     = """-?\d+""".r ^^ INTGR
+  lazy val variable: PackratParser[ID] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
 
   lazy val `false`: PackratParser[FALSE.type] = "false" ^^ { _ =>
     FALSE
@@ -66,20 +63,17 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
   }
 
 
-  lazy val identifier: PackratParser[FIDENTIFIER] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ FIDENTIFIER
+  lazy val identifier: PackratParser[ID] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
 
   // format: off
   lazy val leftParen: PackratParser[`(`.type]  = "(" ^^ {_ => `(`}
   lazy val rightParen: PackratParser[`)`.type] = ")" ^^ {_ => `)`}
   lazy val period: PackratParser[`.`.type]     = "." ^^ { _ => `.` }
-  lazy val plus: PackratParser[PLUS.type]       = "+" ^^{ _ => PLUS }
-  lazy val minus: PackratParser[`-`.type]      = "-" ^^ { _ => `-` }
-  lazy val division: PackratParser[`/`.type]   = "/" ^^ { _ =>`/` }
   lazy val equals: PackratParser[`=`.type]     = "=" ^^ {_ => `=`}
-  lazy val comma: PackratParser[COMMA.type]    = "," ^^ { _ => COMMA }
-  lazy val space: PackratParser[SPACE.type]    = " " ^^ { _ => SPACE }
-
+  lazy val comma: PackratParser[`,`.type]    = "," ^^{ _ => `,` }
+  lazy val space: PackratParser[SPACE.type]    = " " ^^{ _ => SPACE }
   // format: on
+
   lazy val newline: PackratParser[NEWLINE.type] = (sys.props("line.separator") | "\r\n" | "\\n".r) ^^ { _ =>
     NEWLINE
   }

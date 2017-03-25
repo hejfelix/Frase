@@ -1,9 +1,21 @@
 package it.vigtig.lambda.syntax
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
-import scala.util.parsing.input.{NoPosition, Position, Reader}
+import scala.util.parsing.input.{Position, Reader}
 
-sealed trait Fragment
+sealed trait Fragment {
+
+  def pretty: String = this match {
+    case Named(lhs, rhs)             => s"${lhs.pretty} = ${rhs.pretty}"
+    case Bool(b)                     => b.toString
+    case Identifier(id)              => id
+    case Integer(i)                  => i.toString
+    case Application(left, right)    => s"(${left.pretty}) ${right.pretty}"
+    case LambdaAbstraction(id, body) => s"${id.pretty} . ${body.pretty}"
+    case Nil                         => ""
+  }
+
+}
 
 sealed trait Declaration extends Fragment
 sealed trait Term        extends Fragment
@@ -19,20 +31,19 @@ case class LambdaAbstraction(id: Term, body: Term) extends Term
 
 case object Nil extends Term
 
-case class BinOp(name: String, left: Term, right: Term) extends Term
-
 object MyParserExample extends App {
 
   val programString =
     """|x = 20
-      |* ((a . b . + a b) x 1) 2
-    """.stripMargin
+      |* ((a . b . + a b) x 1) 2""".stripMargin
 
-  FraseLexer(programString) match {
-    case Right(tokens) =>
-      println(tokens)
-      println(MyParser(tokens))
+  val ast = FraseLexer(programString).flatMap { tokens =>
+    println(tokens)
+    MyParser(tokens)
   }
+
+  println(ast.map(_.mkString("\n")))
+  println(ast.map(_.map(_.pretty).mkString("\n")))
 
 }
 
@@ -40,7 +51,7 @@ object MyParser extends Parsers with PackratParsers {
 
   override type Elem = Token
 
-  def apply(tokens: List[Token]) = {
+  def apply(tokens: List[Token]): Either[String, List[Fragment]] = {
     val reader = new PackratReader(TokenReader(tokens))
     program(reader) match {
       case NoSuccess(msg, _)  => Left(msg)
@@ -48,19 +59,7 @@ object MyParser extends Parsers with PackratParsers {
     }
   }
 
-
-  lazy val plus: PackratParser[Term] = (PLUS ~> term) ~ term ^^ {
-    case arg1 ~ arg2 => BinOp("+", arg1, arg2)
-  }
-  lazy val multiply: PackratParser[Term] = (TIMES ~> term) ~ term ^^ {
-    case arg1 ~ arg2 => BinOp("*", arg1, arg2)
-  }
-
-//  lazy val multiply: PackratParser[Term] = `*` ~> term ~ term ^^ {
-//    case arg1 ~ arg2 => BinOp("*", arg1, arg2)
-//  }
-
-  lazy val fragment: PackratParser[Fragment] = (named | term) <~ NEWLINE
+  lazy val fragment: PackratParser[Fragment] = (named | term) <~ NEWLINE.*
 
   lazy val program: PackratParser[List[Fragment]] = phrase(rep1(fragment))
 
@@ -72,16 +71,15 @@ object MyParser extends Parsers with PackratParsers {
     override def atEnd: Boolean      = tokens.isEmpty
   }
 
-  lazy val application: PackratParser[Term] = term ~ term ^^ {
+  lazy val application: PackratParser[Term] = term ~ (pterm | terminal) ^^ {
     case left ~ right => Application(left, right)
   }
 
-  private lazy val pureLambdaAbstraction = (term <~ `.`) ~ term ^^ {
+  private lazy val lambdaAbstraction = (identifier <~ (`.`)) ~ term ^^ {
     case id ~ body => LambdaAbstraction(id, body)
   }
-  lazy val lambdaAbstraction: PackratParser[Term] = pureLambdaAbstraction | plus | multiply
 
-  lazy val term: PackratParser[Term] = lambdaAbstraction | terminal | application |  pterm
+  lazy val term: PackratParser[Term] = lambdaAbstraction | application | pterm | terminal
 
   lazy val terminal: PackratParser[Term] = integer | identifier
 
@@ -89,17 +87,16 @@ object MyParser extends Parsers with PackratParsers {
 
   lazy val integer: PackratParser[Integer] =
     accept("integer literal", {
-      case FINTEGER(str) => Integer(str.toInt)
+      case INTGR(str) => Integer(str.toInt)
     })
 
   lazy val identifier: PackratParser[Identifier] =
     accept("identifier", {
-      case FIDENTIFIER(str) => Identifier(str)
+      case ID(str) => Identifier(str)
     })
 
   lazy val named: PackratParser[Named] = identifier ~ (`=` ~> term) ^^ {
     case id ~ term => Named(id, term)
   }
-//  lazy val named: PackratParser[Named] =
 
 }
