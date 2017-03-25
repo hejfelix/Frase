@@ -1,12 +1,12 @@
 package it.vigtig.frase.spectest.unit
 
-import it.vigtig.lambda.ParserLike
+import it.vigtig.lambda.OldParserLike
 import org.scalatest.{FlatSpec, Matchers}
 
-class ParserLikeSpec
+class OldParserLikeSpec
   extends FlatSpec
     with Matchers
-    with ParserLike {
+    with OldParserLike {
 
   behavior of "Parser combinator grammar"
 

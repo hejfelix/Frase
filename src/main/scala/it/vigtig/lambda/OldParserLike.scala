@@ -7,7 +7,7 @@ import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
  * @author Hargreaves
  */
 
-trait ParserLike
+trait OldParserLike
   extends RegexParsers
   with PackratParsers
   with ASTLike {

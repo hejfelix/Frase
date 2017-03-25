@@ -31,23 +31,20 @@ case class LambdaAbstraction(id: Term, body: Term) extends Term
 
 case object Nil extends Term
 
-object MyParserExample extends App {
+object ParserExample extends App {
 
   val programString =
     """|x = 20
       |* ((a . b . + a b) x 1) 2""".stripMargin
 
-  val ast = FraseLexer(programString).flatMap { tokens =>
-    println(tokens)
-    MyParser(tokens)
-  }
+  val ast = FraseLexer(programString).flatMap(Parser.apply)
 
   println(ast.map(_.mkString("\n")))
   println(ast.map(_.map(_.pretty).mkString("\n")))
 
 }
 
-object MyParser extends Parsers with PackratParsers {
+class Parser extends Parsers with PackratParsers {
 
   override type Elem = Token
 

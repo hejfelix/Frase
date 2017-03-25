@@ -2,10 +2,8 @@ package it.vigtig.lambda.syntax
 
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
-
-
 trait Lexer {
-  def apply(program:String): Either[String, List[Token]]
+  def tokenize(program: String): Either[String, List[Token]]
 }
 
 object Lexer {
@@ -19,21 +17,20 @@ object Lexer {
     """.stripMargin
 
     println(program)
-    println(FraseLexer(program))
+    println(DefaultLexer().tokenize(program))
 
   }
 
 }
 
-object FraseLexer extends Lexer with RegexParsers with PackratParsers {
+case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
 
   override val whiteSpace = """[ ]+""".r
-
 
   private def tokenParser: PackratParser[List[Token]] =
     phrase(
       rep1(
-          `true` |
+        `true` |
           `false` |
           integer |
           float |
@@ -46,14 +43,14 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
           rightParen |
           identifier))
 
-  def apply(program: String) = parse(tokenParser, program) match {
+  def tokenize(program: String) = parse(tokenParser, program) match {
     case Success(tokens, _)   => Right(tokens)
     case NoSuccess(result, _) => Left(result)
   }
 
-  lazy val float: PackratParser[FLOAT]         = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ FLOAT
-  lazy val integer: PackratParser[INTGR]     = """-?\d+""".r ^^ INTGR
-  lazy val variable: PackratParser[ID] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
+  lazy val float: PackratParser[FLOAT]   = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ FLOAT
+  lazy val integer: PackratParser[INTGR] = """-?\d+""".r ^^ INTGR
+  lazy val variable: PackratParser[ID]   = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
 
   lazy val `false`: PackratParser[FALSE.type] = "false" ^^ { _ =>
     FALSE
@@ -61,7 +58,6 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
   lazy val `true`: PackratParser[TRUE.type] = "true" ^^ { _ =>
     TRUE
   }
-
 
   lazy val identifier: PackratParser[ID] = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
 
@@ -77,6 +73,5 @@ object FraseLexer extends Lexer with RegexParsers with PackratParsers {
   lazy val newline: PackratParser[NEWLINE.type] = (sys.props("line.separator") | "\r\n" | "\\n".r) ^^ { _ =>
     NEWLINE
   }
-
 
 }
