@@ -1,6 +1,7 @@
 package it.vigtig.lambda.interpreter
 
 import it.vigtig.lambda.errors.{FraseError, GenericError}
+import it.vigtig.lambda.semantic.Keywords
 import it.vigtig.lambda.syntax.AST
 import it.vigtig.lambda.syntax.AST._
 
@@ -10,7 +11,7 @@ trait LetTransformer {
 
 }
 
-case class DefaultLetTransformer() extends LetTransformer {
+case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
 
   override def transform(fragments: List[Fragment]): Either[FraseError, Term] = {
 
@@ -24,7 +25,10 @@ case class DefaultLetTransformer() extends LetTransformer {
       case _        => unknownKey
     }
 
-    val namedExpressions: Seq[Fragment]    = groups.getOrElse(namedKey, Nil)
+    val namedExpressions: Seq[Fragment] = groups.getOrElse(namedKey, Nil).collect {
+      case x @ Named(_, _) if isRecursive(x) => yCombinatorTransformation(x)
+      case x                                 => x
+    }
     val standAloneTerms: Seq[AST.Fragment] = groups.getOrElse(termKey, Nil)
 
     standAloneTerms match {
@@ -34,6 +38,15 @@ case class DefaultLetTransformer() extends LetTransformer {
     }
 
   }
+
+  private def isRecursive(named: Named) =
+    named.rhs
+      .contains(named.lhs)
+
+  private def yCombinatorTransformation(named: Named): Named =
+    Named(named.lhs,
+          LambdaAbstraction(keywords.yCombinator,
+                            LambdaAbstraction(Identifier("f"), named.rhs.relabel(named.lhs, Identifier("f")))))
 
   private def reduce(term: Term, namedExpressions: Seq[Fragment]): AST.Term =
     namedExpressions.foldLeft(term) {

@@ -1,6 +1,6 @@
 package it.vigtig.frase.spectest.unit
 
-import it.vigtig.lambda.{ASTLike, UnificationLike}
+import it.vigtig.lambda.ASTLike
 import org.scalatest.{FlatSpec, Matchers}
 //
 //class UnificationLikeSpec

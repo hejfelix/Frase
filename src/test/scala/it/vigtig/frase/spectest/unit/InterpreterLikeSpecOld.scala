@@ -1,6 +1,6 @@
 package it.vigtig.frase.spectest.unit
 
-import it.vigtig.lambda.DefaultInterpreter
+import it.vigtig.lambda.interpreter.DefaultInterpreter
 import it.vigtig.lambda.syntax.AST.{Integer, Named}
 import org.scalatest.{FlatSpec, Matchers}
 //

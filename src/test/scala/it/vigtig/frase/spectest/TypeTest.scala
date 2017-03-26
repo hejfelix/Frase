@@ -1,6 +1,6 @@
 package it.vigtig.frase.spectest
 
-import it.vigtig.lambda.{HindleyMilnerLike, DefaultInterpreter, OldParserLike}
+import it.vigtig.lambda.{HindleyMilnerLike, OldParserLike}
 import org.scalatest.Matchers.convertToAnyShouldWrapper
 import org.scalatest.PropSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks

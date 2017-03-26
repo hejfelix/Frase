@@ -1,16 +1,17 @@
-package it.vigtig.lambda
+package it.vigtig.lambda.interpreter
 
 import it.vigtig.lambda.errors.FraseError
-import it.vigtig.lambda.interpreter.LetTransformer
 import it.vigtig.lambda.syntax.AST._
-import it.vigtig.lambda.syntax.{AST, Parser}
+import it.vigtig.lambda.syntax.Parser
+import it.vigtig.lambda.debug
+import it.vigtig.lambda.semantic.Keywords
 
 trait Interpreter {
   def interpret(program: String): Either[FraseError, Fragment]
   def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term]
 }
 
-case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
+case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords)
     extends Interpreter
     with UnificationLike {
 
@@ -23,11 +24,10 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
 
   def prettyTrace = debug.trace[Term, String](_.pretty) _
 
-  def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term] = {
-    val letTransformation = letTransformer.transform(fragment :: namedTerms)
-    println(s"After let transformation: ${letTransformation.map(_.pretty)}")
-    letTransformation.map(term => interpret(term)())
-  }
+  def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term] =
+    letTransformer
+      .transform(fragment :: namedTerms)
+      .map(term => interpret(term)())
 
   def interpret(program: String): Either[FraseError, Term] =
     parser
@@ -52,25 +52,14 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
   }
 
   def applicant(t: Term): Term =
-    transform({
+    t.transform {
       case Application(left, right) => applicant(left)
       case Identifier(_)            => t
-    })(t)
-
-  def transform(f: PartialFunction[Term, Term]): PartialFunction[Term, Term] = f orElse {
-    case Application(t, y) => Application(transform(f)(t), transform(f)(y))
-//    case Named(id, body)         => Named(id, transform(f)(body))
-    case LambdaAbstraction(a, b) => LambdaAbstraction(transform(f)(a), transform(f)(b))
-    case Identifier(id)          => Identifier(id)
-//    case s @ SetType(_, _, _) => s
-    case Empty => Empty
-    case a     => a
-  }
+    }
 
   val App = Application
 
-  private val yCombinatorKeyword = "yCombinator"
-  val yCombinator = Identifier(yCombinatorKeyword)
+  val yCombinator = keywords.yCombinator
   def builtIns: PartialFunction[Term, Term] = {
     case App(`yCombinator`, f)                               => App(f, App(yCombinator, f))
     case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => Application(body, yCombExp)

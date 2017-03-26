@@ -19,10 +19,37 @@ object AST {
       case Empty                       => ""
     }
 
+    def contains(term: Term): Boolean = {
+      this match {
+        case `term`                      => true
+        case Named(lhs, rhs)             => lhs.contains(term) || rhs.contains(term)
+        case Application(lhs, rhs)       => lhs.contains(term) || rhs.contains(term)
+        case LambdaAbstraction(id, body) => id.contains(term) || body.contains(term)
+        case _                           => false
+      }
+    }
+
   }
 
-  sealed trait Declaration extends Fragment
-  sealed trait Term        extends Fragment
+  sealed trait Declaration extends Fragment {}
+  sealed trait Term extends Fragment {
+
+    def transform(f: PartialFunction[Term, Term]): Term = {
+
+      val fallback: PartialFunction[Term, Term] = {
+        case Application(left, right) => Application(left.transform(f), right.transform(f))
+        case LambdaAbstraction(id, body) => LambdaAbstraction(id.transform(f), body.transform(f))
+        case x => x
+      }
+      (f orElse fallback) (this)
+    }
+
+    def relabel(oldLabel: Identifier, newLabel: Identifier): Term =
+      transform {
+        case `oldLabel` => newLabel
+      }
+
+  }
 
   case class Named(lhs: Identifier, rhs: Term) extends Declaration
 
@@ -105,9 +132,14 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
 
   private lazy val term: PackratParser[Term] = lambdaAbstraction | application | pterm | terminal
 
-  private lazy val terminal: PackratParser[Term] = integer | identifier
+  private lazy val terminal: PackratParser[Term] = integer | bool | identifier
 
   private lazy val pterm: PackratParser[Term] = `(` ~> term <~ `)`
+
+  private lazy val bool: PackratParser[Bool] = accept("boolean literal", {
+    case TRUE => Bool(true)
+    case FALSE => Bool(false)
+})
 
   private lazy val integer: PackratParser[Integer] =
     accept("integer literal", {

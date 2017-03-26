@@ -1,5 +1,6 @@
-package it.vigtig.lambda
+package it.vigtig.lambda.interpreter
 
+import it.vigtig.lambda.AST
 import it.vigtig.lambda.syntax.AST._
 
 trait UnificationLike {

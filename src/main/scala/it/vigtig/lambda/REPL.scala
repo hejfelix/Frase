@@ -2,16 +2,18 @@ package it.vigtig.lambda
 
 import cats.data.State
 import it.vigtig.lambda.errors.FraseError
-import it.vigtig.lambda.interpreter.DefaultLetTransformer
+import it.vigtig.lambda.interpreter.{DefaultInterpreter, DefaultLetTransformer, Interpreter}
+import it.vigtig.lambda.semantic.DefaultKeywords
 import it.vigtig.lambda.syntax.AST.{Empty, Fragment, Named, Term}
 import it.vigtig.lambda.syntax.{DefaultLexer, DefaultParser}
 
 object REPL extends App {
 
+  val defaultKeywords          = DefaultKeywords()
   val lexer                    = DefaultLexer()
   val parser                   = DefaultParser(lexer)
-  val letTransformer           = DefaultLetTransformer()
-  val interpreter: Interpreter = DefaultInterpreter(parser, letTransformer)
+  val letTransformer           = DefaultLetTransformer(defaultKeywords)
+  val interpreter: Interpreter = DefaultInterpreter(parser, letTransformer, defaultKeywords)
 
   def processStandaloneExpression(term: Fragment, namedTerms: List[Fragment]) =
     interpreter.interpret(term, namedTerms) match {
@@ -38,9 +40,8 @@ object REPL extends App {
       }
     })
 
-  private def processTermNaming(namedTerms: List[Fragment],
-    n: Named) = {
-    println(s"Storing term ${n.rhs.pretty} with name '${n.lhs.pretty}'")
+  private def processTermNaming(namedTerms: List[Fragment], n: Named) = {
+    println(s"${n.lhs.pretty}: ${n.rhs.pretty}")
     (n :: namedTerms, Empty)
   }
 
@@ -51,5 +52,15 @@ object REPL extends App {
     } yield term :: terms
 
   results.run(Nil).value
+
+  val fac =
+    """|fac = yCombinator . f . n . (<= n 1) 1 (* n (f (- n 1)) )
+      |fac 3
+    """.stripMargin
+
+  println(interpreter.interpret(fac))
+
+  println(parser.parseFragment("yCombinator . f . n . (<= n 1) 1 (* n (f (- n 1)) )").map(_.pretty))
+
 
 }
