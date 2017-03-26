@@ -51,15 +51,29 @@ object ParserExample extends App {
 
 trait Parser {
   def parse(program: String): Either[FraseError, List[Fragment]]
+  def parseFragment(fragment: String): Either[FraseError, Fragment]
 }
 
 case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratParsers {
 
   override type Elem = Token
 
-  def parse(program: String): Either[FraseError, List[Fragment]] =
+  override def parse(program: String): Either[FraseError, List[Fragment]] =
     lexer.tokenize(program).flatMap(parse)
 
+  override def parseFragment(fragment: String): Either[FraseError, Fragment] =
+    lexer
+      .tokenize(fragment)
+      .map(_.takeWhile(_ != NEWLINE))
+      .flatMap(parseSingleFragment)
+
+  private def parseSingleFragment(tokens: List[Token]): Either[FraseError, Fragment] = {
+    val reader = new PackratReader(TokenReader(tokens))
+    fragment(reader) match {
+      case NoSuccess(msg, _)  => Left(GenericError(msg))
+      case Success(result, _) => Right(result)
+    }
+  }
 
   private def parse(tokens: List[Token]): Either[FraseError, List[Fragment]] = {
     val reader = new PackratReader(TokenReader(tokens))
@@ -85,7 +99,7 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
     case left ~ right => Application(left, right)
   }
 
-  private lazy val lambdaAbstraction = ( (identifier | terminal) <~ (`.`)) ~ term ^^ {
+  private lazy val lambdaAbstraction = ((identifier | terminal) <~ (`.`)) ~ term ^^ {
     case id ~ body => LambdaAbstraction(id, body)
   }
 

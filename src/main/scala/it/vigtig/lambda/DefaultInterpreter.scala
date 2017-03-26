@@ -7,6 +7,7 @@ import it.vigtig.lambda.syntax.{AST, Parser}
 
 trait Interpreter {
   def interpret(program: String): Either[FraseError, Fragment]
+  def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term]
 }
 
 case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
@@ -21,6 +22,12 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
   }
 
   def prettyTrace = debug.trace[Term, String](_.pretty) _
+
+  def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term] = {
+    val letTransformation = letTransformer.transform(fragment :: namedTerms)
+    println(s"After let transformation: ${letTransformation.map(_.pretty)}")
+    letTransformation.map(term => interpret(term)())
+  }
 
   def interpret(program: String): Either[FraseError, Term] =
     parser
@@ -37,7 +44,7 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
     fixPoint(t)(x => evalStep(x)(context))
 
   def evalStep(t: Term)(context: Map[Term, List[Term]] = Map.empty): Term =
-    fixPoint(t)(t => { println(t.pretty); reduce(t) })
+    fixPoint(t)(t => { reduce(t) })
 
   def args(t: Term): List[Term] = t match {
     case Application(x, y) => y :: args(x)
@@ -62,7 +69,8 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
 
   val App = Application
 
-  val yCombinator = Identifier("y")
+  private val yCombinatorKeyword = "yCombinator"
+  val yCombinator = Identifier(yCombinatorKeyword)
   def builtIns: PartialFunction[Term, Term] = {
     case App(`yCombinator`, f)                               => App(f, App(yCombinator, f))
     case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => Application(body, yCombExp)
@@ -81,7 +89,7 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer)
 //      case Named(id, body) =>
 //        val reduce: AST.Term = betaReduce(body)
 //        Named(id, reduce)
-      case Application(LambdaAbstraction(id, body), rhs) if id == rhs => body
+      case Application(LambdaAbstraction(id, body), rhs) if id == rhs                     => body
       case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != yCombinator =>
 //        println(s"Beta reduce id: ${id.pretty}  body: ${body.pretty}   rhs: ${rhs.pretty}")
 //        println(s"     with result: ${betaReduce(substitute(body)(id -> rhs)).pretty}")
