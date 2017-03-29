@@ -8,7 +8,7 @@ trait Lexer {
   def tokenize(program: String): Either[FraseError, List[Token]]
 }
 
-object Lexer {
+object LexerExample {
 
   def main(args: Array[String]) {
 

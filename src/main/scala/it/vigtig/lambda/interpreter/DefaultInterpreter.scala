@@ -12,8 +12,7 @@ trait Interpreter {
 }
 
 case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords)
-    extends Interpreter
-    with UnificationLike {
+    extends Interpreter {
 
   def listToMap(l: List[(Term, Term)]) =
     l.foldLeft(Map[Term, List[Term]]())(comb)
@@ -111,7 +110,6 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     case (Empty, _)                        => Empty
     case (i: Identifier, (j, k)) if i == j => k
     case (i: Identifier, _)                => i
-    case (a: Identifier, _)                => a
     case (Application(a, b), _)            => Application(substitute(a)(label), substitute(b)(label))
     case (LambdaAbstraction(id: Identifier, body), (x, y)) if id != x && !freeVars(y)(id) =>
       LambdaAbstraction(id, substitute(body)(label))

@@ -53,14 +53,5 @@ object REPL extends App {
 
   results.run(Nil).value
 
-  val fac =
-    """|fac = yCombinator . f . n . (<= n 1) 1 (* n (f (- n 1)) )
-      |fac 3
-    """.stripMargin
-
-  println(interpreter.interpret(fac))
-
-  println(parser.parseFragment("yCombinator . f . n . (<= n 1) 1 (* n (f (- n 1)) )").map(_.pretty))
-
 
 }

@@ -14,12 +14,13 @@ object AST {
       case Bool(b)                     => b.toString
       case Identifier(id)              => id
       case Integer(i)                  => i.toString
+      case Floating(f)                 => f.toString
       case Application(left, right)    => s"(${left.pretty} ${right.pretty})"
       case LambdaAbstraction(id, body) => s"${id.pretty} . (${body.pretty})"
       case Empty                       => ""
     }
 
-    def contains(term: Term): Boolean = {
+    def contains(term: Term): Boolean =
       this match {
         case `term`                      => true
         case Named(lhs, rhs)             => lhs.contains(term) || rhs.contains(term)
@@ -27,7 +28,6 @@ object AST {
         case LambdaAbstraction(id, body) => id.contains(term) || body.contains(term)
         case _                           => false
       }
-    }
 
   }
 
@@ -37,11 +37,11 @@ object AST {
     def transform(f: PartialFunction[Term, Term]): Term = {
 
       val fallback: PartialFunction[Term, Term] = {
-        case Application(left, right) => Application(left.transform(f), right.transform(f))
+        case Application(left, right)    => Application(left.transform(f), right.transform(f))
         case LambdaAbstraction(id, body) => LambdaAbstraction(id.transform(f), body.transform(f))
-        case x => x
+        case x                           => x
       }
-      (f orElse fallback) (this)
+      (f orElse fallback)(this)
     }
 
     def relabel(oldLabel: Identifier, newLabel: Identifier): Term =
@@ -137,9 +137,9 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
   private lazy val pterm: PackratParser[Term] = `(` ~> term <~ `)`
 
   private lazy val bool: PackratParser[Bool] = accept("boolean literal", {
-    case TRUE => Bool(true)
+    case TRUE  => Bool(true)
     case FALSE => Bool(false)
-})
+  })
 
   private lazy val integer: PackratParser[Integer] =
     accept("integer literal", {

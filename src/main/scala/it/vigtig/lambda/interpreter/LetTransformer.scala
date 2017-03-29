@@ -25,9 +25,9 @@ case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
       case _        => unknownKey
     }
 
-    val namedExpressions: Seq[Fragment] = groups.getOrElse(namedKey, Nil).collect {
+    val namedExpressions: Seq[Named] = groups.getOrElse(namedKey, Nil).collect {
       case x @ Named(_, _) if isRecursive(x) => yCombinatorTransformation(x)
-      case x                                 => x
+      case x: Named                          => x
     }
     val standAloneTerms: Seq[AST.Fragment] = groups.getOrElse(termKey, Nil)
 
@@ -48,7 +48,7 @@ case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
           LambdaAbstraction(keywords.yCombinator,
                             LambdaAbstraction(Identifier("f"), named.rhs.relabel(named.lhs, Identifier("f")))))
 
-  private def reduce(term: Term, namedExpressions: Seq[Fragment]): AST.Term =
+  private def reduce(term: Term, namedExpressions: Seq[Named]): AST.Term =
     namedExpressions.foldLeft(term) {
       case (term, Named(id, rhs)) => Application(LambdaAbstraction(id, term), rhs)
     }
