@@ -1,7 +1,7 @@
-package it.vigtig.lambda.syntax
+package com.lambdaminute.syntax
 
-import it.vigtig.lambda.errors.{FraseError, GenericError}
-import it.vigtig.lambda.syntax.AST._
+import com.lambdaminute.errors.{FraseError, GenericError}
+import com.lambdaminute.syntax.AST._
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
 import scala.util.parsing.input.{Position, Reader}
@@ -61,24 +61,6 @@ object AST {
   case class LambdaAbstraction(id: Term, body: Term) extends Term
 
   case object Empty extends Term
-}
-
-object ParserExample extends App {
-
-  val programString =
-    """|x = 20
-      |* ((a . b . + a b) x 1) 2""".stripMargin
-
-  val ast = DefaultParser(DefaultLexer()).parse(programString)
-
-  println(ast.map(_.mkString("\n")))
-  println(ast.map(_.map(_.pretty).mkString("\n")))
-
-}
-
-trait Parser {
-  def parse(program: String): Either[FraseError, List[Fragment]]
-  def parseFragment(fragment: String): Either[FraseError, Fragment]
 }
 
 case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratParsers {

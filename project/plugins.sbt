@@ -1,5 +1,8 @@
-resolvers += "Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/"
+import sbt.Opts.resolver
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
+resolvers ++= Seq("Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/",
+                  "mybintray" at "https://dl.bintray.com/")
 
-addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.2.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.3")

@@ -1,6 +1,6 @@
-package it.vigtig.lambda.semantic
+package com.lambdaminute.semantic
 
-import it.vigtig.lambda.syntax.AST.Identifier
+import com.lambdaminute.syntax.AST.Identifier
 
 trait Keywords {
   val yCombinatorKeyword: String

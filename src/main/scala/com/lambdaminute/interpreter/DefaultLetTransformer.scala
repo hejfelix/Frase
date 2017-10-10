@@ -1,15 +1,9 @@
-package it.vigtig.lambda.interpreter
+package com.lambdaminute.interpreter
 
-import it.vigtig.lambda.errors.{FraseError, GenericError}
-import it.vigtig.lambda.semantic.Keywords
-import it.vigtig.lambda.syntax.AST
-import it.vigtig.lambda.syntax.AST._
-
-trait LetTransformer {
-
-  def transform(fragments: List[Fragment]): Either[FraseError, Term]
-
-}
+import com.lambdaminute.errors.{FraseError, GenericError}
+import com.lambdaminute.semantic.Keywords
+import com.lambdaminute.syntax.AST
+import com.lambdaminute.syntax.AST._
 
 case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
 
@@ -20,15 +14,19 @@ case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
     val unknownKey = 'UNKNOWN
 
     val groups = fragments.groupBy {
-      case n: Named => namedKey
+      case _: Named => namedKey
       case _: Term  => termKey
       case _        => unknownKey
     }
 
-    val namedExpressions: Seq[Named] = groups.getOrElse(namedKey, Nil).collect {
-      case x @ Named(_, _) if isRecursive(x) => yCombinatorTransformation(x)
-      case x: Named                          => x
-    }
+    val namedExpressions: Seq[Named] =
+      groups
+        .getOrElse(namedKey, Nil)
+        .collect {
+          case x @ Named(_, _) if isRecursive(x) => yCombinatorTransformation(x)
+          case x: Named                          => x
+        }
+
     val standAloneTerms: Seq[AST.Fragment] = groups.getOrElse(termKey, Nil)
 
     standAloneTerms match {

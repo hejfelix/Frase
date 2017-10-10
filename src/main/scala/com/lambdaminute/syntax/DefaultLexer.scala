@@ -1,29 +1,10 @@
-package it.vigtig.lambda.syntax
+package com.lambdaminute.syntax
 
-import it.vigtig.lambda.errors.{FraseError, GenericError}
+import com.lambdaminute.errors.GenericError
 
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
-trait Lexer {
-  def tokenize(program: String): Either[FraseError, List[Token]]
-}
 
-object LexerExample {
-
-  def main(args: Array[String]) {
-
-    val program =
-      """
-      |x = 20
-      |* ((a . b . + a b) x 1) 2
-    """.stripMargin
-
-    println(program)
-    println(DefaultLexer().tokenize(program))
-
-  }
-
-}
 
 case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
 
