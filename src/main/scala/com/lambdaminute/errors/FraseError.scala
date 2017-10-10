@@ -1,4 +1,4 @@
-package it.vigtig.lambda.errors
+package com.lambdaminute.errors
 
 sealed trait FraseError {
   def msg: String

@@ -1,10 +1,10 @@
-package it.vigtig.lambda.interpreter
+package com.lambdaminute.interpreter
 
-import it.vigtig.lambda.errors.FraseError
-import it.vigtig.lambda.syntax.AST._
-import it.vigtig.lambda.syntax.Parser
-import it.vigtig.lambda.debug
-import it.vigtig.lambda.semantic.Keywords
+import com.lambdaminute.errors.FraseError
+import com.lambdaminute.syntax.AST._
+import com.lambdaminute.syntax.Parser
+import com.lambdaminute.debug
+import com.lambdaminute.semantic.Keywords
 
 case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords) extends Interpreter {
 

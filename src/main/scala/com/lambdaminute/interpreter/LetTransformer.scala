@@ -1,7 +1,7 @@
-package it.vigtig.lambda.interpreter
+package com.lambdaminute.interpreter
 
-import it.vigtig.lambda.errors.FraseError
-import it.vigtig.lambda.syntax.AST._
+import com.lambdaminute.errors.FraseError
+import com.lambdaminute.syntax.AST._
 
 trait LetTransformer {
 
