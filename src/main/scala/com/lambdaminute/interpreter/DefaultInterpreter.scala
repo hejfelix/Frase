@@ -2,20 +2,20 @@ package com.lambdaminute.interpreter
 
 import com.lambdaminute.errors.FraseError
 import com.lambdaminute.syntax.AST._
-import com.lambdaminute.syntax.Parser
+import com.lambdaminute.syntax.{AST, Parser}
 import com.lambdaminute.debug
 import com.lambdaminute.semantic.Keywords
 
 case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords) extends Interpreter {
 
-  def listToMap(l: List[(Term, Term)]) =
+  def listToMap(l: List[(Term, Term)]): Map[Term, List[Term]] =
     l.foldLeft(Map[Term, List[Term]]())(comb)
 
-  def comb(m: Map[Term, List[Term]], t: (Term, Term)) = t match {
+  def comb(m: Map[Term, List[Term]], t: (Term, Term)): Map[Term, List[Term]] = t match {
     case (a, b) => m + (a -> (b :: m.getOrElse(a, Nil)))
   }
 
-  def prettyTrace = debug.trace[Term, String](_.pretty) _
+  val prettyTrace: Term => Term = debug.trace[Term, String](_.pretty)
 
   def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term] =
     letTransformer
@@ -50,9 +50,9 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
       case Identifier(_)        => t
     }
 
-  val App = Application
+  val App: AST.Application.type = Application
 
-  val yCombinator = keywords.yCombinator
+  val yCombinator: Identifier = keywords.yCombinator
   def builtIns: PartialFunction[Term, Term] = {
     case App(`yCombinator`, f)                               => App(f, App(yCombinator, f))
     case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => Application(body, yCombExp)
@@ -66,7 +66,7 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     case App(App(Identifier("%"), Integer(a)), Integer(b))   => Integer(a % b)
   }
 
-  def reduce = {
+  def reduce: PartialFunction[Term, Term] = {
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Application(LambdaAbstraction(id, body), rhs) if id == rhs => body
       case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != yCombinator =>

@@ -1,4 +1,4 @@
-package it.vigtig.lambda
+package com.lambdaminute
 
 package object debug {
   def trace[T](x: T): T = { println(x); x }
