@@ -1,6 +1,6 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.AST.{Application, Identifier, LambdaAbstraction, Term}
+import com.lambdaminute.syntax.AST._
 
 case class Typer() {
 
@@ -9,10 +9,17 @@ case class Typer() {
     def asTypeId: Type = Identifier(id).asType
   }
 
-  def variables(term: Term, acc: Map[Term, Type], freshVar: Var = Var("a")): (Map[Term, Type], Var) =
+  private def builtInTypes: PartialFunction[Term, Type] = {
+    case Bool(_)     => Identifier("Bool").asType
+    case Floating(_) => Identifier("Float").asType
+    case Integer(_)  => Identifier("Int").asType
+  }
+
+  def variables(term: Term, acc: Map[Term, Type] = Map.empty, freshVar: Var = Var("a")): (Map[Term, Type], Var) =
     term match {
-      case _ if acc.contains(term) => (acc, freshVar)
-      case Identifier(_)           => (acc + (term -> freshVar.asTypeId), freshVar.increment)
+      case _ if builtInTypes.isDefinedAt(term) => (acc + (term -> builtInTypes(term)), freshVar)
+      case _ if acc.contains(term)             => (acc, freshVar)
+      case Identifier(_)                       => (acc + (term -> freshVar.asTypeId), freshVar.increment)
       case LambdaAbstraction(arg, body) =>
         val (r1, nextVar1) = variables(arg, acc, freshVar)
         val (r2, nextVar2) = variables(body, r1, nextVar1)

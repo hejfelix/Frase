@@ -85,6 +85,11 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     else
       t
 
+  /**
+    * The set of free variables in t (=variables that have not been bound)
+    * @param t The term to search for free variables
+    * @return The set containing all free variables inside t
+    */
   def freeVars(t: Term): Set[Identifier] = t match {
     case a @ Identifier(_)                       => Set(a)
     case LambdaAbstraction(id: Identifier, body) => freeVars(body) - id

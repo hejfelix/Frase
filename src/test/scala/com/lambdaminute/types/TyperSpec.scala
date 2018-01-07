@@ -1,10 +1,21 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.AST
+import com.lambdaminute.syntax.{AST, DefaultLexer, DefaultParser}
 import com.lambdaminute.syntax.AST.{Application, Identifier, LambdaAbstraction, Term}
 import org.scalatest.{Matchers, WordSpec}
 
-class TyperSpec extends WordSpec with Matchers {
+trait ParserHelper {
+  private val lexer  = DefaultLexer()
+  private val parser = DefaultParser(lexer)
+  implicit class StringParsable(s: String) {
+    def toTerm: Term = parser.parseTerm(s).right.get
+    def toType: Type = parser.parseTerm(s).right.get.asType
+  }
+  implicit def tupleToTypeJudgement(strs: (String, String)): (Term, Type) = strs._1.toTerm -> strs._2.toType
+
+}
+
+class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
   "Typer" should {
     val xid = Identifier("x")
@@ -45,6 +56,38 @@ class TyperSpec extends WordSpec with Matchers {
         .updated(topLevel, LambdaAbstraction(expectedXidType, Identifier("a")).asType)
 
       res shouldBe expected
+    }
+
+    "deal with capturing" in {
+      val typer = Typer()
+      val term  = "(x . x)".toTerm
+      println(term)
+
+      val (res, nextVar)       = typer.variables(term)
+      val (expanded, nextVar2) = typer.expandMap(res, nextVar)
+      val (expanded2, _)       = typer.expandMap(expanded, nextVar2)
+      prettyPrintMap(res, "capturing")
+      prettyPrintMap(expanded, "expanded")
+      prettyPrintMap(expanded2, "expanded2")
+      term shouldBe res
+    }
+
+    "find variables2" in {
+
+      val typer = Typer()
+      val term  = "x . x y".toTerm
+
+      // format: off
+      val expected: Map[AST.Term, Type] = Map(
+          "x"       -> "a",
+          "y"       -> "b",
+          "x y"     -> "c",
+          "x . x y" -> "d")
+      // format: on
+
+      val (result, _) = typer.variables(term, Map.empty, typer.Var("a"))
+
+      result shouldBe expected
     }
 
     "find variables" in {

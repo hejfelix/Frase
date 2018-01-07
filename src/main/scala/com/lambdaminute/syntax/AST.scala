@@ -57,6 +57,36 @@ object AST {
       (f orElse fallback)(this)
     }
 
+    def enumerate: List[Term] = this match {
+      case Application(left, right)    => (this :: left.enumerate) ::: right.enumerate
+      case LambdaAbstraction(id, body) => this :: id :: body.enumerate
+      case _                           => this :: Nil
+    }
+
+    /**
+      * The set of free variables in t (=variables that have not been bound)
+      * @return The set containing all free variables inside `this`
+      */
+    def freeVars: Set[Identifier] = this match {
+      case a @ Identifier(_)                       => Set(a)
+      case LambdaAbstraction(id: Identifier, body) => body.freeVars - id
+      case Application(a, b)                       => a.freeVars ++ b.freeVars
+      case Empty                                   => Set()
+      case _                                       => Set()
+    }
+
+    //Capture-avoiding substitution
+    def substitute(label: (Term, Term)): Term = (this, label) match {
+      case (Empty, _)                        => Empty
+      case (i: Identifier, (j, k)) if i == j => k
+      case (i: Identifier, _)                => i
+      case (Application(a, b), _)            => Application(a.substitute(label), b.substitute(label))
+      case (LambdaAbstraction(id: Identifier, body), (x, y)) if id != x && !y.freeVars(id) =>
+        LambdaAbstraction(id, body.substitute(label))
+      case (a @ LambdaAbstraction(_, _), _) => a
+      case _                                => this
+    }
+
     def relabel(oldLabel: Identifier, newLabel: Identifier): Term =
       transform {
         case `oldLabel` => newLabel

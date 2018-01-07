@@ -1,15 +1,14 @@
 
-  name := "Frase"
-  version := "0.1"
-  scalaVersion := "2.12.3"
+name := "Frase"
+version := "0.1"
+scalaVersion := "2.12.3"
 
 
 libraryDependencies ++= Seq(
   //Scala libraries
-  "org.scalacheck"             %% "scalacheck"               % "1.11.4" % "test",
+  "org.scalacheck"             %% "scalacheck"               % "1.13.5" % "test",
+  "org.scalatest"              %% "scalatest"                % "3.0.1"  % "test",
   "org.scala-lang.modules"     %% "scala-parser-combinators" % "1.0.5",
-  "org.scalacheck"             %% "scalacheck"               % "1.13.5",
-  "org.scalatest"              %% "scalatest"                % "3.0.1" % "test",
   "com.typesafe.scala-logging" %% "scala-logging"            % "3.5.0",
   "com.softwaremill.common"    %%  "tagging"                 % "2.2.0",
 

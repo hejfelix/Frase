@@ -6,8 +6,6 @@ import com.lambdaminute.syntax.AST._
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
 import scala.util.parsing.input.{Position, Reader}
 
-
-
 case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratParsers {
 
   override type Elem = Token
@@ -20,6 +18,17 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
       .tokenize(fragment)
       .map(_.takeWhile(_ != NEWLINE))
       .flatMap(parseSingleFragment)
+
+  override def parseTerm(term: String): Either[FraseError, Term] =
+    lexer.tokenize(term).flatMap(parseSingleTerm)
+
+  private def parseSingleTerm(tokens: List[Token]) = {
+    val reader = new PackratReader(TokenReader(tokens))
+    term(reader) match {
+      case NoSuccess(msg, _)  => Left(GenericError(msg))
+      case Success(result, _) => Right(result)
+    }
+  }
 
   private def parseSingleFragment(tokens: List[Token]): Either[FraseError, Fragment] = {
     val reader = new PackratReader(TokenReader(tokens))
