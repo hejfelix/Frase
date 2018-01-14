@@ -100,7 +100,10 @@ object AST {
     def unshadow: Term = this match {
       case LambdaAbstraction(arg: Identifier, body) if !body.freeVars.contains(arg) =>
         val newId = nextAvailableId
-        LambdaAbstraction(newId, body.substitute(arg -> newId))
+        println(s"$arg is not free in ${body.pretty}")
+        LambdaAbstraction(newId, body.substitute(arg -> newId).unshadow)
+      case LambdaAbstraction(arg, body) =>
+        LambdaAbstraction(arg, body.unshadow)
       case _ => this
     }
 

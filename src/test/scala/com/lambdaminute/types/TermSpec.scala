@@ -70,6 +70,13 @@ class TermSpec extends WordSpec with GeneratorDrivenPropertyChecks with TermGene
       val unshadowed = exp.unshadow
       unshadowed shouldBe "z . x . x y".toTerm
     }
+
+    "unshadow captured variables3" in {
+      val exp        = "x . x . x . x y".toTerm
+      val unshadowed = exp.unshadow
+      println(unshadowed.pretty)
+      unshadowed shouldBe "z . z . x . x y".toTerm
+    }
   }
 
 }
