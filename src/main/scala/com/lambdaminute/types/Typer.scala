@@ -51,11 +51,16 @@ case class Typer() {
         val appResultType = freshVar.asTypeId
         val newLeftType   = LambdaAbstraction(universe(right), appResultType).asType
         (universe.updated(left, newLeftType).updated(app, appResultType), freshVar.increment)
-      case (abs @ LambdaAbstraction(arg, body), _) =>
+      case (abs @ LambdaAbstraction(arg @ Identifier(_), body), _) if body.freeVars.contains(arg) =>
         val argType: Type  = universe(arg)
         val bodyType: Type = universe(body)
         val absType: Type  = LambdaAbstraction(argType.asTerm, bodyType.asTerm).asType
         (universe.updated(abs, absType), freshVar)
+      case (abs @ LambdaAbstraction(Identifier(_), body), _) =>
+        val argType: Type  = freshVar.asTypeId
+        val bodyType: Type = universe(body)
+        val absType: Type  = LambdaAbstraction(argType.asTerm, bodyType.asTerm).asType
+        (universe.updated(abs, absType), freshVar.increment)
       case _ => (universe, freshVar)
     }
 

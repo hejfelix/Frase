@@ -1,5 +1,7 @@
 package com.lambdaminute.syntax
 
+import cats.implicits._
+
 object AST {
   object TerminalColors {
     val Green = Console.GREEN
@@ -91,6 +93,48 @@ object AST {
       transform {
         case `oldLabel` => newLabel
       }
+
+    private def combineUnifications(a: Map[Term, Term], b: Map[Term, Term]): Either[String, Map[Term, Term]] = {
+      val commonKeys: List[Term] = a.keys.filter(b.contains).toList
+
+      val stringOrTermToTerm = commonKeys
+        .traverse { key: Term =>
+          a(key).unifyBlindly(b(key))
+        }
+        .map(_.fold(Map.empty)(_ ++ _))
+
+      stringOrTermToTerm
+        .map(_ ++ a ++ b)
+    }
+
+    def unify(that: Term): Either[String, Map[Term, Term]] =
+      this
+        .unifyBlindly(that)
+        .map(_.filter {
+          case (x, y) if x != y => true
+          case _                => false
+        })
+    private def unifyBlindly(that: Term): Either[String, Map[Term, Term]] = (this, that) match {
+      case (Bool(x), Bool(y)) if x == y         => Right(Map.empty)
+      case (Identifier(x), y)                   => Right(Map(Identifier(x) -> y))
+      case (Floating(x), Floating(y)) if x == y => Right(Map.empty)
+      case (Integer(x), Integer(y)) if x == y   => Right(Map.empty)
+      case (Empty, Empty)                       => Right(Map.empty)
+      case (Application(l1, r1), Application(l2, r2)) =>
+        for {
+          leftResult  <- l1.unifyBlindly(l2)
+          rightResult <- r1.unifyBlindly(r2)
+          combined    <- combineUnifications(leftResult, rightResult)
+        } yield combined
+
+      case (LambdaAbstraction(argl, bodyl), LambdaAbstraction(argr, bodyr)) =>
+        for {
+          argResult  <- argl.unifyBlindly(argr)
+          bodyResult <- bodyl.unifyBlindly(bodyr)
+          combined   <- combineUnifications(argResult, bodyResult)
+        } yield combined
+      case _ => Left(s"Unable to unify ${this.pretty} with ${that.pretty}")
+    }
 
   }
 

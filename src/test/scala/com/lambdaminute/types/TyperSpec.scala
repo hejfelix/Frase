@@ -1,19 +1,9 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.{AST, DefaultLexer, DefaultParser}
+import com.lambdaminute.interactive.ParserHelper
+import com.lambdaminute.syntax.AST
 import com.lambdaminute.syntax.AST.{Application, Identifier, LambdaAbstraction, Term}
 import org.scalatest.{Matchers, WordSpec}
-
-trait ParserHelper {
-  private val lexer  = DefaultLexer()
-  private val parser = DefaultParser(lexer)
-  implicit class StringParsable(s: String) {
-    def toTerm: Term = parser.parseTerm(s).right.get
-    def toType: Type = parser.parseTerm(s).right.get.asType
-  }
-  implicit def tupleToTypeJudgement(strs: (String, String)): (Term, Type) = strs._1.toTerm -> strs._2.toType
-
-}
 
 class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
@@ -60,7 +50,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
     "deal with capturing" in {
       val typer = Typer()
-      val term  = "(x . x)".toTerm
+      val term  = "(x . x . x)".toTerm
       println(term)
 
       val (res, nextVar)       = typer.variables(term)
@@ -69,7 +59,8 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       prettyPrintMap(res, "capturing")
       prettyPrintMap(expanded, "expanded")
       prettyPrintMap(expanded2, "expanded2")
-      term shouldBe res
+
+      expanded2(term) shouldBe "a . (b . b)".toType
     }
 
     "find variables2" in {
