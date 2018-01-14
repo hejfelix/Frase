@@ -58,6 +58,18 @@ class TermSpec extends WordSpec with GeneratorDrivenPropertyChecks with TermGene
         case Right(_) =>
       }
     }
+
+    "unshadow captured variables" in {
+      val exp        = "x . x . x".toTerm
+      val unshadowed = exp.unshadow
+      unshadowed shouldBe "y . x . x".toTerm
+    }
+
+    "unshadow captured variables2" in {
+      val exp        = "x . x . x y".toTerm
+      val unshadowed = exp.unshadow
+      unshadowed shouldBe "z . x . x y".toTerm
+    }
   }
 
 }

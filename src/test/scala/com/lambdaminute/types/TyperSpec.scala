@@ -13,7 +13,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
     def prettyPrintMap(typeMap: Map[Term, Type], tag: String): Unit = {
       println(tag)
-      typeMap.foreach {
+      typeMap.toList.sortBy { case (term, _) => term.size }.foreach {
         case (term, tpe) => print(s"${term.pretty}: ${tpe.prettyType},    ")
       }
       println()
@@ -60,7 +60,24 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       prettyPrintMap(expanded, "expanded")
       prettyPrintMap(expanded2, "expanded2")
 
-      expanded2(term) shouldBe "a . (b . b)".toType
+      expanded2(term) should matchPattern {
+        case LambdaAbstraction(x, LambdaAbstraction(y, z)) if x != y && y == z =>
+      }
+    }
+
+    "deal with capturing2" in {
+      val typer = Typer()
+      val term  = "(x . x . x) 2 3".toTerm
+      println(term)
+
+      val (res, nextVar)       = typer.variables(term)
+      val (expanded, nextVar2) = typer.expandMap(res, nextVar)
+      val (expanded2, _)       = typer.expandMap(expanded, nextVar2)
+      prettyPrintMap(res, "capturing")
+      prettyPrintMap(expanded, "expanded")
+      prettyPrintMap(expanded2, "expanded2")
+
+      expanded2(term) shouldBe 42
     }
 
     "find variables2" in {
@@ -107,23 +124,16 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
     "expand variables in `lambda-abstraction`s" in {
 
-      val aid = Identifier("a")
-      val bid = Identifier("b")
-      val cid = Identifier("c")
+      val abstr = "x . y".toTerm
 
-      val abstr = LambdaAbstraction(xid, yid)
-
-      val variableTypes: Map[AST.Term, Type] =
-        Map(xid -> aid.asType, yid -> bid.asType, abstr -> cid.asType)
-
-      prettyPrintMap(variableTypes, "Expanding variables")
-      val typer   = Typer()
-      val nextVar = typer.Var("d")
+      val typer              = Typer()
+      val nextVar            = typer.Var("a")
+      val (variableTypes, _) = typer.variables(abstr)
 
       val (expandedResult, _) = typer.expandMap(variableTypes, nextVar)
 
       prettyPrintMap(expandedResult, "Resulting expansion:")
-      val expectedAbstrType: Type = LambdaAbstraction(aid, bid).asType
+      val expectedAbstrType: Type = "a . b".toType
       val expectedResult: Map[AST.Term, Type] =
         variableTypes.updated(abstr, expectedAbstrType)
 

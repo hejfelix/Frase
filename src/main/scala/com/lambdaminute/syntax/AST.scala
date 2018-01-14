@@ -1,6 +1,7 @@
 package com.lambdaminute.syntax
 
 import cats.implicits._
+import com.lambdaminute.math._
 
 object AST {
   object TerminalColors {
@@ -65,6 +66,8 @@ object AST {
       case _                           => this :: Nil
     }
 
+    def size = enumerate.size
+
     /**
       * The set of free variables in t (=variables that have not been bound)
       * @return The set containing all free variables inside `this`
@@ -87,6 +90,18 @@ object AST {
         LambdaAbstraction(id, body.substitute(label))
       case (a @ LambdaAbstraction(_, _), _) => a
       case _                                => this
+    }
+
+    def nextAvailableId: Identifier = Identifier(increment(this.enumerate.collect { case Identifier(x) => x }.max))
+
+    private def increment(s: String): String =
+      (s.map(_ - 'a').reverse.fromBase(26) + 1).toBase(26).reverse.map(_ + 'a').map(_.toChar).mkString
+
+    def unshadow: Term = this match {
+      case LambdaAbstraction(arg: Identifier, body) if !body.freeVars.contains(arg) =>
+        val newId = nextAvailableId
+        LambdaAbstraction(newId, body.substitute(arg -> newId))
+      case _ => this
     }
 
     def relabel(oldLabel: Identifier, newLabel: Identifier): Term =
@@ -114,6 +129,7 @@ object AST {
           case (x, y) if x != y => true
           case _                => false
         })
+
     private def unifyBlindly(that: Term): Either[String, Map[Term, Term]] = (this, that) match {
       case (Bool(x), Bool(y)) if x == y         => Right(Map.empty)
       case (Identifier(x), y)                   => Right(Map(Identifier(x) -> y))
