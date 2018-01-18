@@ -2,7 +2,13 @@ package com.lambdaminute.types
 
 import com.lambdaminute.syntax.AST._
 
-case class Typer() {
+case class Typer(logging: Boolean = false) {
+
+  private def log(): Unit = log("")
+  private def log(s: String): Unit =
+    if (logging) {
+      println(s)
+    }
 
   case class Var(id: String) {
     def increment: Var = Var((id.charAt(0) + 1).toChar.toString)
@@ -35,6 +41,62 @@ case class Typer() {
 
   def expandMap(universe: Map[Term, Type], freshVar: Var = Var("a")): (Map[Term, Type], Var) =
     universe.toList.foldLeft((universe, freshVar))((acc, judgement) => expand(acc._1, judgement, acc._2))
+
+  def relabelWith(t: Term, relabels: Map[Term, Term]) =
+    relabels.foldLeft(t)((acc, relabeling: (Term, Term)) => (acc.relabel _).tupled(relabeling))
+
+  val tab = "  "
+  def infer(universe: Map[Term, Type] = Map.empty, freshVar: Var = Var("a"))(term: Term): (Map[Term, Type], Var) =
+    if (builtInTypes.isDefinedAt(term)) {
+      (universe + (term -> builtInTypes(term)), freshVar)
+    } else {
+      term match {
+        case Identifier(_) =>
+          (universe + (term -> freshVar.asTypeId), freshVar.increment)
+        case Application(left, right) =>
+          val (contextWithRightType, nextVariable) = infer(universe, freshVar)(right)
+          val rightType: Type                      = contextWithRightType(right)
+
+          val (contextWithLeftType, _) = infer(contextWithRightType, nextVariable)(left)
+          val leftType1: Type          = contextWithLeftType(left)
+
+          val argumentResultType: Type = nextVariable.asTypeId
+          val leftType2: Type          = LambdaAbstraction(rightType, argumentResultType).asType
+
+          val unifiedLeftType: Map[Term, Term] =
+            leftType1.unify(leftType2).fold(sys.error, identity)
+
+          val relabeledLeftType: Type                = relabelWith(leftType1, unifiedLeftType).asType
+          val LambdaAbstraction(_, expectedTermType) = relabeledLeftType.asTerm
+
+          log(s"[App] Found judgements for term: ${term.pretty}")
+          log(s"$tab right type: ${right.pretty}: ${rightType.prettyType}")
+          log(s"$tab left type1: ${left.pretty}: ${leftType1.prettyType}")
+          log(s"$tab left type2: ${left.pretty}: ${leftType2.prettyType}")
+          log(s"$tab Result from unification: ${relabeledLeftType.prettyType}")
+          log(s"$tab unification map: ${unifiedLeftType}")
+          log()
+
+          (contextWithLeftType + (left -> relabeledLeftType) + (term -> expectedTermType.asType),
+           nextVariable.increment)
+
+        case LambdaAbstraction(arg, body) =>
+          val (bodyContext, nextVariable) = infer(universe, freshVar)(body)
+          val (argContext, nextVariable2) = infer(bodyContext, nextVariable)(arg)
+          val inferredType: Type          = LambdaAbstraction(argContext(arg), argContext(body)).asType
+
+          val argType  = argContext(arg)
+          val bodyType = argContext(body)
+          log(s"[Abs] Found judgements for term: ${term.pretty}")
+          log(s"$tab arg type: ${arg.pretty}: ${argType.prettyType}")
+          log(s"$tab body type: ${body.pretty}: ${bodyType.prettyType}")
+          log(s"$tab term type: ${term.pretty}: ${inferredType.prettyType}")
+          log()
+
+          (argContext + (term -> inferredType), nextVariable2)
+        case x => log(s"Unexpected ${x}"); ???
+      }
+    }
 
   /**
     * Precondition: All subterms in the keys of universe have matching keys in the universe

@@ -45,9 +45,9 @@ class TyperPropSpec extends WordSpec with GeneratorDrivenPropertyChecks with Ter
 
   "Typer" should {
     "work for all terms " in {
-      val typer = Typer()
+      val typer2 = Typer()
       forAll { term: Term =>
-        val (res, _) = typer.variables(term, Map.empty)
+        val (res, _) = typer2.variables(term, Map.empty)
         res.size shouldBe term.enumerate.toSet.size
       }
     }

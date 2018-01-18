@@ -107,7 +107,7 @@ object AST {
       case _ => this
     }
 
-    def relabel(oldLabel: Identifier, newLabel: Identifier): Term =
+    def relabel(oldLabel: Term, newLabel: Term): Term =
       transform {
         case `oldLabel` => newLabel
       }
@@ -133,9 +133,14 @@ object AST {
           case _                => false
         })
 
+    def isMono(s: String) = !s.isEmpty && s.head.isUpper
+    def isPoly(s: String) = !isMono(s)
+
+    //TODO: fix with this https://en.wikipedia.org/wiki/Unification_(computer_science)
     private def unifyBlindly(that: Term): Either[String, Map[Term, Term]] = (this, that) match {
       case (Bool(x), Bool(y)) if x == y         => Right(Map.empty)
-      case (Identifier(x), y)                   => Right(Map(Identifier(x) -> y))
+      case (y, Identifier(x)) if isPoly(x)      => Right(Map(Identifier(x) -> y))
+      case (Identifier(x), y) if isPoly(x)      => Right(Map(Identifier(x) -> y))
       case (Floating(x), Floating(y)) if x == y => Right(Map.empty)
       case (Integer(x), Integer(y)) if x == y   => Right(Map.empty)
       case (Empty, Empty)                       => Right(Map.empty)
