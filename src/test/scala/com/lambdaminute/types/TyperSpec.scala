@@ -20,11 +20,11 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
     }
 
     "deal with capturing3" in {
-      val typer      = Typer(logging = true)
+      val typer      = Typer(new UnificationLike(), logging = true)
       val termString = "((x . x . x) 2) 3"
       val term       = termString.toTerm
       println(termString)
-      println(term.pretty)
+      println()
 
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "inferred once")
@@ -34,7 +34,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
     "applications should infer abstraction in left argument" in {
       val term         = "x y".toTerm
-      val typer        = Typer()
+      val typer        = Typer(new UnificationLike())
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "type of application")
 
@@ -44,7 +44,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
     "abstraction should infer based on body and argument" in {
       val term         = "x . 42".toType
-      val typer        = Typer()
+      val typer        = Typer(new UnificationLike())
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "type of abstraction")
 
@@ -62,7 +62,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       val variableTypes: Map[AST.Term, Type] =
         Map(xid -> aid.asType, yid -> bid.asType, appl -> cid.asType)
 
-      val typer   = Typer()
+      val typer   = Typer(new UnificationLike())
       val nextVar = typer.Var("d")
 
       prettyPrintMap(variableTypes, "Expanding variables")

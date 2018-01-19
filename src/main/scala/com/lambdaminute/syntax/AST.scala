@@ -94,6 +94,8 @@ object AST {
 
     def nextAvailableId: Identifier = Identifier(increment(this.enumerate.collect { case Identifier(x) => x }.max))
 
+    def vars: List[Identifier] = this.enumerate.collect { case Identifier(x) => Identifier(x) }
+
     private def increment(s: String): String =
       (s.map(_ - 'a').reverse.fromBase(26) + 1).toBase(26).reverse.map(_ + 'a').map(_.toChar).mkString
 
@@ -113,15 +115,18 @@ object AST {
       }
 
     private def combineUnifications(a: Map[Term, Term], b: Map[Term, Term]): Either[String, Map[Term, Term]] = {
+
       val commonKeys: List[Term] = a.keys.filter(b.contains).toList
 
-      val stringOrTermToTerm = commonKeys
+      val maybeEquations: Either[String, List[Map[Term, Term]]] = commonKeys
         .traverse { key: Term =>
           a(key).unifyBlindly(b(key))
         }
+
+      val maybeSingleEquation: Either[String, Map[Term, Term]] = maybeEquations
         .map(_.fold(Map.empty)(_ ++ _))
 
-      stringOrTermToTerm
+      maybeSingleEquation
         .map(_ ++ a ++ b)
     }
 
@@ -138,12 +143,13 @@ object AST {
 
     //TODO: fix with this https://en.wikipedia.org/wiki/Unification_(computer_science)
     private def unifyBlindly(that: Term): Either[String, Map[Term, Term]] = (this, that) match {
-      case (Bool(x), Bool(y)) if x == y         => Right(Map.empty)
-      case (y, Identifier(x)) if isPoly(x)      => Right(Map(Identifier(x) -> y))
-      case (Identifier(x), y) if isPoly(x)      => Right(Map(Identifier(x) -> y))
-      case (Floating(x), Floating(y)) if x == y => Right(Map.empty)
-      case (Integer(x), Integer(y)) if x == y   => Right(Map.empty)
-      case (Empty, Empty)                       => Right(Map.empty)
+      case (Bool(x), Bool(y)) if x == y             => Right(Map.empty)
+      case (Identifier(x), y) if isPoly(x)          => Right(Map(Identifier(x) -> y))
+      case (y, Identifier(x)) if isPoly(x)          => Right(Map(Identifier(x) -> y))
+      case (Identifier(x), Identifier(y)) if x == y => Right(Map.empty)
+      case (Floating(x), Floating(y)) if x == y     => Right(Map.empty)
+      case (Integer(x), Integer(y)) if x == y       => Right(Map.empty)
+      case (Empty, Empty)                           => Right(Map.empty)
       case (Application(l1, r1), Application(l2, r2)) =>
         for {
           leftResult  <- l1.unifyBlindly(l2)

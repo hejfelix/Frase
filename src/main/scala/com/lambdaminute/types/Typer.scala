@@ -2,7 +2,7 @@ package com.lambdaminute.types
 
 import com.lambdaminute.syntax.AST._
 
-case class Typer(logging: Boolean = false) {
+case class Typer(unification: Unification, logging: Boolean = false) {
 
   private def log(): Unit = log("")
   private def log(s: String): Unit =
@@ -42,7 +42,7 @@ case class Typer(logging: Boolean = false) {
   def expandMap(universe: Map[Term, Type], freshVar: Var = Var("a")): (Map[Term, Type], Var) =
     universe.toList.foldLeft((universe, freshVar))((acc, judgement) => expand(acc._1, judgement, acc._2))
 
-  def relabelWith(t: Term, relabels: Map[Term, Term]) =
+  def relabelWith(t: Term, relabels: List[(Term, Term)]) =
     relabels.foldLeft(t)((acc, relabeling: (Term, Term)) => (acc.relabel _).tupled(relabeling))
 
   val tab = "  "
@@ -63,22 +63,26 @@ case class Typer(logging: Boolean = false) {
           val argumentResultType: Type = nextVariable.asTypeId
           val leftType2: Type          = LambdaAbstraction(rightType, argumentResultType).asType
 
-          val unifiedLeftType: Map[Term, Term] =
-            leftType1.unify(leftType2).fold(sys.error, identity)
+//          val unifiedLeftType: Map[Term, Term] =
+//            leftType1.unify(leftType2).fold(sys.error, identity)
 
-          val relabeledLeftType: Type                = relabelWith(leftType1, unifiedLeftType).asType
-          val LambdaAbstraction(_, expectedTermType) = relabeledLeftType.asTerm
+//          val united = unite(leftType1, leftType2)()
+          val unifier: Either[String, List[(Term, Term)]] = unification.unifyFix(List(leftType1 -> leftType2))
+          val united: Term                                = relabelWith(leftType1.asTerm, unifier.right.get)
+//          val relabeledLeftType: Type                = relabelWith(leftType1, unifiedLeftType).asType
+//          val relabeledLeftType2: Type               = relabelWith(leftType2, unifiedLeftType).asType
+          val LambdaAbstraction(_, expectedTermType) = united
 
           log(s"[App] Found judgements for term: ${term.pretty}")
           log(s"$tab right type: ${right.pretty}: ${rightType.prettyType}")
           log(s"$tab left type1: ${left.pretty}: ${leftType1.prettyType}")
           log(s"$tab left type2: ${left.pretty}: ${leftType2.prettyType}")
-          log(s"$tab Result from unification: ${relabeledLeftType.prettyType}")
-          log(s"$tab unification map: ${unifiedLeftType}")
+          log(s"$tab Unification: ${united.prettyType}")
+//          log(s"$tab Result from unification2: ${relabeledLeftType2.prettyType}")
+//          log(s"$tab unification map: ${unifiedLeftType}")
           log()
 
-          (contextWithLeftType + (left -> relabeledLeftType) + (term -> expectedTermType.asType),
-           nextVariable.increment)
+          (contextWithLeftType + (left -> united.asType) + (term -> expectedTermType.asType), nextVariable.increment)
 
         case LambdaAbstraction(arg, body) =>
           val (bodyContext, nextVariable) = infer(universe, freshVar)(body)
