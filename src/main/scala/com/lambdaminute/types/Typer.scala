@@ -21,27 +21,6 @@ case class Typer(unification: Unification, logging: Boolean = false) {
     case Integer(_)  => Identifier("Int").asType
   }
 
-  def variables(term: Term, acc: Map[Term, Type] = Map.empty, freshVar: Var = Var("a")): (Map[Term, Type], Var) =
-    term match {
-      case _ if builtInTypes.isDefinedAt(term) => (acc + (term -> builtInTypes(term)), freshVar)
-      case _ if acc.contains(term)             => (acc, freshVar)
-      case Identifier(_)                       => (acc + (term -> freshVar.asTypeId), freshVar.increment)
-      case LambdaAbstraction(arg, body) =>
-        val (r1, nextVar1) = variables(arg, acc, freshVar)
-        val (r2, nextVar2) = variables(body, r1, nextVar1)
-        (r2 + (term -> nextVar2.asTypeId), nextVar2.increment)
-
-      case Application(left, right) =>
-        val (r1, nextVar1) = variables(left, acc, freshVar)
-        val (r2, nextVar2) = variables(right, r1, nextVar1)
-        (r2 + (term -> nextVar2.asTypeId), nextVar2.increment)
-
-      case _ => sys.error("EXPLOSION")
-    }
-
-  def expandMap(universe: Map[Term, Type], freshVar: Var = Var("a")): (Map[Term, Type], Var) =
-    universe.toList.foldLeft((universe, freshVar))((acc, judgement) => expand(acc._1, judgement, acc._2))
-
   def relabelWith(t: Term, relabels: List[(Term, Term)]) =
     relabels.foldLeft(t)((acc, relabeling: (Term, Term)) => (acc.relabel _).tupled(relabeling))
 
@@ -63,23 +42,15 @@ case class Typer(unification: Unification, logging: Boolean = false) {
           val argumentResultType: Type = nextVariable.asTypeId
           val leftType2: Type          = LambdaAbstraction(rightType, argumentResultType).asType
 
-//          val unifiedLeftType: Map[Term, Term] =
-//            leftType1.unify(leftType2).fold(sys.error, identity)
-
-//          val united = unite(leftType1, leftType2)()
           val unifier: Either[String, List[(Term, Term)]] = unification.unifyFix(List(leftType1 -> leftType2))
           val united: Term                                = relabelWith(leftType1.asTerm, unifier.right.get)
-//          val relabeledLeftType: Type                = relabelWith(leftType1, unifiedLeftType).asType
-//          val relabeledLeftType2: Type               = relabelWith(leftType2, unifiedLeftType).asType
-          val LambdaAbstraction(_, expectedTermType) = united
+          val LambdaAbstraction(_, expectedTermType)      = united
 
           log(s"[App] Found judgements for term: ${term.pretty}")
           log(s"$tab right type: ${right.pretty}: ${rightType.prettyType}")
           log(s"$tab left type1: ${left.pretty}: ${leftType1.prettyType}")
           log(s"$tab left type2: ${left.pretty}: ${leftType2.prettyType}")
           log(s"$tab Unification: ${united.prettyType}")
-//          log(s"$tab Result from unification2: ${relabeledLeftType2.prettyType}")
-//          log(s"$tab unification map: ${unifiedLeftType}")
           log()
 
           (contextWithLeftType + (left -> united.asType) + (term -> expectedTermType.asType), nextVariable.increment)
@@ -100,34 +71,6 @@ case class Typer(unification: Unification, logging: Boolean = false) {
           (argContext + (term -> inferredType), nextVariable2)
         case x => log(s"Unexpected ${x}"); ???
       }
-    }
-
-  /**
-    * Precondition: All subterms in the keys of universe have matching keys in the universe
-    * @param universe
-    * @param judgement
-    * @param freshVar
-    * @return
-    */
-  private def expand(universe: Map[Term, Type], judgement: (Term, Type), freshVar: Var): (Map[Term, Type], Var) =
-    judgement match {
-      case (Identifier(_), _) =>
-        (universe, freshVar)
-      case (app @ Application(left, right), _) =>
-        val appResultType = freshVar.asTypeId
-        val newLeftType   = LambdaAbstraction(universe(right), appResultType).asType
-        (universe.updated(left, newLeftType).updated(app, appResultType), freshVar.increment)
-      case (abs @ LambdaAbstraction(arg @ Identifier(_), body), _) if body.freeVars.contains(arg) =>
-        val argType: Type  = universe(arg)
-        val bodyType: Type = universe(body)
-        val absType: Type  = LambdaAbstraction(argType.asTerm, bodyType.asTerm).asType
-        (universe.updated(abs, absType), freshVar)
-      case (abs @ LambdaAbstraction(Identifier(_), body), _) =>
-        val argType: Type  = freshVar.asTypeId
-        val bodyType: Type = universe(body)
-        val absType: Type  = LambdaAbstraction(argType.asTerm, bodyType.asTerm).asType
-        (universe.updated(abs, absType), freshVar.increment)
-      case _ => (universe, freshVar)
     }
 
 }

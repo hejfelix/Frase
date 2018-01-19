@@ -3,8 +3,6 @@ package com.lambdaminute.types
 import com.lambdaminute.syntax.AST
 import com.lambdaminute.syntax.AST._
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.{Matchers, WordSpec}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 trait TermGenerators {
 
@@ -38,19 +36,5 @@ trait TermGenerators {
   implicit val arbId: Arbitrary[Identifier]   = Arbitrary { idGen }
   implicit val argFloat: Arbitrary[Any]       = Arbitrary { floatingGen }
   implicit val arbBool: Arbitrary[Bool]       = Arbitrary { boolGen }
-
-}
-
-class TyperPropSpec extends WordSpec with GeneratorDrivenPropertyChecks with TermGenerators with Matchers {
-
-  "Typer" should {
-    "work for all terms " in {
-      val typer2 = Typer(new UnificationLike())
-      forAll { term: Term =>
-        val (res, _) = typer2.variables(term, Map.empty)
-        res.size shouldBe term.enumerate.toSet.size
-      }
-    }
-  }
 
 }
