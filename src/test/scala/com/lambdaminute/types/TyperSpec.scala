@@ -1,7 +1,7 @@
 package com.lambdaminute.types
 
 import com.lambdaminute.interactive.ParserHelper
-import com.lambdaminute.syntax.AST.{Identifier, Term}
+import com.lambdaminute.syntax.AST.{Identifier, LambdaAbstraction, Term}
 import org.scalatest.{Matchers, WordSpec}
 
 class TyperSpec extends WordSpec with Matchers with ParserHelper {
@@ -39,7 +39,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "inferred")
 
-      context(term) shouldBe Identifier("b").asType
+      context(term) shouldBe Identifier("f").asType
     }
 
     "applications should infer abstraction in left argument" in {
@@ -48,8 +48,19 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "type of application")
 
-      context("x".toTerm) shouldBe "a . b".toType
-      context(term) shouldBe "b".toType
+      context("x".toTerm) shouldBe "a . c".toType
+      context(term) shouldBe "c".toType
+    }
+
+    "nested abstractions should infer correctly" in {
+      val programText  = "(x . 42) z"
+      val term         = programText.toTerm
+      val typer        = Typer(new UnificationLike(logging = true), logging = true)
+      val (context, _) = typer.infer()(term)
+      println(programText)
+      prettyPrintMap(context, "type of nested abstraction")
+
+      context("x . 42".toTerm) shouldBe LambdaAbstraction(Identifier("a"), Identifier("Int")).asType
     }
 
     "abstraction should infer based on body and argument" in {

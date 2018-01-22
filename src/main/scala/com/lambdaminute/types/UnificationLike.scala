@@ -84,13 +84,17 @@ class UnificationLike(logging: Boolean = false) extends Unification {
   def isMono(s: String) = !s.isEmpty && s.head.isUpper
   def isPoly(s: String) = !isMono(s)
 
+  private def nonRedundant(equation: (Term, Term)): Boolean = equation match {
+    case (x, y) => x != y
+  }
+
   def unify(eq: (Term, Term)): Step = eq match {
+    case (a, b) if a == b                                         => Delete(eq)
     case (Identifier(x), Identifier(y)) if isPoly(x) && isPoly(y) => Ignore
     case (_, Identifier(b)) if isPoly(b)                          => Swap(eq)
-    case (a, b) if a == b                                         => Delete(eq)
-    case ((Application(l1, r1), Application(l2, r2)))             => Decompose(List(l1 -> l2, r1 -> r2))
+    case ((Application(l1, r1), Application(l2, r2)))             => Decompose(List(l1 -> l2, r1 -> r2).filter(nonRedundant))
     case (LambdaAbstraction(argl, bodyl), LambdaAbstraction(argr, bodyr)) =>
-      Decompose(List(argl -> argr, bodyl -> bodyr))
+      Decompose(List(argl -> argr, bodyl -> bodyr).filter(nonRedundant))
     case (a @ Identifier(_), b) if !b.vars.contains(a) => Eliminate(a, b)
     case (Identifier(_), _)                            => Ignore
     case _                                             => Fail

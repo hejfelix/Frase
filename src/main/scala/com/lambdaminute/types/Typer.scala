@@ -36,10 +36,10 @@ case class Typer(unification: Unification, logging: Boolean = false) {
           val (contextWithRightType, nextVariable) = infer(universe, freshVar)(right)
           val rightType: Type                      = contextWithRightType(right)
 
-          val (contextWithLeftType, _) = infer(contextWithRightType, nextVariable)(left)
-          val leftType1: Type          = contextWithLeftType(left)
+          val (contextWithLeftType, nextVariable2) = infer(contextWithRightType, nextVariable)(left)
+          val leftType1: Type                      = contextWithLeftType(left)
 
-          val argumentResultType: Type = nextVariable.asTypeId
+          val argumentResultType: Type = nextVariable2.asTypeId
           val leftType2: Type          = LambdaAbstraction(rightType, argumentResultType).asType
 
           val unifier: Either[String, List[(Term, Term)]] = unification.unifyFix(List(leftType1 -> leftType2))
@@ -53,7 +53,7 @@ case class Typer(unification: Unification, logging: Boolean = false) {
           log(s"$tab Unification: ${united.prettyType}")
           log()
 
-          (contextWithLeftType + (left -> united.asType) + (term -> expectedTermType.asType), nextVariable.increment)
+          (contextWithLeftType + (left -> united.asType) + (term -> expectedTermType.asType), nextVariable2.increment)
 
         case LambdaAbstraction(arg, body) =>
           val (bodyContext, nextVariable) = infer(universe, freshVar)(body)
