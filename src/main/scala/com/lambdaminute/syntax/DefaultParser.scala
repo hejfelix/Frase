@@ -1,6 +1,7 @@
 package com.lambdaminute.syntax
 
-import com.lambdaminute.errors.{FraseError, GenericError}
+import com.lambdaminute.errors._
+import com.lambdaminute.errors.FraseError
 import com.lambdaminute.syntax.AST._
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
@@ -20,29 +21,29 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
       .flatMap(parseSingleFragment)
 
   override def parseTerm(term: String): Either[FraseError, Term] =
-    lexer.tokenize(term).flatMap(parseSingleTerm)
+    lexer.tokenize(term).map(x => { println(x); x }) flatMap (parseSingleTerm)
 
   private def parseSingleTerm(tokens: List[Token]) = {
     val reader = new PackratReader(TokenReader(tokens))
     term(reader) match {
-      case NoSuccess(msg, _)  => Left(GenericError(msg))
-      case Success(result, _) => Right(result)
+      case NoSuccess(msg, next) => Left(ParsingError(msg, next))
+      case Success(result, _)   => Right(result)
     }
   }
 
   private def parseSingleFragment(tokens: List[Token]): Either[FraseError, Fragment] = {
     val reader = new PackratReader(TokenReader(tokens))
     fragment(reader) match {
-      case NoSuccess(msg, _)  => Left(GenericError(msg))
-      case Success(result, _) => Right(result)
+      case NoSuccess(msg, next) => Left(ParsingError(msg, next))
+      case Success(result, _)   => Right(result)
     }
   }
 
   private def parse(tokens: List[Token]): Either[FraseError, List[Fragment]] = {
     val reader = new PackratReader(TokenReader(tokens))
     program(reader) match {
-      case NoSuccess(msg, _)  => Left(GenericError(msg))
-      case Success(result, _) => Right(result)
+      case NoSuccess(msg, next) => Left(ParsingError(msg, next))
+      case Success(result, _)   => Right(result)
     }
   }
 
@@ -62,13 +63,13 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
     case left ~ right => Application(left, right)
   }
 
-  private lazy val lambdaAbstraction = ((identifier | terminal) <~ (`.`)) ~ term ^^ {
+  private lazy val lambdaAbstraction = ((identifier | terminal) <~ `.`) ~ term ^^ {
     case id ~ body => LambdaAbstraction(id, body)
   }
 
   private lazy val term: PackratParser[Term] = lambdaAbstraction | application | pterm | terminal
 
-  private lazy val terminal: PackratParser[Term] = integer | bool | identifier
+  private lazy val terminal: PackratParser[Term] = float | integer | bool | identifier
 
   private lazy val pterm: PackratParser[Term] = `(` ~> term <~ `)`
 
@@ -80,6 +81,11 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
   private lazy val integer: PackratParser[Integer] =
     accept("integer literal", {
       case INTGR(str) => Integer(str.toInt)
+    })
+
+  private lazy val float: PackratParser[Floating] =
+    accept("floating point literal", {
+      case FLOAT(str) => Floating(str.toFloat)
     })
 
   private lazy val identifier: PackratParser[Identifier] =

@@ -29,7 +29,7 @@ class UnificationLike(logging: Boolean = false) extends Unification {
   def unify(eqs: List[(Term, Term)]): Either[String, List[(Term, Term)]] =
     eqs.foldLeft(Right(eqs): Either[String, List[(Term, Term)]])((acc, nextEquation) => {
       val nextStep        = unify(nextEquation)
-      val prettyEquations = acc.right.get.map(prettyEq).mkString(",  ")
+      val prettyEquations = acc.map(_.map(prettyEq)).toString
       if (nextStep != Ignore) {
         log(s"Applying step to:   ${prettyEquations}")
         log(s"  ${prettyStep(nextStep)}")
@@ -95,9 +95,9 @@ class UnificationLike(logging: Boolean = false) extends Unification {
     case ((Application(l1, r1), Application(l2, r2)))             => Decompose(List(l1 -> l2, r1 -> r2).filter(nonRedundant))
     case (LambdaAbstraction(argl, bodyl), LambdaAbstraction(argr, bodyr)) =>
       Decompose(List(argl -> argr, bodyl -> bodyr).filter(nonRedundant))
-    case (a @ Identifier(_), b) if !b.vars.contains(a) => Eliminate(a, b)
-    case (Identifier(_), _)                            => Ignore
-    case _                                             => Fail
+    case (a @ Identifier(aa), b) if !b.vars.contains(a) && isPoly(aa) => Eliminate(a, b)
+    case (Identifier(x), _) if isPoly(x)                              => Ignore
+    case _                                                            => Fail
   }
 
 }

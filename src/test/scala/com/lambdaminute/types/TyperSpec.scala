@@ -134,6 +134,15 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
       context(term) shouldBe Identifier("Int").asType
     }
 
+    "deal with built ins4" in {
+      val programText = "true 10 13.37"
+      val term        = programText.toTerm
+      val typer       = Typer(new UnificationLike(true), logging = true)
+      assertThrows[NoSuchElementException] {
+        typer.infer()(term)
+      }
+    }
+
   }
 
 }

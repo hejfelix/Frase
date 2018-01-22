@@ -48,8 +48,9 @@ case class Typer(unification: Unification, logging: Boolean = false) {
           val leftType2: Type          = LambdaAbstraction(rightType, argumentResultType).asType
 
           val unifier: Either[String, List[(Term, Term)]] = unification.unifyFix(List(leftType1 -> leftType2))
-          val united: Term                                = relabelWith(leftType1.asTerm, unifier.right.get)
-          val LambdaAbstraction(_, expectedTermType)      = united
+          println(unifier)
+          val united: Term                           = relabelWith(leftType1.asTerm, unifier.right.get)
+          val LambdaAbstraction(_, expectedTermType) = united
 
           log(s"[App] Found judgements for term: ${term.pretty}")
           log(s"$tab right type: ${right.pretty}: ${rightType.prettyType}")

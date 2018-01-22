@@ -1,10 +1,8 @@
 package com.lambdaminute.syntax
 
-import com.lambdaminute.errors.GenericError
+import com.lambdaminute.errors.LexerError
 
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
-
-
 
 case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
 
@@ -15,8 +13,8 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
       rep1(
         `true` |
           `false` |
-          integer |
           float |
+          integer |
           period |
           equals |
           comma |
@@ -27,11 +25,11 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
           identifier))
 
   def tokenize(program: String) = parse(tokenParser, program) match {
-    case Success(tokens, _)   => Right(tokens)
-    case NoSuccess(result, _) => Left(GenericError(result))
+    case Success(tokens, _)             => Right(tokens)
+    case NoSuccess(result, next: Input) => Left(LexerError(result, next))
   }
 
-  lazy val float: PackratParser[FLOAT]   = """-?(\d+(\.\d*)?|\d*\.\d+)([eE][+-]?\d+)?[fFdD]?""".r ^^ FLOAT
+  lazy val float: PackratParser[FLOAT]   = """-?(\d+(\.\d*)|\d*\.\d+)""".r ^^ FLOAT
   lazy val integer: PackratParser[INTGR] = """-?\d+""".r ^^ INTGR
   lazy val variable: PackratParser[ID]   = """<=|(?!or)(?!set)[a-z+\-\\/\*=%<][a-zA-Z]*""".r ^^ ID
 
@@ -49,7 +47,7 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
   lazy val rightParen: PackratParser[`)`.type] = ")" ^^ {_ => `)`}
   lazy val period: PackratParser[`.`.type]     = "." ^^ { _ => `.` }
   lazy val equals: PackratParser[`=`.type]     = "=" ^^ {_ => `=`}
-  lazy val comma: PackratParser[`,`.type]    = "," ^^{ _ => `,` }
+  lazy val comma: PackratParser[`,`.type]      = "," ^^{ _ => `,` }
   lazy val space: PackratParser[SPACE.type]    = " " ^^{ _ => SPACE }
   // format: on
 
