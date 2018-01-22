@@ -15,10 +15,14 @@ case class Typer(unification: Unification, logging: Boolean = false) {
     def asTypeId: Type = Identifier(id).asType
   }
 
-  private def builtInTypes: PartialFunction[Term, Type] = {
-    case Bool(_)     => Identifier("Bool").asType
-    case Floating(_) => Identifier("Float").asType
-    case Integer(_)  => Identifier("Int").asType
+  private def builtInTypes(freshVar: Var): PartialFunction[Term, (Type, Var)] = {
+    case Bool(_) =>
+      (LambdaAbstraction(freshVar.asTypeId, LambdaAbstraction(freshVar.asTypeId, freshVar.asTypeId)).asType,
+       freshVar.increment)
+    case Floating(_) =>
+      (Identifier("Float").asType, freshVar)
+    case Integer(_) =>
+      (Identifier("Int").asType, freshVar)
   }
 
   def relabelWith(t: Term, relabels: List[(Term, Term)]) =
@@ -26,8 +30,9 @@ case class Typer(unification: Unification, logging: Boolean = false) {
 
   val tab = "  "
   def infer(universe: Map[Term, Type] = Map.empty, freshVar: Var = Var("a"))(term: Term): (Map[Term, Type], Var) =
-    if (builtInTypes.isDefinedAt(term)) {
-      (universe + (term -> builtInTypes(term)), freshVar)
+    if (builtInTypes(freshVar).isDefinedAt(term)) {
+      val (tpe, nextVar) = builtInTypes(freshVar)(term)
+      (universe + (term -> tpe), nextVar)
     } else {
       term match {
         case Identifier(_) =>
