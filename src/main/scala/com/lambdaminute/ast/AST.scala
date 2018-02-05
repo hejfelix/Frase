@@ -6,8 +6,8 @@ import com.lambdaminute.math._
 
 object AST {
   object TerminalColors {
-    val Green = Console.GREEN
-    val Off   = Console.RESET
+    val Green: String = Console.GREEN
+    val Off: String   = Console.RESET
   }
 
   sealed trait Fragment {

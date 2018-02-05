@@ -4,7 +4,7 @@ import com.lambdaminute.errors.LexerError
 
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
-case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
+case class DefaultLexer(private val lambdaAbstractionSeparator: String = ".") extends Lexer with RegexParsers with PackratParsers {
 
   override val whiteSpace = """[ ]+""".r
 
@@ -45,7 +45,7 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
   // format: off
   lazy val leftParen: PackratParser[`(`.type]  = "(" ^^ {_ => `(`}
   lazy val rightParen: PackratParser[`)`.type] = ")" ^^ {_ => `)`}
-  lazy val period: PackratParser[`.`.type]     = "." ^^ { _ => `.` }
+  lazy val period: PackratParser[`.`.type]     = lambdaAbstractionSeparator ^^ { _ => `.` }
   lazy val equals: PackratParser[`=`.type]     = "=" ^^ {_ => `=`}
   lazy val comma: PackratParser[`,`.type]      = "," ^^{ _ => `,` }
   lazy val space: PackratParser[SPACE.type]    = " " ^^{ _ => SPACE }
