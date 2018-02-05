@@ -1,4 +1,4 @@
-package com.lambdaminute.syntax
+package com.lambdaminute.grammar
 
 sealed trait Token
 

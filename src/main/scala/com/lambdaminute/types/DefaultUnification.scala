@@ -1,8 +1,9 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.interpreter.FixPoint
+import com.lambdaminute.ast.AST._
 
-class UnificationLike(logging: Boolean = false) extends Unification {
+class DefaultUnification(logging: Boolean = false) extends Unification with FixPoint {
 
   trait Step
   case object Ignore                               extends Step
@@ -18,7 +19,7 @@ class UnificationLike(logging: Boolean = false) extends Unification {
   def log(): Unit          = if (logging) println()
   def log(s: String): Unit = if (logging) { println(s) } else {}
 
-  def prettyStep(step: Step) = step match {
+  def prettyStep(step: Step): String = step match {
     case Delete(eq)             => s"Delete ${prettyEq(eq)}"
     case Swap(eq)               => s"Swap ${prettyEq(eq)}"
     case Eliminate(x, newLabel) => s"Eliminate `${x.pretty}` by replacement: `${newLabel.pretty}`"
@@ -56,15 +57,6 @@ class UnificationLike(logging: Boolean = false) extends Unification {
 
   override def unifyFix(eqs: List[(Term, Term)]): Either[String, List[(Term, Term)]] =
     fixPoint(Right(eqs): Either[String, List[(Term, Term)]])(_.flatMap(unify))
-
-  def fixPoint[T](fix: T)(f: T => T): T = {
-    val fOfFix = f(fix)
-    if (fOfFix == fix) {
-      fix
-    } else {
-      fixPoint(fOfFix)(f)
-    }
-  }
 
   def applyStep(eqs: List[(Term, Term)])(step: Step): List[(Term, Term)] = step match {
     case Decompose(newEqs) => (eqs ::: newEqs)

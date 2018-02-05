@@ -1,6 +1,7 @@
-package com.lambdaminute.syntax
+package com.lambdaminute.ast
 
 import cats.implicits._
+import com.lambdaminute.errors.{FraseError, UnificationError}
 import com.lambdaminute.math._
 
 object AST {
@@ -114,23 +115,23 @@ object AST {
         case `oldLabel` => newLabel
       }
 
-    private def combineUnifications(a: Map[Term, Term], b: Map[Term, Term]): Either[String, Map[Term, Term]] = {
+    private def combineUnifications(a: Map[Term, Term], b: Map[Term, Term]): Either[FraseError, Map[Term, Term]] = {
 
       val commonKeys: List[Term] = a.keys.filter(b.contains).toList
 
-      val maybeEquations: Either[String, List[Map[Term, Term]]] = commonKeys
+      val maybeEquations: Either[FraseError, List[Map[Term, Term]]] = commonKeys
         .traverse { key: Term =>
           a(key).unifyBlindly(b(key))
         }
 
-      val maybeSingleEquation: Either[String, Map[Term, Term]] = maybeEquations
+      val maybeSingleEquation: Either[FraseError, Map[Term, Term]] = maybeEquations
         .map(_.fold(Map.empty)(_ ++ _))
 
       maybeSingleEquation
         .map(_ ++ a ++ b)
     }
 
-    def unify(that: Term): Either[String, Map[Term, Term]] =
+    def unify(that: Term): Either[FraseError, Map[Term, Term]] =
       this
         .unifyBlindly(that)
         .map(_.filter {
@@ -142,7 +143,7 @@ object AST {
     def isPoly(s: String) = !isMono(s)
 
     //TODO: fix with this https://en.wikipedia.org/wiki/Unification_(computer_science)
-    private def unifyBlindly(that: Term): Either[String, Map[Term, Term]] = (this, that) match {
+    private def unifyBlindly(that: Term): Either[FraseError, Map[Term, Term]] = (this, that) match {
       case (Bool(x), Bool(y)) if x == y             => Right(Map.empty)
       case (Identifier(x), y) if isPoly(x)          => Right(Map(Identifier(x) -> y))
       case (y, Identifier(x)) if isPoly(x)          => Right(Map(Identifier(x) -> y))
@@ -163,7 +164,7 @@ object AST {
           bodyResult <- bodyl.unifyBlindly(bodyr)
           combined   <- combineUnifications(argResult, bodyResult)
         } yield combined
-      case _ => Left(s"Unable to unify ${this.pretty} with ${that.pretty}")
+      case _ => Left(UnificationError(s"Unable to unify ${this.pretty} with ${that.pretty}"))
     }
 
   }

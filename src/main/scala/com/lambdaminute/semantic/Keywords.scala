@@ -1,6 +1,6 @@
 package com.lambdaminute.semantic
 
-import com.lambdaminute.syntax.AST.Identifier
+import com.lambdaminute.ast.AST.Identifier
 
 trait Keywords {
   val yCombinatorKeyword: String

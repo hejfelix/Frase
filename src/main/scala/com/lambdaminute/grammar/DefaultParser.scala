@@ -1,8 +1,8 @@
-package com.lambdaminute.syntax
+package com.lambdaminute.grammar
 
 import com.lambdaminute.errors._
 import com.lambdaminute.errors.FraseError
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST._
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
 import scala.util.parsing.input.{Position, Reader}

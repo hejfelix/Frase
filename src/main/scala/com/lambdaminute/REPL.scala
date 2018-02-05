@@ -4,8 +4,8 @@ import cats.data.State
 import com.lambdaminute.errors.FraseError
 import com.lambdaminute.interpreter.{DefaultInterpreter, DefaultLetTransformer, Interpreter}
 import com.lambdaminute.semantic.DefaultKeywords
-import com.lambdaminute.syntax.AST.{Empty, Fragment, Named, Term}
-import com.lambdaminute.syntax.{DefaultLexer, DefaultParser}
+import com.lambdaminute.ast.AST.{Empty, Fragment, Named, Term}
+import com.lambdaminute.grammar.{DefaultLexer, DefaultParser}
 
 object REPL extends App {
 

@@ -1,5 +1,3 @@
-import sbt.Opts.resolver
-
 resolvers ++= Seq("Typesafe Repository" at "https://repo.typesafe.com/typesafe/releases/",
                   "mybintray" at "https://dl.bintray.com/")
 

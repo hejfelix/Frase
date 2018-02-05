@@ -1,7 +1,8 @@
 package com.lambdaminute.types
 
 import com.lambdaminute.interactive.ParserHelper
-import com.lambdaminute.syntax.AST.{Identifier, Term}
+import com.lambdaminute.ast.AST.{Identifier, Term}
+import com.lambdaminute.errors.UnificationError
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
@@ -47,7 +48,7 @@ class TermSpec extends WordSpec with GeneratorDrivenPropertyChecks with TermGene
       val result = a.unify(b)
       println(result)
       result should matchPattern {
-        case Left("Unable to unify 1 with 2") =>
+        case Left(UnificationError("Unable to unify 1 with 2")) =>
       }
     }
 

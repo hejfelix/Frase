@@ -1,7 +1,7 @@
 package com.lambdaminute.interactive
 
-import com.lambdaminute.syntax.AST.Term
-import com.lambdaminute.syntax.{DefaultLexer, DefaultParser}
+import com.lambdaminute.ast.AST.Term
+import com.lambdaminute.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.types.Type
 import com.lambdaminute.types._
 

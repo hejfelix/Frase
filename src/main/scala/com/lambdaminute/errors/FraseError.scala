@@ -6,6 +6,8 @@ sealed trait FraseError {
 
 case class GenericError(msg: String) extends FraseError
 
+case class UnificationError(msg: String) extends FraseError
+
 case class ParsingError[T](err: String, next: T) extends FraseError {
   def msg = s"$err, next temr: ${next}"
 }

@@ -1,4 +1,4 @@
-package com.lambdaminute.syntax
+package com.lambdaminute.grammar
 
 import com.lambdaminute.errors.LexerError
 
@@ -24,7 +24,7 @@ case class DefaultLexer() extends Lexer with RegexParsers with PackratParsers {
           rightParen |
           identifier))
 
-  def tokenize(program: String) = parse(tokenParser, program) match {
+  def tokenize(program: String): Either[LexerError[Input], List[Token]] = parse(tokenParser, program) match {
     case Success(tokens, _)             => Right(tokens)
     case NoSuccess(result, next: Input) => Left(LexerError(result, next))
   }

@@ -1,6 +1,6 @@
 package com.lambdaminute
 
-import com.lambdaminute.syntax.AST.Term
+import com.lambdaminute.ast.AST.Term
 import com.softwaremill.tagging._
 
 package object types {

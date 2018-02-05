@@ -1,7 +1,7 @@
 package com.lambdaminute.interpreter
 
 import com.lambdaminute.errors.FraseError
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST._
 
 trait LetTransformer {
 

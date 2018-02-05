@@ -3,7 +3,7 @@ package com.lambdaminute
 package object math {
 
   implicit class BaseMathInt(i: Int) {
-    def toBase(base: Int)                          = toBaseHelper(base)
+    def toBase(base: Int): List[Int]               = toBaseHelper(base)
     private def toBaseHelper(base: Int): List[Int] = if (i < base) List(i) else i % base :: (i / base).toBase(base)
   }
 

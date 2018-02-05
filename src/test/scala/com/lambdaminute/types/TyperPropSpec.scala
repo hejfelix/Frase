@@ -1,7 +1,7 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.AST
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST
+import com.lambdaminute.ast.AST._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait TermGenerators {

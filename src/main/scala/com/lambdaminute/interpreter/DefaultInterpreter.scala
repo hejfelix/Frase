@@ -1,12 +1,20 @@
 package com.lambdaminute.interpreter
 
+import com.lambdaminute.ast.AST
 import com.lambdaminute.errors.FraseError
-import com.lambdaminute.syntax.AST._
-import com.lambdaminute.syntax.{AST, Parser}
+import com.lambdaminute.ast.AST._
+import com.lambdaminute.grammar.Parser
 import com.lambdaminute.debug
 import com.lambdaminute.semantic.Keywords
 
-case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords) extends Interpreter {
+case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, keywords: Keywords)
+    extends Interpreter
+    with FixPoint {
+
+  implicit class TermSyntax(t: Term) {
+    def interpret = DefaultInterpreter.this.interpret(t)
+    def reduce    = DefaultInterpreter.this.reduce(t)
+  }
 
   def listToMap(l: List[(Term, Term)]): Map[Term, List[Term]] =
     l.foldLeft(Map[Term, List[Term]]())(comb)
@@ -26,7 +34,7 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     parser
       .parse(program)
       .flatMap(letTransformer.transform)
-      .map(term => evalStep(term))
+      .map(evalStep)
 
   def interpret(f: Fragment): Fragment = f match {
     case x @ Named(_, _) => x
@@ -43,12 +51,6 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     case Application(x, y) => y :: args(x)
     case _                 => Nil
   }
-
-  def applicant(t: Term): Term =
-    t.transform {
-      case Application(left, _) => applicant(left)
-      case Identifier(_)        => t
-    }
 
   val App: AST.Application.type = Application
 
@@ -70,44 +72,13 @@ case class DefaultInterpreter(parser: Parser, letTransformer: LetTransformer, ke
     def betaReduce: PartialFunction[Term, Term] = builtIns orElse {
       case Application(LambdaAbstraction(id, body), rhs) if id == rhs => body
       case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != yCombinator =>
-        betaReduce(substitute(body)(id -> rhs))
+        betaReduce(body.substitute(id -> rhs))
       case Application(t, y)       => Application(betaReduce(t), betaReduce(y))
       case LambdaAbstraction(a, b) => LambdaAbstraction(a, betaReduce(b))
       case i @ Identifier(_)       => i
       case t                       => t
     }
     betaReduce
-  }
-
-  def fixPoint[T](t: T)(p: T => T): T =
-    if (p(t) != t)
-      fixPoint(p(t))(p)
-    else
-      t
-
-  /**
-    * The set of free variables in t (=variables that have not been bound)
-    * @param t The term to search for free variables
-    * @return The set containing all free variables inside t
-    */
-  def freeVars(t: Term): Set[Identifier] = t match {
-    case a @ Identifier(_)                       => Set(a)
-    case LambdaAbstraction(id: Identifier, body) => freeVars(body) - id
-    case Application(a, b)                       => freeVars(a) ++ freeVars(b)
-    case Empty                                   => Set()
-    case _                                       => Set()
-  }
-
-  //Capture-avoiding substitution
-  def substitute(t: Term)(label: (Term, Term)): Term = (t, label) match {
-    case (Empty, _)                        => Empty
-    case (i: Identifier, (j, k)) if i == j => k
-    case (i: Identifier, _)                => i
-    case (Application(a, b), _)            => Application(substitute(a)(label), substitute(b)(label))
-    case (LambdaAbstraction(id: Identifier, body), (x, y)) if id != x && !freeVars(y)(id) =>
-      LambdaAbstraction(id, substitute(body)(label))
-    case (a @ LambdaAbstraction(_, _), _) => a
-    case _                                => t
   }
 
 }

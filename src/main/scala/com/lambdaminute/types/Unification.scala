@@ -1,5 +1,5 @@
 package com.lambdaminute.types
-import com.lambdaminute.syntax.AST.Term
+import com.lambdaminute.ast.AST.Term
 
 trait Unification {
   object syntax {

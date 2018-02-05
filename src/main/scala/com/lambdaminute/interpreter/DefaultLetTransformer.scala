@@ -1,9 +1,9 @@
 package com.lambdaminute.interpreter
 
+import com.lambdaminute.ast.AST
 import com.lambdaminute.errors.{FraseError, GenericError}
 import com.lambdaminute.semantic.Keywords
-import com.lambdaminute.syntax.AST
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST._
 
 case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
 

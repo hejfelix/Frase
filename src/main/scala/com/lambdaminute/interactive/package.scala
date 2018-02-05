@@ -2,7 +2,7 @@ package com.lambdaminute
 
 import com.lambdaminute.interpreter.{DefaultInterpreter, DefaultLetTransformer, Interpreter}
 import com.lambdaminute.semantic.DefaultKeywords
-import com.lambdaminute.syntax.{DefaultLexer, DefaultParser}
+import com.lambdaminute.grammar.{DefaultLexer, DefaultParser}
 
 package object interactive extends ParserHelper {
 

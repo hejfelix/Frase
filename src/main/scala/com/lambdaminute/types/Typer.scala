@@ -1,6 +1,6 @@
 package com.lambdaminute.types
 
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST._
 
 case class Typer(unification: Unification, logging: Boolean = false) {
 

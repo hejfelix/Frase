@@ -1,10 +1,10 @@
 package com.lambdaminute.types
 
 import com.lambdaminute.interactive.ParserHelper
-import com.lambdaminute.syntax.AST._
+import com.lambdaminute.ast.AST._
 import org.scalatest.{Matchers, WordSpec}
 
-class UnificationLikeSpec extends WordSpec with Matchers with ParserHelper {
+class DefaultUnificationSpec extends WordSpec with Matchers with ParserHelper {
 
   def prettyEq(eq: (Term, Term)) =
     s"${eq._1.pretty} = ${eq._2.pretty}"
@@ -12,7 +12,7 @@ class UnificationLikeSpec extends WordSpec with Matchers with ParserHelper {
   "Unification" should {
     "do stuff" in {
 
-      val unification = new UnificationLike(logging = true)
+      val unification = new DefaultUnification(logging = true)
 
       val t1 = "a . a".toTerm
       val t2 = LambdaAbstraction(Identifier("Int"), Identifier("b"))
@@ -23,7 +23,7 @@ class UnificationLikeSpec extends WordSpec with Matchers with ParserHelper {
     }
 
     "fixpoint" in {
-      val unification = new UnificationLike()
+      val unification = new DefaultUnification()
       unification.fixPoint(100)(_ / 2) shouldBe 0
 
       unification.fixPoint(List(1, 2, 3, 4))(_.drop(1)) shouldBe Nil
