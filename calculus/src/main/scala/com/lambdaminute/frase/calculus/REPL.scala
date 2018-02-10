@@ -1,8 +1,16 @@
-package com.lambdaminute.frase.calculus.grammar
+package com.lambdaminute.frase.calculus
+import cats.data
 import cats.data.State
+import com.lambdaminute.frase.calculus.ast.AST
 import com.lambdaminute.frase.calculus.ast.AST.{Empty, Fragment, Named, Term}
 import com.lambdaminute.frase.calculus.errors.FraseError
-import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter, DefaultLetTransformer, Interpreter}
+import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
+import com.lambdaminute.frase.calculus.interpreter.{
+  DefaultBuiltins,
+  DefaultInterpreter,
+  DefaultLetTransformer,
+  Interpreter
+}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords
 
 object REPL extends App {
@@ -41,15 +49,15 @@ object REPL extends App {
   /*
   Reading and parsing
    */
-  def readNextLine(): State[List[Fragment], Option[Term]] = State(reactToLine)
+  def readNextLine(): data.State[List[AST.Fragment], Option[AST.Term]] = State(reactToLine)
 
-  def reactToLine(namedTerms: List[Fragment]) =
+  def reactToLine(namedTerms: List[Fragment]): (List[Fragment], Option[Term]) =
     io.StdIn.readLine("Frase>") match {
-      case ":exit" => (namedTerms, None)
-      case line    => parseLine(namedTerms, line)
+      case ":exit"      => (namedTerms, None)
+      case line: String => parseLine(namedTerms, line)
     }
 
-  private def parseLine(namedTerms: List[Fragment], line: String) =
+  private def parseLine(namedTerms: List[Fragment], line: String): (List[Fragment], Option[Term]) =
     parser.parseFragment(line) match {
       case Right(n: Named) => processTermNaming(namedTerms, n)
       case Right(term)     => processStandaloneExpression(term, namedTerms)
