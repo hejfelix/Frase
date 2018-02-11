@@ -1,11 +1,12 @@
-package com.lambdaminute.frase.calculus
+package com.lambdaminute.frase.repl
+
 import com.lambdaminute.frase.calculus.ast.AST.Term
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter, Interpreter}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords
 
-object REPL extends App {
+object REPLCalculus extends App {
 
   def defaultKeywords = DefaultKeywords()
   def lexer           = DefaultLexer()
@@ -14,35 +15,44 @@ object REPL extends App {
   def interpreter: Interpreter =
     DefaultInterpreter(parser, defaultKeywords, defaultBuiltins)
 
+  sealed trait Result
+  case class TermResult(t: Term) extends Result
+  case object ExitResult         extends Result
+
   /*
   Processing
    */
-  def processStandaloneExpression(term: Term): Option[Term] =
+  def processStandaloneExpression(term: Term): Either[FraseError, Result] =
     interpreter.interpret(term) match {
       case Right(result) => processEvaluationSuccess(result)
       case Left(err)     => processParsingError(err)
     }
 
-  private def processEvaluationSuccess(result: Term): Option[Term] = {
+  private def processEvaluationSuccess(result: Term): Either[FraseError, Result] = {
     println(result.pretty)
-    Option(result)
+    Right(TermResult(result))
   }
 
-  private def processParsingError(err: FraseError): Option[Term] = {
+  private def processParsingError(err: FraseError): Either[FraseError, Result] = {
     println(err)
-    None
+    Left(err)
   }
 
-  def reactToLine(): Option[Term] =
+  def reactToLine(): Either[FraseError, Result] =
     io.StdIn.readLine("Frase>") match {
-      case ":exit"      => None
+      case ":exit"      => Right(ExitResult)
       case line: String => parseLine(line)
     }
 
-  private def parseLine(line: String): Option[Term] =
+  private def parseLine(line: String): Either[FraseError, Result] =
     parser.parseFragment(line) match {
       case Right(term) => processStandaloneExpression(term)
       case Left(err)   => processParsingError(err)
     }
+
+  Stream
+    .continually(reactToLine)
+    .takeWhile(_ != Right(ExitResult))
+    .force
 
 }
