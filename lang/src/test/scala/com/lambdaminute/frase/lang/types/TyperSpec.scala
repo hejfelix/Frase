@@ -6,26 +6,26 @@ import org.scalatest.{Matchers, WordSpec}
 
 class TyperSpec extends WordSpec with Matchers with ParserHelper {
 
+  private val logEnabled = false
+
   implicit class ParseToType(s: String) {
     def toType: Type = s.toTerm.asType
   }
 
   "Typer" should {
 
-    def prettyPrintMap(typeMap: Map[Term, Type], tag: String): Unit = {
-      println(tag)
-      typeMap.toList.sortBy { case (term, _) => term.size }.foreach {
-        case (term, tpe) => print(s"${term.pretty}: ${tpe.prettyType},    ")
+    def prettyPrintMap(typeMap: Map[Term, Type], tag: String): Unit =
+      if (logEnabled) {
+        println(tag)
+        typeMap.toList.sortBy { case (term, _) => term.size }.foreach {
+          case (term, tpe) => print(s"${term.pretty}: ${tpe.prettyType},    ")
+        }
       }
-      println()
-    }
 
     "deal with capturing3" in {
-      val typer      = Typer(new DefaultUnification(logging = true), logging = true)
+      val typer      = Typer(new DefaultUnification(logging = logEnabled), logging = logEnabled)
       val termString = "((x . x . x) 2) 3"
       val term       = termString.toTerm
-      println(termString)
-      println()
 
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "inferred")
@@ -34,11 +34,9 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
     }
 
     "deal with capturing4" in {
-      val typer      = Typer(new DefaultUnification(logging = true), logging = true)
+      val typer      = Typer(new DefaultUnification(logging = logEnabled), logging = logEnabled)
       val termString = "((x . x . x) 2) y"
       val term       = termString.toTerm
-      println(termString)
-      println()
 
       val (context, _) = typer.infer()(term)
       prettyPrintMap(context, "inferred")
@@ -59,9 +57,8 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
     "nested abstractions should infer correctly" in {
       val programText  = "(x . 42) z"
       val term         = programText.toTerm
-      val typer        = Typer(new DefaultUnification(logging = true), logging = true)
+      val typer        = Typer(new DefaultUnification(logging = logEnabled), logging = logEnabled)
       val (context, _) = typer.infer()(term)
-      println(programText)
       prettyPrintMap(context, "type of nested abstraction")
 
       context("x . 42".toTerm) shouldBe LambdaAbstraction(Identifier("a"), Identifier("Int")).asType
@@ -141,7 +138,7 @@ class TyperSpec extends WordSpec with Matchers with ParserHelper {
     "deal with built ins4" in {
       val programText = "true 10 13.37"
       val term        = programText.toTerm
-      val typer       = Typer(new DefaultUnification(true), logging = true)
+      val typer       = Typer(new DefaultUnification(logging = logEnabled), logging = logEnabled)
       assertThrows[NoSuchElementException] {
         typer.infer()(term)
       }

@@ -20,7 +20,7 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
       .flatMap(parseSingleFragment)
 
   override def parseTerm(term: String): Either[FraseError, Term] =
-    lexer.tokenize(term).map(x => { println(x); x }) flatMap (parseSingleTerm)
+    lexer.tokenize(term).flatMap(parseSingleTerm)
 
   private def parseSingleTerm(tokens: List[Token]) = {
     val reader = new PackratReader(TokenReader(tokens))

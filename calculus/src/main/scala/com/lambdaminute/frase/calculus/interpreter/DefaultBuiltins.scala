@@ -10,7 +10,7 @@ object DefaultBuiltins {
     import keyWords._
     {
       case App(`yCombinator`, f)                               => App(f, App(yCombinator, f))
-      case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => Application(body, yCombExp)
+      case yCombExp @ LambdaAbstraction(`yCombinator`, body)   => App(body, yCombExp)
       case App(App(Identifier("=="), a), b)                    => Bool(a == b)
       case App(App(Identifier("<="), Integer(a)), Integer(b))  => Bool(a <= b)
       case App(App(Bool(p), yes), no)                          => if (p) yes else no
