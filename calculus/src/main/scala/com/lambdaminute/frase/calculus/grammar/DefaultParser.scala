@@ -1,8 +1,7 @@
 package com.lambdaminute.frase.calculus.grammar
 
-import com.lambdaminute.frase.calculus.errors._
-import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.errors.{FraseError, _}
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
 import scala.util.parsing.input.{Position, Reader}
@@ -11,10 +10,10 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
 
   override type Elem = Token
 
-  override def parse(program: String): Either[FraseError, List[Fragment]] =
+  override def parse(program: String): Either[FraseError, Term] =
     lexer.tokenize(program).flatMap(parse)
 
-  override def parseFragment(fragment: String): Either[FraseError, Fragment] =
+  override def parseFragment(fragment: String): Either[FraseError, Term] =
     lexer
       .tokenize(fragment)
       .map(_.takeWhile(_ != NEWLINE))
@@ -31,25 +30,23 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
     }
   }
 
-  private def parseSingleFragment(tokens: List[Token]): Either[FraseError, Fragment] = {
+  private def parseSingleFragment(tokens: List[Token]): Either[FraseError, Term] = {
     val reader = new PackratReader(TokenReader(tokens))
-    fragment(reader) match {
+    term(reader) match {
       case NoSuccess(msg, next) => Left(ParsingError(msg, next))
       case Success(result, _)   => Right(result)
     }
   }
 
-  private def parse(tokens: List[Token]): Either[FraseError, List[Fragment]] = {
-    val reader = new PackratReader(TokenReader(tokens))
+  private def parse(tokens: List[Token]): Either[FraseError, Term] = {
+    val reader: PackratReader[Token] = new PackratReader(TokenReader(tokens))
     program(reader) match {
       case NoSuccess(msg, next) => Left(ParsingError(msg, next))
       case Success(result, _)   => Right(result)
     }
   }
 
-  private lazy val fragment: PackratParser[Fragment] = (named | term) <~ NEWLINE.*
-
-  private lazy val program: PackratParser[List[Fragment]] = phrase(rep1(fragment))
+  private lazy val program: PackratParser[Term] = phrase(term)
 
   private case class MyPos(line: Int, column: Int, lineContents: String) extends Position
   private case class TokenReader(tokens: List[Token], position: Int = 1) extends Reader[Token] {
@@ -92,9 +89,5 @@ case class DefaultParser(lexer: Lexer) extends Parser with Parsers with PackratP
     accept("identifier", {
       case ID(str) => Identifier(str)
     })
-
-  private lazy val named: PackratParser[Named] = identifier ~ (`=` ~> term) ^^ {
-    case id ~ term => Named(id, term)
-  }
 
 }

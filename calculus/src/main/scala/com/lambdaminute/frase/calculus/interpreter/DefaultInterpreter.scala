@@ -1,16 +1,13 @@
 package com.lambdaminute.frase.calculus.interpreter
 
 import com.lambdaminute.frase.calculus.ast.AST
-import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.ast.AST._
-import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.debug
+import com.lambdaminute.frase.calculus.errors.FraseError
+import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.semantic.Keywords
 
-case class DefaultInterpreter(parser: Parser,
-                              letTransformer: LetTransformer,
-                              keywords: Keywords,
-                              builtIns: Keywords => PartialFunction[Term, Term])
+case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keywords => PartialFunction[Term, Term])
     extends Interpreter
     with FixPoint {
 
@@ -28,27 +25,13 @@ case class DefaultInterpreter(parser: Parser,
 
   val prettyTrace: Term => Term = debug.trace[Term, String](_.pretty)
 
-  def interpret(fragment: Fragment, namedTerms: List[Fragment]): Either[FraseError, Term] =
-    letTransformer
-      .transform(fragment :: namedTerms)
-      .map(term => interpret(term))
-
   def interpret(program: String): Either[FraseError, Term] =
     parser
       .parse(program)
-      .flatMap(letTransformer.transform)
-      .map(evalStep)
+      .flatMap(interpret)
 
-  def interpret(f: Fragment): Fragment = f match {
-    case x @ Named(_, _) => x
-    case term: Term      => interpret(term)
-  }
-
-  def interpret(t: Term): Term =
-    fixPoint(t)(x => evalStep(x))
-
-  def evalStep(t: Term): Term =
-    fixPoint(t)(t => { reduce(t) })
+  def interpret(t: Term): Either[FraseError, Term] =
+    Right(fixPoint(t)(t => reduce(t)))
 
   val App: AST.Application.type = Application
 

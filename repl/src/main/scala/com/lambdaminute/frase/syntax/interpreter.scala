@@ -2,18 +2,17 @@ package com.lambdaminute.frase.syntax
 
 import com.lambdaminute.frase.calculus.ast.AST
 import com.lambdaminute.frase.calculus.errors.FraseError
-import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter, DefaultLetTransformer, Interpreter}
+import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter, Interpreter}
 
 trait InterpreterSyntax {
   import DefaultParserInstances._
 
-  private def letTransformer = DefaultLetTransformer(defaultKeywords)
   private def interpreter: Interpreter =
-    DefaultInterpreter(parser, letTransformer, defaultKeywords, DefaultBuiltins.builtIns)
+    DefaultInterpreter(parser, defaultKeywords, DefaultBuiltins.builtIns)
 
   implicit class InterpreterSyntax(s: String) {
-    def interpret: Either[FraseError, AST.Fragment] = interpreter.interpret(s)
-    def interpretUnsafe: AST.Fragment               = interpreter.interpret(s).right.get
+    def interpret: Either[FraseError, AST.Term] = interpreter.interpret(s)
+    def interpretUnsafe: AST.Term               = interpreter.interpret(s).right.get
   }
 
 }

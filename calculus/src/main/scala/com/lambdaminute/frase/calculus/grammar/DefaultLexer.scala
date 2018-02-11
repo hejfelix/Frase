@@ -5,7 +5,10 @@ import com.lambdaminute.frase.calculus.errors.LexerError
 import scala.util.matching.Regex
 import scala.util.parsing.combinator.{PackratParsers, RegexParsers}
 
-case class DefaultLexer(private val lambdaAbstractionSeparator: String = ".") extends Lexer with RegexParsers with PackratParsers {
+case class DefaultLexer(private val lambdaAbstractionSeparator: String = ".")
+    extends Lexer
+    with RegexParsers
+    with PackratParsers {
 
   override val whiteSpace: Regex = """[ ]+""".r
 
