@@ -6,6 +6,7 @@ import com.lambdaminute.frase.calculus.debug
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.semantic.Keywords
+import cats.implicits._
 
 case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keywords => PartialFunction[Term, Term])
     extends Interpreter
@@ -47,5 +48,26 @@ case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keyw
     }
     betaReduce
   }
+
+  override def interpretScan(term: Term): List[Either[FraseError, Term]] = {
+    def steps: Stream[Term] = Stream.iterate(term) { t =>
+      reduce(t)
+    }
+
+    term.asRight[FraseError] :: steps
+      .zip(steps.tail)
+      .takeWhile {
+        case (a, b) => a != b
+      }
+      .map(_._2)
+      .map(Right.apply)
+      .toList
+  }
+
+  override def interpretScan(program: String): List[Either[FraseError, Term]] =
+    parser.parse(program) match {
+      case error @ Left(_) => List(error)
+      case Right(t)        => interpretScan(t)
+    }
 
 }

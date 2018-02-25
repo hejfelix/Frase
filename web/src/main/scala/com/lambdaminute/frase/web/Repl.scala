@@ -1,5 +1,7 @@
 package com.lambdaminute.frase.web
 
+import com.lambdaminute.frase.calculus.ast.AST
+import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords
@@ -20,16 +22,20 @@ import slinky.web.html._
     DefaultInterpreter(parser, defaultKeywords, defaultBuiltins)
 
   case class Props()
-  case class State(program: String = "", result: String = "")
+  case class State(program: String = "", results: List[String] = Nil)
 
   private val handleInput = (e: Event) => {
     val program: String = e.target.asInstanceOf[HTMLInputElement].value
-    this.setState(s => s.copy(result = interpreter.interpret(program).toString))
+    this.setState(s => {
+      val steps: List[Either[FraseError, AST.Term]] = interpreter.interpretScan(program)
+      println(steps)
+      s.copy(results = steps.map(_.fold(_.msg, _.pretty)))
+    })
   }
 
   override def initialState = State()
   override def render(): ReactElement = div(
     input(onChange := handleInput),
-    p(state.result.mkString)
+    state.results.map(p(_))
   )
 }
