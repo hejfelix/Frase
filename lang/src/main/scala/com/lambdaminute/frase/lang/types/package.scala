@@ -1,8 +1,8 @@
 package com.lambdaminute.frase.lang
 
 import com.lambdaminute.frase.calculus.ast.AST.Term
-import com.softwaremill.tagging._
-
+import shapeless.tag
+import shapeless.tag.@@
 package object types {
 
   //Maker traits
@@ -11,7 +11,7 @@ package object types {
   }
 
   implicit class TermToType(t: Term) {
-    def asType: Type = t.taggedWith[Tags.Type]
+    def asType: Type = tag[Tags.Type][Term](t)
   }
 
   implicit class TypeToTerm(t: Type) {

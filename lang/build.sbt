@@ -1,6 +1,4 @@
-libraryDependencies ++= Seq(
-  //Scala libraries
-  Dependencies.scalatest,
-  Dependencies.scalacheck
-)
+import Dependencies.sharedTestDeps
+
+libraryDependencies ++= sharedTestDeps.value
 
