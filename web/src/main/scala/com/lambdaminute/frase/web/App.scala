@@ -23,11 +23,10 @@ object ReactLogo extends js.Object
   def render() =
     div(className := "App")(
       header(className := "App-header")(
-        img(src := ReactLogo.asInstanceOf[String], className := "App-logo", alt := "logo"),
         h1(className := "App-title")("Welcome to Frase Web")
       ),
       p(className := "App-intro")(
-        "Enter some lambda calculus in the text field and hit `evaluate`"
+        "Enter some lambda calculus in the text field to see the beta-reduction"
       ),
       Repl()
     )
