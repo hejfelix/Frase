@@ -12,14 +12,16 @@ object AST {
 
     import TerminalColors._
     def prettyType: String = this match {
-      case Bool(b)                                                     => b.toString
-      case Identifier(id)                                              => s"$Green$id$Off"
-      case Integer(i)                                                  => i.toString
-      case Floating(f)                                                 => f.toString
-      case Application(left, right)                                    => s"(${left.prettyType} ${right.prettyType})"
-      case LambdaAbstraction(id @ Identifier(_), body @ Identifier(_)) => s"${id.prettyType} -> ${body.prettyType}"
-      case LambdaAbstraction(id, body @ Identifier(_))                 => s"(${id.prettyType}) -> ${body.prettyType}"
-      case LambdaAbstraction(id, body)                                 => s"(${id.prettyType}) -> (${body.prettyType})"
+      case Bool(b)                  => b.toString
+      case Identifier(id)           => s"$Green$id$Off"
+      case Integer(i)               => i.toString
+      case Floating(f)              => f.toString
+      case Application(left, right) => s"(${left.prettyType} ${right.prettyType})"
+      case LambdaAbstraction(id @ Identifier(_), body @ Identifier(_)) =>
+        s"${id.prettyType} -> ${body.prettyType}"
+      case LambdaAbstraction(id, body @ Identifier(_)) =>
+        s"(${id.prettyType}) -> ${body.prettyType}"
+      case LambdaAbstraction(id, body) => s"(${id.prettyType}) -> (${body.prettyType})"
     }
 
     def pretty: String = this match {
@@ -79,12 +81,21 @@ object AST {
       case _                                => this
     }
 
-    def nextAvailableId: Identifier = Identifier(increment(this.enumerate.collect { case Identifier(x) => x }.max))
+    def nextAvailableId: Identifier =
+      if (vars.isEmpty)
+        Identifier("a")
+      else
+        Identifier(increment(vars.map(_.id).max))
 
     def vars: List[Identifier] = this.enumerate.collect { case Identifier(x) => Identifier(x) }
 
     private def increment(s: String): String =
-      (s.map(_ - 'a').reverse.fromBase(26) + 1).toBase(26).reverse.map(_ + 'a').map(_.toChar).mkString
+      (s.map(_ - 'a').reverse.fromBase(26) + 1)
+        .toBase(26)
+        .reverse
+        .map(_ + 'a')
+        .map(_.toChar)
+        .mkString
 
     def unshadow: Term = this match {
       case LambdaAbstraction(arg: Identifier, body) if !body.freeVars.contains(arg) =>

@@ -24,8 +24,9 @@ class DefaultUnification(logging: Boolean = false) extends Unification with FixP
     case Delete(eq)             => s"Delete ${prettyEq(eq)}"
     case Swap(eq)               => s"Swap ${prettyEq(eq)}"
     case Eliminate(x, newLabel) => s"Eliminate `${x.pretty}` by replacement: `${newLabel.pretty}`"
-    case Decompose(xs)          => val prettyEqs = xs.map(prettyEq).mkString(", "); s"Decomposing into { ${prettyEqs} }"
-    case _                      => ""
+    case Decompose(xs) =>
+      val prettyEqs = xs.map(prettyEq).mkString(", "); s"Decomposing into { ${prettyEqs} }"
+    case _ => ""
   }
 
   def unify(eqs: List[(Term, Term)]): Either[FraseError, List[(Term, Term)]] =
@@ -60,7 +61,7 @@ class DefaultUnification(logging: Boolean = false) extends Unification with FixP
     fixPoint(Right(eqs): Either[FraseError, List[(Term, Term)]])(_.flatMap(unify))
 
   def applyStep(eqs: List[(Term, Term)])(step: Step): List[(Term, Term)] = step match {
-    case Decompose(newEqs) => (eqs ::: newEqs)
+    case Decompose(newEqs) => eqs ::: newEqs
     case Swap(toBeSwapped) => eqs.map(x => if (x == toBeSwapped) toBeSwapped.swap else x)
     case Eliminate(x, newLabel) =>
       eqs.map {
@@ -69,9 +70,9 @@ class DefaultUnification(logging: Boolean = false) extends Unification with FixP
       }
     case Delete(eq) =>
       val prettyEqs = eqs.map(prettyEq).mkString(", ")
-      log(s"${prettyEq(eq)} deleting in ${prettyEqs}"); eqs.filter(_ != eq)
+      log(s"${prettyEq(eq)} deleting in $prettyEqs"); eqs.filter(_ != eq)
     case Ignore => eqs
-    case _      => sys.error(s"Unable to perform ${step}")
+    case _      => sys.error(s"Unable to perform $step")
   }
 
   def isMono(s: String) = !s.isEmpty && s.head.isUpper
@@ -85,7 +86,8 @@ class DefaultUnification(logging: Boolean = false) extends Unification with FixP
     case (a, b) if a == b                                         => Delete(eq)
     case (Identifier(x), Identifier(y)) if isPoly(x) && isPoly(y) => Ignore
     case (_, Identifier(b)) if isPoly(b)                          => Swap(eq)
-    case ((Application(l1, r1), Application(l2, r2)))             => Decompose(List(l1 -> l2, r1 -> r2).filter(nonRedundant))
+    case ((Application(l1, r1), Application(l2, r2))) =>
+      Decompose(List(l1 -> l2, r1 -> r2).filter(nonRedundant))
     case (LambdaAbstraction(argl, bodyl), LambdaAbstraction(argr, bodyr)) =>
       Decompose(List(argl -> argr, bodyl -> bodyr).filter(nonRedundant))
     case (a @ Identifier(aa), b) if !b.vars.contains(a) && isPoly(aa) => Eliminate(a, b)

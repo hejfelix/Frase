@@ -8,13 +8,15 @@ import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.semantic.Keywords
 import cats.implicits._
 
-case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keywords => PartialFunction[Term, Term])
+case class DefaultInterpreter(parser: Parser,
+                              keywords: Keywords,
+                              builtIns: Keywords => BetaReduction)
     extends Interpreter
     with FixPoint {
 
   implicit class TermSyntax(t: Term) {
-    def interpret = DefaultInterpreter.this.interpret(t)
-    def reduce    = DefaultInterpreter.this.reduce(t)
+    def interpret: Either[FraseError, Term] = DefaultInterpreter.this.interpret(t)
+    def reduce                              = DefaultInterpreter.this.reduce(t.nextAvailableId -> t)
   }
 
   def listToMap(l: List[(Term, Term)]): Map[Term, List[Term]] =
@@ -32,41 +34,51 @@ case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keyw
       .flatMap(interpret)
 
   def interpret(t: Term): Either[FraseError, Term] =
-    Right(fixPoint(t)(t => reduce(t)))
+    interpretScan(t).last // yiikes
 
   val App: AST.Application.type = Application
 
-  def reduce: PartialFunction[Term, Term] = {
-    def betaReduce: PartialFunction[Term, Term] = builtIns(keywords) orElse {
-      case Application(LambdaAbstraction(id, body), rhs) if id == rhs => body
-      case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != keywords.yCombinator =>
-        betaReduce(body.substitute(id -> rhs))
-      case Application(t, y)       => Application(betaReduce(t), betaReduce(y))
-      case LambdaAbstraction(a, b) => LambdaAbstraction(a, betaReduce(b))
-      case i @ Identifier(_)       => i
-      case t                       => t
+  def reduce: BetaReduction = {
+    def betaReduce: BetaReduction = builtIns(keywords) orElse {
+      case (nextId, Application(LambdaAbstraction(id, body), rhs)) if id == rhs => (nextId, body)
+      case (nextId, Application(LambdaAbstraction(id: Identifier, body), rhs))
+          if id != keywords.yCombinator =>
+        betaReduce(nextId -> body.substitute(id -> rhs))
+      case (nextId, Application(t, y)) =>
+        val (nextLeft, left)   = betaReduce(nextId   -> t)
+        val (nextRight, right) = betaReduce(nextLeft -> y)
+        (nextRight, Application(left, right))
+      case (nextId, LambdaAbstraction(a, b)) =>
+        val (nextBody, body) = betaReduce(nextId -> b)
+        (nextBody, LambdaAbstraction(a, body))
+      case (nextId, i @ Identifier(_)) => (nextId, i)
+      case t                           => t
     }
     betaReduce
   }
 
-  override def interpretScan(term: Term): List[Either[FraseError, Term]] = {
-    def steps: Stream[Term] = Stream.iterate(term) { t =>
-      reduce(t)
-    }
+  override def interpretScan(term: Term): Stream[Either[FraseError, Term]] = {
+    def steps: Stream[Term] =
+      Stream
+        .iterate(term.nextAvailableId -> term) {
+          case (nextId, t) =>
+            println(s"Next available id:${nextId},  ${nextId.pretty}")
+            reduce(nextId -> t)
+        }
+        .map(_._2)
 
-    term.asRight[FraseError] :: steps
+    term.asRight[FraseError] #:: steps
       .zip(steps.tail)
       .takeWhile {
         case (a, b) => a != b
       }
       .map(_._2)
       .map(Right.apply)
-      .toList
   }
 
-  override def interpretScan(program: String): List[Either[FraseError, Term]] =
+  override def interpretScan(program: String): Stream[Either[FraseError, Term]] =
     parser.parse(program) match {
-      case error @ Left(_) => List(error)
+      case error @ Left(_) => Stream(error)
       case Right(t)        => interpretScan(t)
     }
 

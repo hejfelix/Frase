@@ -9,7 +9,9 @@ lazy val commonSettings = Seq(
 
 lazy val calculus = crossProject
   .in(file("calculus"))
-  .settings(commonSettings, libraryDependencies ++= sharedDeps.value, libraryDependencies ++= sharedTestDeps.value)
+  .settings(commonSettings,
+            libraryDependencies ++= sharedDeps.value,
+            libraryDependencies ++= sharedTestDeps.value)
 
 lazy val calculusJVM = calculus.jvm
 lazy val calculusJS  = calculus.js
@@ -39,4 +41,5 @@ lazy val web = project
     webpackDevServerExtraArgs in fastOptJS := Seq("--inline", "--hot"),
     webpackBundlingMode in fastOptJS := BundlingMode.LibraryOnly(),
     addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full)
-  ).dependsOn(calculusJS)
+  )
+  .dependsOn(calculusJS)
