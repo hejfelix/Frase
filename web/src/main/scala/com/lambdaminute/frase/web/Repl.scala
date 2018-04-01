@@ -22,36 +22,39 @@ import slinky.web.html._
     DefaultInterpreter(parser, defaultKeywords, defaultBuiltins)
 
   case class Props()
-  case class State(program: String = "", results: List[String] = Nil, stepsToEvaluate: Int = 10)
+  case class State(program: String = "", stepsToEvaluate: Int = 30, evaluated: List[String] = Nil)
 
-  private def evaluated: List[String] =
-    if (state.program.isEmpty) {
+  private def evaluate(program: String): List[String] =
+    if (program.isEmpty) {
       Nil
     } else {
-      val steps: Stream[Either[FraseError, AST.Term]] = interpreter.interpretScan(state.program)
-      println(steps)
-      steps.take(state.stepsToEvaluate).map(_.fold(_.msg, _.pretty)).toList
+      val steps: Stream[Either[FraseError, AST.Term]] = interpreter.interpretScan(program)
+      steps.map(_.fold(_.msg, _.pretty)).take(state.stepsToEvaluate).toList
     }
 
   private val handleInput = (e: Event) => {
     val program: String = e.target.asInstanceOf[HTMLInputElement].value
-    this.setState(_.copy(program = program))
+    this.setState(_.copy(program = program, evaluated = evaluate(program)))
   }
 
   private val handleStepsInput = (e: Event) => {
     val number = e.target.asInstanceOf[HTMLInputElement].valueAsNumber
-    println(number)
-    this.setState { _.copy(stepsToEvaluate = number) }
+    this.setState(s => s.copy(stepsToEvaluate = number, evaluated = evaluate(s.program)))
   }
 
   override def initialState = State()
   override def render(): ReactElement = div(
     p("Number of steps to evaluate:"),
-    input(`type` := "number",
-          value := state.stepsToEvaluate.toString,
-          onChange := handleStepsInput),
+    input(`type` := "number", value := state.stepsToEvaluate.toString, onChange := handleStepsInput),
     p("Enter some lambda calculus in the text field to see the beta-reduction"),
     input(onChange := handleInput, size := "80"),
-    evaluated.map(step => p(key := step.toString)(step))
+    br(),
+    br(),
+    s"Last evaluated result: ",
+    b(state.evaluated.takeRight(1).mkString),
+    s" (total steps: ${state.evaluated.length})",
+    br(),
+    br(),
+    state.evaluated.map(step => p(key := step.toString)(step))
   )
 }

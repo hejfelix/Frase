@@ -8,6 +8,13 @@ object AST {
     val Off: String   = Console.RESET
   }
 
+  object Syntax {
+    implicit class AstSyntax(self: Term) {
+      def app(that: Term) = Application(self, that)
+      def abs(that: Term) = LambdaAbstraction(self, that)
+    }
+  }
+
   sealed trait Term {
 
     import TerminalColors._
@@ -74,24 +81,30 @@ object AST {
     def substitute(label: (Term, Term)): Term = (this, label) match {
       case (i: Identifier, (j, k)) if i == j => k
       case (i: Identifier, _)                => i
-      case (Application(a, b), _)            => Application(a.substitute(label), b.substitute(label))
-      case (LambdaAbstraction(id: Identifier, body), (x, y)) if id != x && !y.freeVars(id) =>
+      case (Application(a, b), _) =>
+        Application(a.substitute(label), b.substitute(label))
+      case (LambdaAbstraction(id: Identifier, body), (oldLabel, newLabel))
+          if id != oldLabel && !newLabel.freeVars(id) =>
         LambdaAbstraction(id, body.substitute(label))
       case (a @ LambdaAbstraction(_, _), _) => a
       case _                                => this
     }
 
-    def nextAvailableId: Identifier =
-      if (vars.isEmpty)
+    def nextAvailableId: Identifier = nextAvailableId(Set.empty)
+
+    def nextAvailableId(ignoreKeywords: Set[String]): Identifier = {
+      val filteredVars = vars.map(_.id).filter(!ignoreKeywords.contains(_))
+      if (filteredVars.isEmpty)
         Identifier("a")
       else
-        Identifier(increment(vars.map(_.id).max))
+        Identifier(increment(filteredVars.max))
+    }
 
-    def vars: List[Identifier] = this.enumerate.collect { case Identifier(x) => Identifier(x) }
+    def vars: List[Identifier] = this.enumerate.collect { case i @ Identifier(_) => i }
 
     private def increment(s: String): String =
-      (s.map(_ - 'a').reverse.fromBase(26) + 1)
-        .toBase(26)
+      (s.map(_ - 'a').reverse.fromBase(base = 26) + 1)
+        .toBase(base = 26)
         .reverse
         .map(_ + 'a')
         .map(_.toChar)

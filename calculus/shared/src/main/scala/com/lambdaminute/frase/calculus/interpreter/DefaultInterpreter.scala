@@ -8,9 +8,7 @@ import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.semantic.Keywords
 import cats.implicits._
 
-case class DefaultInterpreter(parser: Parser,
-                              keywords: Keywords,
-                              builtIns: Keywords => BetaReduction)
+case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keywords => BetaReduction)
     extends Interpreter
     with FixPoint {
 
@@ -40,14 +38,13 @@ case class DefaultInterpreter(parser: Parser,
 
   def reduce: BetaReduction = {
     def betaReduce: BetaReduction = builtIns(keywords) orElse {
-      case (nextId, Application(LambdaAbstraction(id, body), rhs)) if id == rhs => (nextId, body)
-      case (nextId, Application(LambdaAbstraction(id: Identifier, body), rhs))
-          if id != keywords.yCombinator =>
-        betaReduce(nextId -> body.substitute(id -> rhs))
+      case (nextId, Application(LambdaAbstraction(id: Identifier, body), rhs)) if id != keywords.yCombinator =>
+        nextId -> body.substitute(id -> rhs)
       case (nextId, Application(t, y)) =>
-        val (nextLeft, left)   = betaReduce(nextId   -> t)
+        val (nextLeft, left)   = betaReduce(nextId -> t)
         val (nextRight, right) = betaReduce(nextLeft -> y)
-        (nextRight, Application(left, right))
+        val result             = Application(left, right)
+        (nextRight, result)
       case (nextId, LambdaAbstraction(a, b)) =>
         val (nextBody, body) = betaReduce(nextId -> b)
         (nextBody, LambdaAbstraction(a, body))
@@ -58,14 +55,15 @@ case class DefaultInterpreter(parser: Parser,
   }
 
   override def interpretScan(term: Term): Stream[Either[FraseError, Term]] = {
-    def steps: Stream[Term] =
+    def steps: Stream[Term] = {
+      val firstAvailableId = term.nextAvailableId(ignoreKeywords = Set(keywords.yCombinatorKeyword))
       Stream
-        .iterate(term.nextAvailableId -> term) {
+        .iterate(firstAvailableId -> term) {
           case (nextId, t) =>
-            println(s"Next available id:${nextId},  ${nextId.pretty}")
             reduce(nextId -> t)
         }
         .map(_._2)
+    }
 
     term.asRight[FraseError] #:: steps
       .zip(steps.tail)
