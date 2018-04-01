@@ -27,7 +27,6 @@ object DefaultBuiltins {
       case (nextId, App(App(Identifier("+"), Floating(x)), Floating(y))) => (nextId, Floating(x + y))
       case (nextId, App(App(Identifier("-"), Integer(x)), Integer(y)))   => (nextId, Integer(x - y))
       case (nextId, App(App(Identifier("%"), Integer(a)), Integer(b)))   => (nextId, Integer(a % b))
-
     }
   }
 
