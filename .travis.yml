@@ -1,15 +1,27 @@
 language: scala
 scala:
-  - 2.11.6
+  - 2.12.4
 jdk:
   - oraclejdk8
 
 script:
   - export CODACY_PROJECT_TOKEN=8b28cb32200f483b9b0b9688c8b99c5d
-  - sbt clean coverage test
-  - sbt coverageReport
-  - sbt coverageAggregate
-  - sbt codacyCoverage
+  - sbt "calculusJS/test"
+  - sbt "calculusJVM/test"
+  - sbt "lang/test"
+  - sbt "web/fastOptJS::webpack"
+  - ./bin/refresh_gh_pages.sh
+
+deploy:
+  edge:
+    branch: v1.8.47
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in travis-ci.org dashboard, marked secure
+  keep-history: true
+  on:
+    branch: master
+  local-dir: deploy
 
 notifications:
   email:
