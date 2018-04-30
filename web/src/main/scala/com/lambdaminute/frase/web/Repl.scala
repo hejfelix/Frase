@@ -14,22 +14,25 @@ import slinky.web.html._
 
 @react class Repl extends Component {
 
-  private val defaultKeywords = DefaultKeywords()
-  private val lexer           = DefaultLexer()
-  private val parser          = DefaultParser(lexer)
-  private val defaultBuiltins = DefaultBuiltins.builtIns
+  private val expressionLengthCutoff = 90
+  private val defaultKeywords        = DefaultKeywords()
+  private val lexer                  = DefaultLexer()
+  private val parser                 = DefaultParser(lexer)
+  private val defaultBuiltins        = DefaultBuiltins.builtIns
+
   private val interpreter =
     DefaultInterpreter(parser, defaultKeywords, defaultBuiltins)
-
   case class Props()
-  case class State(program: String = "", stepsToEvaluate: Int = 30, evaluated: List[String] = Nil)
 
+  case class State(program: String = "", stepsToEvaluate: Int = 30, evaluated: List[String] = Nil)
   private def evaluate(program: String): List[String] =
     if (program.isEmpty) {
       Nil
     } else {
       val steps: Stream[Either[FraseError, AST.Term]] = interpreter.interpretScan(program)
-      steps.map(_.fold(_.msg, _.pretty)).take(state.stepsToEvaluate).toList
+      steps.map(_.fold(_.msg, _.pretty)).take(state.stepsToEvaluate).toList.map { s =>
+        if (s.length > expressionLengthCutoff) s.take(expressionLengthCutoff) + "..." else s
+      }
     }
 
   private val handleInput = (e: Event) => {
