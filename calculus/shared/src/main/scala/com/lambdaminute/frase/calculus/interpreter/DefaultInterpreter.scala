@@ -14,7 +14,7 @@ case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keyw
 
   implicit class TermSyntax(t: Term) {
     def interpret: Either[FraseError, Term] = DefaultInterpreter.this.interpret(t)
-    def reduce                              = DefaultInterpreter.this.reduce(t.nextAvailableId -> t)
+    def reduce                              = DefaultInterpreter.this.reduce(t)
   }
 
   def listToMap(l: List[(Term, Term)]): Map[Term, List[Term]] =
@@ -38,32 +38,18 @@ case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keyw
 
   def reduce: BetaReduction = {
     def betaReduce: BetaReduction = builtIns(keywords) orElse {
-      case (nextId, Application(LambdaAbstraction(id: Identifier, body), rhs)) if id != keywords.yCombinator =>
-        nextId -> body.substitute(id -> rhs)
-      case (nextId, Application(t, y)) =>
-        val (nextLeft, left)   = betaReduce(nextId -> t)
-        val (nextRight, right) = betaReduce(nextLeft -> y)
-        val result             = Application(left, right)
-        (nextRight, result)
-      case (nextId, LambdaAbstraction(a, b)) =>
-        val (nextBody, body) = betaReduce(nextId -> b)
-        (nextBody, LambdaAbstraction(a, body))
-      case (nextId, i @ Identifier(_)) => (nextId, i)
-      case t                           => t
+      case Application(LambdaAbstraction(id: Identifier, body), rhs) if id != keywords.yCombinator =>
+        body.substitute(id -> rhs)
+      case Application(t, y)       => Application(betaReduce(t), betaReduce(y))
+      case LambdaAbstraction(a, b) => LambdaAbstraction(a, betaReduce(b))
+      case i @ Identifier(_)       => i
+      case t                       => t
     }
     betaReduce
   }
 
   override def interpretScan(term: Term): Stream[Either[FraseError, Term]] = {
-    def steps: Stream[Term] = {
-      val firstAvailableId = term.nextAvailableId(ignoreKeywords = Set(keywords.yCombinatorKeyword))
-      Stream
-        .iterate(firstAvailableId -> term) {
-          case (nextId, t) =>
-            reduce(nextId -> t)
-        }
-        .map(_._2)
-    }
+    def steps: Stream[Term] = Stream.iterate(term)(reduce)
 
     term.asRight[FraseError] #:: steps
       .zip(steps.tail)
