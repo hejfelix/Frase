@@ -5,7 +5,7 @@ import sbt.addCompilerPlugin
 lazy val commonSettings = Seq(
   organization := "com.lambdaminute",
   version := "0.1",
-  scalaVersion := "2.12.7"
+  scalaVersion := "2.12.6"
 )
 
 lazy val calculus = crossProject
