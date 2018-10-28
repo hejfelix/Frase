@@ -1,23 +1,39 @@
 import Dependencies._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import sbt.addCompilerPlugin
+
 lazy val commonSettings = Seq(
   organization := "com.lambdaminute",
   version := "0.1",
-  scalaVersion := "2.12.4"
+  scalaVersion := "2.12.7"
 )
 
 lazy val calculus = crossProject
   .in(file("calculus"))
-  .settings(commonSettings,
-            libraryDependencies ++= sharedDeps.value,
-            libraryDependencies ++= sharedTestDeps.value)
+  .settings(commonSettings, libraryDependencies ++= sharedDeps.value, libraryDependencies ++= sharedTestDeps.value)
 
 lazy val calculusJVM = calculus.jvm
 lazy val calculusJS  = calculus.js
 
-lazy val lang = project.in(file("lang")).settings(commonSettings).dependsOn(calculusJVM)
-lazy val repl = project.in(file("repl")).settings(commonSettings).dependsOn(lang, calculusJVM)
+lazy val lang = project
+  .in(file("lang"))
+  .settings(commonSettings)
+  .dependsOn(calculusJVM)
+
+lazy val repl = project
+  .in(file("repl"))
+  .settings(commonSettings, libraryDependencies ++= sharedTestDeps.value)
+  .dependsOn(lang, calculusJVM)
+
+lazy val interactive = project
+  .settings(commonSettings)
+  .dependsOn(lang, calculusJVM, repl)
+  .settings(
+    initialCommands in console :=
+      """
+        |import com.lambdaminute.frase.syntax.all._
+      """.stripMargin
+  )
 
 lazy val web = project
   .in(file("web"))
@@ -43,3 +59,5 @@ lazy val web = project
     addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full)
   )
   .dependsOn(calculusJS)
+
+addCommandAlias("fraseRepl", "interactive/console")

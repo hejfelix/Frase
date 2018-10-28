@@ -8,7 +8,8 @@ object Dependencies {
     val scalacheck          = "1.13.5"
     val parserCombinators   = "1.0.5"
     val scalatest           = "3.0.1"
-    val cats                = "0.9.0"
+    val cats                = "1.1.0"
+    val catsEffect          = "1.0.0-RC"
     val shapeless           = "2.3.3"
   }
 
@@ -24,6 +25,7 @@ object Dependencies {
       "org.typelevel"          %%% "cats-macros"              % v.cats,
       "org.typelevel"          %%% "cats-kernel"              % v.cats,
       "org.typelevel"          %%% "cats-core"                % v.cats,
+      "org.typelevel"          %%% "cats-effect"              % v.catsEffect,
       "org.scala-lang.modules" %%% "scala-parser-combinators" % v.parserCombinators,
       "com.chuusai"            %%% "shapeless"                % v.shapeless
     ))

@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.calculus.interactive
 
-import com.lambdaminute.frase.calculus.ast.AST.Term
+import com.lambdaminute.frase.calculus.ast.Ast.Term
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 
 trait ParserHelper {

@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.calculus.interpreter
 
-import com.lambdaminute.frase.calculus.ast.AST.Term
+import com.lambdaminute.frase.calculus.ast.Ast.Term
 import com.lambdaminute.frase.calculus.errors.FraseError
 
 trait Interpreter {

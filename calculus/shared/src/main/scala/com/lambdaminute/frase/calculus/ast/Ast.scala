@@ -1,8 +1,9 @@
 package com.lambdaminute.frase.calculus.ast
 
 import com.lambdaminute.frase.calculus.math._
+import com.lambdaminute.frase.calculus.pretty.PrettyPrinter
 
-object AST {
+object Ast {
   object TerminalColors {
     val Green: String = Console.GREEN
     val Off: String   = Console.RESET
@@ -31,14 +32,7 @@ object AST {
       case LambdaAbstraction(id, body) => s"(${id.prettyType}) -> (${body.prettyType})"
     }
 
-    def pretty: String = this match {
-      case Bool(b)                     => b.toString
-      case Identifier(id)              => id
-      case Integer(i)                  => i.toString
-      case Floating(f)                 => f.toString
-      case Application(left, right)    => s"(${left.pretty} ${right.pretty})"
-      case LambdaAbstraction(id, body) => s"${id.pretty} . (${body.pretty})"
-    }
+    def pretty: String = PrettyPrinter.apply.pretty(this)
 
     def contains(term: Term): Boolean =
       this match {
@@ -47,6 +41,16 @@ object AST {
         case LambdaAbstraction(id, body) => id.contains(term) || body.contains(term)
         case _                           => false
       }
+
+    def isApplication = this match {
+      case _: Application => true
+      case _              => false
+    }
+
+    def isAtom: Boolean = this match {
+      case Bool(_) | Floating(_) | Integer(_) | Identifier(_) => true
+      case _                                                  => false
+    }
 
     def transform(f: PartialFunction[Term, Term]): Term = {
 
@@ -64,10 +68,11 @@ object AST {
       case _                           => this :: Nil
     }
 
-    def size = enumerate.size
+    def size: Int = enumerate.size
 
     /**
       * The set of free variables in t (=variables that have not been bound)
+      *
       * @return The set containing all free variables inside `this`
       */
     def freeVars: Set[Identifier] = this match {
@@ -124,8 +129,8 @@ object AST {
         case `oldLabel` => newLabel
       }
 
-    def isMono(s: String) = !s.isEmpty && s.head.isUpper
-    def isPoly(s: String) = !isMono(s)
+    def isMono(s: String): Boolean = !s.isEmpty && s.head.isUpper
+    def isPoly(s: String): Boolean = !isMono(s)
 
   }
 

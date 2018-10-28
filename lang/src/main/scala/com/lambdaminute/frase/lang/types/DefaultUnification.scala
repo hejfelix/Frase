@@ -1,7 +1,7 @@
 package com.lambdaminute.frase.lang.types
 
 import com.lambdaminute.frase.calculus.interpreter.FixPoint
-import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.ast.Ast._
 import com.lambdaminute.frase.calculus.errors.{FraseError, UnificationError}
 
 class DefaultUnification(logging: Boolean = false) extends Unification with FixPoint {

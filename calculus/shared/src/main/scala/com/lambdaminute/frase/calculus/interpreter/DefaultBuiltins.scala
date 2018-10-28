@@ -1,12 +1,12 @@
 package com.lambdaminute.frase.calculus.interpreter
 
-import com.lambdaminute.frase.calculus.ast.AST
-import com.lambdaminute.frase.calculus.ast.AST.{Application => App, _}
+import com.lambdaminute.frase.calculus.ast.Ast
+import com.lambdaminute.frase.calculus.ast.Ast.{Application => App, _}
 import com.lambdaminute.frase.calculus.semantic.Keywords
 
 object DefaultBuiltins {
   def builtIns: Keywords => BetaReduction = keyWords => {
-    import AST.Syntax.AstSyntax
+    import Ast.Syntax.AstSyntax
     import keyWords._
     {
       case Bool(b) =>

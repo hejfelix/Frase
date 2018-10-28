@@ -1,7 +1,7 @@
 package com.lambdaminute.frase.lang.types
 
 import com.lambdaminute.frase.calculus.interactive.ParserHelper
-import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.ast.Ast._
 import org.scalatest.{Matchers, WordSpec}
 
 class DefaultUnificationSpec extends WordSpec with Matchers with ParserHelper {

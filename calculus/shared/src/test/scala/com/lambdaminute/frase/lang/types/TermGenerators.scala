@@ -1,15 +1,15 @@
 package com.lambdaminute.frase.lang.types
 
-import com.lambdaminute.frase.calculus.ast.AST
-import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.ast.Ast
+import com.lambdaminute.frase.calculus.ast.Ast._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait TermGenerators {
 
-  def termGen: Gen[AST.Term] =
+  def termGen: Gen[Ast.Term] =
     Gen.oneOf(leafs, nodes)
 
-  def nodes: Gen[AST.Term] = Gen.oneOf(appGen, lambdaGen)
+  def nodes: Gen[Ast.Term] = Gen.oneOf(appGen, lambdaGen)
 
   def leafs =
     Gen.oneOf(idGen, floatingGen, boolGen)

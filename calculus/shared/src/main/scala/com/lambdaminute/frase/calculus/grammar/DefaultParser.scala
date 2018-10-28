@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.calculus.grammar
 
-import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.ast.Ast._
 import com.lambdaminute.frase.calculus.errors.{FraseError, _}
 
 import scala.util.parsing.combinator.{PackratParsers, Parsers}
