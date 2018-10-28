@@ -5,12 +5,12 @@ import com.lambdaminute.frase.calculus.ast.Ast.Integer
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.frase.calculus.interpreter.{ConcurrentInterpreter, DefaultBuiltins, DefaultInterpreter}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords
-import org.scalatest.{EitherValues, Matchers, WordSpec}
+import org.scalatest.{AsyncWordSpec, EitherValues, Matchers}
 
-import concurrent.duration._
-import scala.concurrent.Await
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
-class ConcurrentInterpreterSpec extends WordSpec with Matchers with EitherValues {
+class ConcurrentInterpreterSpec extends AsyncWordSpec with Matchers with EitherValues {
 
   "ConcurrentInterpreterSpec" should {
     "work" in {
@@ -24,10 +24,14 @@ class ConcurrentInterpreterSpec extends WordSpec with Matchers with EitherValues
       val result = b
       ((System.currentTimeMillis() - start).millis, result)
     }
+    def timeAsync[T](b: => Future[T]): Future[(Duration, T)] = {
+      val start = System.currentTimeMillis()
+      b.map(r => ((System.currentTimeMillis() - start).millis, r))
+    }
 
     "interpret fibonacci function" in {
 
-      def fib = "yCombinator (fib . n . ( (<= n 1) n (+ (fib (- n 2)) (fib (- n 1))))) 24"
+      def fib = "yCombinator (fib . n . ( (<= n 1) n (+ (fib (- n 2)) (fib (- n 1))))) 17"
 
       val parser = DefaultParser(DefaultLexer())
 
@@ -37,14 +41,15 @@ class ConcurrentInterpreterSpec extends WordSpec with Matchers with EitherValues
       val sequentialInterpreter =
         DefaultInterpreter(parser, DefaultKeywords(), DefaultBuiltins.builtIns)
 
-      val io                 = concurrentInterpreter.interpret(fib).value
-      val timeLimit          = 10.seconds
-      val (concTime, result) = time { Await.result(io.unsafeToFuture(), timeLimit).right.get }
+      val io = concurrentInterpreter.interpret(fib).value
 
-      val (seqTime, seqResult) = time { sequentialInterpreter.interpret(fib).right.get }
-
-      println(s"Concurrent time: $concTime, Sequential time: ${seqTime}")
-      result shouldBe seqResult
+      for {
+        (concTime, result)   <- timeAsync { io.unsafeToFuture() }
+        (seqTime, seqResult) <- Future(time { sequentialInterpreter.interpret(fib).right.get })
+      } yield {
+        println(s"Concurrent time: $concTime, Sequential time: $seqTime")
+        result.right.value shouldBe seqResult
+      }
     }
   }
 

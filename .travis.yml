@@ -1,15 +1,12 @@
 language: scala
 scala:
-  - 2.12.4
+  - 2.12.6
 jdk:
   - oraclejdk8
 
 script:
   - export CODACY_PROJECT_TOKEN=8b28cb32200f483b9b0b9688c8b99c5d
-  - sbt "calculusJS/test"
-  - sbt "calculusJVM/test"
-  - sbt "lang/test"
-  - sbt "web/fastOptJS::webpack"
+  - sbt calculusJS/test calculusJVM/test lang/test web/fastOptJS::webpack
   - ./bin/refresh_gh_pages.sh
 
 deploy:
