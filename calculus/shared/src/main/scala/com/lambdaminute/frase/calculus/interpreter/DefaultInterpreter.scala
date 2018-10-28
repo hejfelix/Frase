@@ -1,7 +1,7 @@
 package com.lambdaminute.frase.calculus.interpreter
 
-import com.lambdaminute.frase.calculus.ast.AST
-import com.lambdaminute.frase.calculus.ast.AST._
+import com.lambdaminute.frase.calculus.ast.Ast
+import com.lambdaminute.frase.calculus.ast.Ast._
 import com.lambdaminute.frase.calculus.debug
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.Parser
@@ -34,7 +34,7 @@ case class DefaultInterpreter(parser: Parser, keywords: Keywords, builtIns: Keyw
   def interpret(t: Term): Either[FraseError, Term] =
     interpretScan(t).last // yiikes
 
-  val App: AST.Application.type = Application
+  val App: Ast.Application.type = Application
 
   def reduce: BetaReduction = {
     def betaReduce: BetaReduction = builtIns(keywords) orElse {

@@ -1,7 +1,7 @@
 package com.lambdaminute.frase.lang.types
 
 import cats.effect.IO
-import com.lambdaminute.frase.calculus.ast.AST.Integer
+import com.lambdaminute.frase.calculus.ast.Ast.Integer
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.frase.calculus.interpreter.{ConcurrentInterpreter, DefaultBuiltins, DefaultInterpreter}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords

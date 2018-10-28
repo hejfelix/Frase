@@ -1,7 +1,7 @@
 package com.lambdaminute.frase.lang.types
 
 import com.lambdaminute.frase.calculus.interactive.ParserHelper
-import com.lambdaminute.frase.calculus.ast.AST.{Identifier, LambdaAbstraction, Term}
+import com.lambdaminute.frase.calculus.ast.Ast.{Identifier, LambdaAbstraction, Term}
 import org.scalatest.{Matchers, WordSpec}
 
 class TyperSpec extends WordSpec with Matchers with ParserHelper {

@@ -3,7 +3,7 @@ package com.lambdaminute.frase.calculus.interpreter
 import cats.data.EitherT
 import cats.effect.Concurrent
 import cats.implicits._
-import com.lambdaminute.frase.calculus.ast.AST.{Application, Identifier, LambdaAbstraction, Term}
+import com.lambdaminute.frase.calculus.ast.Ast.{Application, Identifier, LambdaAbstraction, Term}
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.Parser
 import com.lambdaminute.frase.calculus.semantic.Keywords

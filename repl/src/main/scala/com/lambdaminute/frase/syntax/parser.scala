@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.syntax
 
-import com.lambdaminute.frase.calculus.ast.AST.Term
+import com.lambdaminute.frase.calculus.ast.Ast.Term
 import com.lambdaminute.frase.calculus.errors.{FraseError, LexerError}
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser, Token}
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords

@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.lang
 
-import com.lambdaminute.frase.calculus.ast.AST
+import com.lambdaminute.frase.calculus.ast.Ast
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.semantic.Keywords
 
@@ -48,5 +48,5 @@ case class DefaultLetTransformer(keywords: Keywords) extends LetTransformer {
 //    namedExpressions.foldLeft(term) {
 //      case (term, Named(id, rhs)) => Application(LambdaAbstraction(id, term), rhs)
 //    }
-  override def transform(fragments: List[AST.Term]): Either[FraseError, AST.Term] = ???
+  override def transform(fragments: List[Ast.Term]): Either[FraseError, Ast.Term] = ???
 }

@@ -1,6 +1,6 @@
 package com.lambdaminute.frase.web
 
-import com.lambdaminute.frase.calculus.ast.AST
+import com.lambdaminute.frase.calculus.ast.Ast
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
 import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter}
@@ -29,7 +29,7 @@ import slinky.web.html._
     if (program.isEmpty) {
       Nil
     } else {
-      val steps: Stream[Either[FraseError, AST.Term]] = interpreter.interpretScan(program)
+      val steps: Stream[Either[FraseError, Ast.Term]] = interpreter.interpretScan(program)
       steps.map(_.fold(_.msg, _.pretty)).take(state.stepsToEvaluate).toList.map { s =>
         if (s.length > expressionLengthCutoff) s.take(expressionLengthCutoff) + "..." else s
       }
