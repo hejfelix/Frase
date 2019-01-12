@@ -3,9 +3,10 @@ package com.lambdaminute.frase.web
 import slinky.core._
 import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
-import slinky.web.html._
+import slinky.web.html.{style, _}
 
 import scala.scalajs.js
+import scala.scalajs.js.Dynamic
 import scala.scalajs.js.annotation.JSImport
 
 @JSImport("resources/index.css", JSImport.Default)
@@ -25,28 +26,28 @@ object IndexCss extends js.Object
     "yCombinator (fac . n . ( (<= n 1) 1 (* n (fac (- n 1))))) 3" -> "yCombinator with the non-recursive part of the factorial function as an argument"
   )
 
-  private val titleStyle = js.Dynamic.literal("display" -> "flex", "justify-content" -> "center")
+  private val titleStyle = js.Dynamic.literal("display" -> "flex", "justifyContent" -> "center")
   private val snippetsStyle =
-    js.Dynamic.literal("display" -> "flex", "flex-direction" -> "column", "justify-content" -> "space-evenly")
+    js.Dynamic.literal("display" -> "flex", "flexDirection" -> "column", "justifyContent" -> "space-evenly")
   private val snippetItem =
-    js.Dynamic.literal("flex"       -> "none",
-                       "width"      -> "100%",
-                       "height"     -> "auto",
-                       "margin-top" -> "1em",
-                       "padding"    -> "16px")
+    js.Dynamic.literal("flex"      -> "none",
+                       "width"     -> "100%",
+                       "height"    -> "auto",
+                       "marginTop" -> "1em",
+                       "padding"   -> "16px")
 
   def render(): ReactElement =
     div(
       div(style := titleStyle)(header(h1(className := "mdc-typography--headline1")("Welcome to Frase Web"))),
       div(className := "mainPage")(
-        h3("Examples:"),
+        h3(className := "mdc-typography--headline4")("Examples:"),
         div(style := snippetsStyle)(
           examples
             .map {
               case (program, explanation) =>
                 div(key := program, className := "mdc-card", style := snippetItem)(
                   code(program),
-                  p(i(className := "mdc-typography--body2")(explanation)))
+                  p(i(className := "mdc-typography--body2", style := Dynamic.literal("color" -> "#888"))(explanation)))
             },
         ),
         hr(),

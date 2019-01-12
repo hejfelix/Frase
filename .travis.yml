@@ -21,8 +21,6 @@ deploy:
 notifications:
   email:
     - hejfelix@gmail.com
-
-notifications:
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/ba2f1f37ff3f71b00991
