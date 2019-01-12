@@ -5,6 +5,13 @@ import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
 import slinky.web.html._
 
+import scala.scalajs.js
+import scala.scalajs.js.annotation.JSImport
+
+@JSImport("resources/index.css", JSImport.Default)
+@js.native
+object IndexCss extends js.Object
+
 @react class App extends StatelessComponent {
   type Props = Unit
 
@@ -18,15 +25,32 @@ import slinky.web.html._
     "yCombinator (fac . n . ( (<= n 1) 1 (* n (fac (- n 1))))) 3" -> "yCombinator with the non-recursive part of the factorial function as an argument"
   )
 
+  private val titleStyle = js.Dynamic.literal("display" -> "flex", "justify-content" -> "center")
+  private val snippetsStyle =
+    js.Dynamic.literal("display" -> "flex", "flex-direction" -> "column", "justify-content" -> "space-evenly")
+  private val snippetItem =
+    js.Dynamic.literal("flex"       -> "none",
+                       "width"      -> "100%",
+                       "height"     -> "auto",
+                       "margin-top" -> "1em",
+                       "padding"    -> "16px")
+
   def render(): ReactElement =
-    div(className := "App")(
-      header(h1("Welcome to Frase Web")),
-      h3("Examples:"),
-      examples.map {
-        case (program, explanation) =>
-          div(key := program)(code(program), p(i(explanation), br(), br()))
-      },
-      hr(),
-      Repl()
+    div(
+      div(style := titleStyle)(header(h1(className := "mdc-typography--headline1")("Welcome to Frase Web"))),
+      div(className := "mainPage")(
+        h3("Examples:"),
+        div(style := snippetsStyle)(
+          examples
+            .map {
+              case (program, explanation) =>
+                div(key := program, className := "mdc-card", style := snippetItem)(
+                  code(program),
+                  p(i(className := "mdc-typography--body2")(explanation)))
+            },
+        ),
+        hr(),
+        Repl()
+      )
     )
 }

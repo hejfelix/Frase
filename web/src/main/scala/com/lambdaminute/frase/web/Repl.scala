@@ -7,10 +7,12 @@ import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInte
 import com.lambdaminute.frase.calculus.semantic.DefaultKeywords
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLInputElement
-import slinky.core.Component
+import slinky.core.{Component, CustomAttribute, CustomTag}
 import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
 import slinky.web.html._
+
+import scala.scalajs.js
 
 @react class Repl extends Component {
 
@@ -47,11 +49,22 @@ import slinky.web.html._
 
   override def initialState = State()
 
+  private val forAttr = new CustomAttribute[String]("for")
+
+  private def lineInput =
+    div(className := "mdc-text-field")(
+      input(`type` := "number",
+            id := "line-number",
+            className := "mdc-text-field__input",
+            value := state.stepsToEvaluate.toString,
+            onChange := handleStepsInput),
+    )
+
   override def render(): ReactElement = div(
     p("Number of steps to evaluate:"),
-    input(`type` := "number", value := state.stepsToEvaluate.toString, onChange := handleStepsInput),
+    lineInput,
     p("Enter some lambda calculus in the text field to see the beta-reduction"),
-    input(onChange := handleInput, size := "80"),
+    input(className := "mdc-text-field__input", onChange := handleInput, size := "80"),
     br(),
     br(),
     s"Last evaluated result: ",
