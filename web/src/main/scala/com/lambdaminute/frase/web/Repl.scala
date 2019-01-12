@@ -22,7 +22,7 @@ import slinky.web.html._
 
   private val interpreter =
     DefaultInterpreter(parser, defaultKeywords, defaultBuiltins)
-  case class Props()
+  type Props = Unit
 
   case class State(program: String = "", stepsToEvaluate: Int = 30, evaluated: List[String] = Nil)
   private def evaluate(program: String): List[String] =
@@ -41,11 +41,12 @@ import slinky.web.html._
   }
 
   private val handleStepsInput = (e: Event) => {
-    val number = e.target.asInstanceOf[HTMLInputElement].valueAsNumber
+    val number = e.target.asInstanceOf[HTMLInputElement].valueAsNumber.toInt
     this.setState(s => s.copy(stepsToEvaluate = number, evaluated = evaluate(s.program)))
   }
 
   override def initialState = State()
+
   override def render(): ReactElement = div(
     p("Number of steps to evaluate:"),
     input(`type` := "number", value := state.stepsToEvaluate.toString, onChange := handleStepsInput),

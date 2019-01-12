@@ -5,21 +5,8 @@ import slinky.core.annotations.react
 import slinky.core.facade.ReactElement
 import slinky.web.html._
 
-import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
-
-@JSImport("resources/App.css", JSImport.Default)
-@js.native
-object AppCSS extends js.Object
-
-@JSImport("resources/logo.svg", JSImport.Default)
-@js.native
-object ReactLogo extends js.Object
-
 @react class App extends StatelessComponent {
   type Props = Unit
-
-  private val css = AppCSS
 
   private val examples: List[(String, String)] = List(
     "+ 41 1"         -> "Adds 41 and 1 by applying the function `+` first to 41, then to 1 to produce the result",
@@ -33,9 +20,7 @@ object ReactLogo extends js.Object
 
   def render(): ReactElement =
     div(className := "App")(
-      header(className := "App-header")(
-        h1(className := "App-title")("Welcome to Frase Web")
-      ),
+      header(h1("Welcome to Frase Web")),
       h3("Examples:"),
       examples.map {
         case (program, explanation) =>
