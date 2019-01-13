@@ -8140,7 +8140,7 @@ exports = module.exports = __webpack_require__(175)(undefined);
 
 
 // module
-exports.push([module.i, "body {\n    margin: 0;\n    padding: 0;\n    font-family: sans-serif;\n    background-color: whitesmoke;\n}\n\n.mainPage {\n    margin: auto;\n    max-width: 40%;\n    display: flex;\n    align-items: flex-start;\n    flex-direction: column;\n    justify-content: space-around;\n}\n\n", ""]);
+exports.push([module.i, "body {\n    margin: 0;\n    padding: 0;\n    font-family: sans-serif;\n    background-color: whitesmoke;\n}\n\n.mainPage {\n    margin: 0 5% auto 5%;\n    max-width: 40%;\n    display: flex;\n    align-items: flex-start;\n    flex-direction: column;\n    justify-content: space-around;\n}\n\n", ""]);
 
 // exports
 

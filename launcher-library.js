@@ -18842,121 +18842,45 @@ function $s_Lcom_lambdaminute_frase_web_Repl__handleInput__p4__Lcom_lambdaminute
 function $s_Lcom_lambdaminute_frase_web_Repl__render__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this) {
   var x0$2 = $s_Lcom_lambdaminute_frase_web_Repl__lineInput__p4__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this);
   var x1$1 = $this.codeInput;
-  var elems = $m_sci_Nil$();
-  var x2 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems);
-  var elems$1 = $m_sci_Nil$();
-  var x3 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems$1);
-  var s = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array(["Last evaluated result: "])).s__sc_Seq__T($m_sci_Nil$());
-  var this$12 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1.takeRight__I__sci_List(1);
-  var s$1 = $f_sc_TraversableOnce__mkString__T__T__T__T(this$12, "", "", "");
-  var properties = {};
-  var x5 = $i_react.createElement("b", properties, s$1);
-  var jsx$1 = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array([" (total steps: ", ")"]));
-  var this$22 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1;
-  var s$2 = jsx$1.s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([$f_sc_LinearSeqOptimized__length__I(this$22)]));
-  var elems$2 = $m_sci_Nil$();
-  var x7 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems$2);
-  var elems$3 = $m_sci_Nil$();
-  var x8 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems$3);
-  var this$35 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1;
-  var this$34 = $m_sci_List$();
-  var bf = this$34.ReusableCBFInstance$2;
-  var this$78 = $as_sci_List($f_sc_IterableLike__zipWithIndex__scg_CanBuildFrom__O(this$35, bf));
-  var f = (function(this$2$1) {
-    return (function(x0$1$2) {
-      var x0$1 = $as_T2(x0$1$2);
-      if ((x0$1 !== null)) {
-        var step = $as_T(x0$1.$$und1__O());
-        var idx = $uI(x0$1.$$und2__O());
-        var pair = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-card");
-        var pair$1 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("key", step);
-        var v = {
-          "marginTop": "1em",
-          "padding": "1em"
-        };
-        var pair$2 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v);
-        var array = [pair$1, pair$2];
-        var dictionary = {};
-        dictionary[pair.name$1] = pair.value$1;
-        var i = 0;
-        var len = $uI(array.length);
-        while ((i < len)) {
-          var index = i;
-          var arg1 = array[index];
-          var m = $as_Lslinky_core_AttrPair(arg1);
-          dictionary[m.name$1] = m.value$1;
-          i = ((1 + i) | 0)
-        };
-        var this$70 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary);
-        var v$1 = {
-          "color": "#aaa"
-        };
-        var pair$3 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$1);
-        var array$1 = [];
-        var dictionary$1 = {};
-        dictionary$1[pair$3.name$1] = pair$3.value$1;
-        var i$1 = 0;
-        var len$1 = $uI(array$1.length);
-        while ((i$1 < len$1)) {
-          var index$1 = i$1;
-          var arg1$1 = array$1[index$1];
-          var m$1 = $as_Lslinky_core_AttrPair(arg1$1);
-          dictionary$1[m$1.name$1] = m$1.value$1;
-          i$1 = ((1 + i$1) | 0)
-        };
-        var this$54 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("i", dictionary$1);
-        var s$3 = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array(["Step ", " >"])).s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([idx]));
-        var a = this$54.slinky$core$WithAttrs$$name$f;
-        var properties$1 = this$54.slinky$core$WithAttrs$$attrs$f;
-        var x0 = $i_react.createElement(a, properties$1, s$3);
-        var s$4 = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array(["", ""])).s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([step]));
-        var properties$2 = {};
-        var x1 = $i_react.createElement("p", properties$2, s$4);
-        var a$1 = this$70.slinky$core$WithAttrs$$name$f;
-        var properties$3 = this$70.slinky$core$WithAttrs$$attrs$f;
-        return $i_react.createElement(a$1, properties$3, x0, x1)
-      } else {
-        throw new $c_s_MatchError().init___O(x0$1)
-      }
-    })
-  })($this);
-  var this$77 = $m_sci_List$();
-  var bf$1 = this$77.ReusableCBFInstance$2;
-  if ((bf$1 === $m_sci_List$().ReusableCBFInstance$2)) {
-    if ((this$78 === $m_sci_Nil$())) {
-      var jsx$2 = $m_sci_Nil$()
-    } else {
-      var arg1$2 = this$78.head__O();
-      var h = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$2), $m_sci_Nil$());
-      var t = h;
-      var rest = $as_sci_List(this$78.tail__O());
-      while ((rest !== $m_sci_Nil$())) {
-        var arg1$3 = rest.head__O();
-        var nx = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$3), $m_sci_Nil$());
-        t.tl$5 = nx;
-        t = nx;
-        rest = $as_sci_List(rest.tail__O())
-      };
-      var jsx$2 = h
-    }
-  } else {
-    var b = $f_sc_TraversableLike__builder$1__psc_TraversableLike__scg_CanBuildFrom__scm_Builder(this$78, bf$1);
-    var these = this$78;
-    while ((!these.isEmpty__Z())) {
-      var arg1$4 = these.head__O();
-      b.$$plus$eq__O__scm_Builder(f(arg1$4));
-      these = $as_sci_List(these.tail__O())
+  var this$1 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1.takeRight__I__sci_List(1);
+  if ($f_sc_TraversableOnce__nonEmpty__Z(this$1)) {
+    var pair = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-elevation--z3");
+    var v = $s_Lcom_lambdaminute_frase_web_Repl__resultStyle__p4__Lcom_lambdaminute_frase_web_Repl__sjs_js_Object($this);
+    var pair$1 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v);
+    var array = [pair$1];
+    var dictionary = {};
+    dictionary[pair.name$1] = pair.value$1;
+    var i = 0;
+    var len = $uI(array.length);
+    while ((i < len)) {
+      var index = i;
+      var arg1 = array[index];
+      var m = $as_Lslinky_core_AttrPair(arg1);
+      dictionary[m.name$1] = m.value$1;
+      i = ((1 + i) | 0)
     };
-    var jsx$2 = b.result__O()
+    var this$34 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary);
+    var this$9 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1.takeRight__I__sci_List(1);
+    var s = $f_sc_TraversableOnce__mkString__T__T__T__T(this$9, "", "", "");
+    var properties = {};
+    var x0 = $i_react.createElement("code", properties, s);
+    var properties$1 = {};
+    var x0$1 = $i_react.createElement("b", properties$1, x0);
+    var elems = $m_sci_Nil$();
+    var x1 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems);
+    var jsx$1 = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array([" (total steps: ", ")"]));
+    var this$32 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1;
+    var s$1 = jsx$1.s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([$f_sc_LinearSeqOptimized__length__I(this$32)]));
+    var a = this$34.slinky$core$WithAttrs$$name$f;
+    var properties$2 = this$34.slinky$core$WithAttrs$$attrs$f;
+    var x2 = $i_react.createElement(a, properties$2, x0$1, x1, s$1)
+  } else {
+    var elems$1 = $m_sci_Nil$();
+    var x2 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("div", {}, elems$1)
   };
-  var s$5 = $as_sc_Iterable(jsx$2);
-  var cv = $m_s_Predef$().singleton$und$less$colon$less$2;
-  var jsx$3 = $m_sjs_js_JSConverters$JSRichGenTraversableOnce$();
-  var this$80 = $m_sc_Iterable$();
-  var col = $as_sc_GenTraversableOnce(s$5.map__F1__scg_CanBuildFrom__O(cv, this$80.ReusableCBFInstance$2));
-  var x9 = jsx$3.toJSArray$extension__sc_GenTraversableOnce__sjs_js_Array(col);
-  var properties$4 = {};
-  return $i_react.createElement("div", properties$4, x0$2, x1$1, x2, x3, s, x5, s$2, x7, x8, x9)
+  var x3 = $s_Lcom_lambdaminute_frase_web_Repl__results__p4__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this);
+  var properties$3 = {};
+  return $i_react.createElement("div", properties$3, x0$2, x1$1, x2, x3)
 }
 function $s_Lcom_lambdaminute_frase_web_Repl__lineInput__p4__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this) {
   var pair = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-text-field");
@@ -19095,6 +19019,128 @@ function $s_Lcom_lambdaminute_frase_web_Repl__evaluate__p4__Lcom_lambdaminute_fr
     return $as_sci_List($f_sc_TraversableLike__to__scg_CanBuildFrom__O(this$4, cbf))
   }
 }
+function $s_Lcom_lambdaminute_frase_web_Repl__results__p4__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this) {
+  var pair = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-card");
+  var v = {
+    "marginTop": "1em",
+    "padding": "1em"
+  };
+  var pair$1 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v);
+  var array = [pair$1];
+  var dictionary = {};
+  dictionary[pair.name$1] = pair.value$1;
+  var i = 0;
+  var len = $uI(array.length);
+  while ((i < len)) {
+    var index = i;
+    var arg1 = array[index];
+    var m = $as_Lslinky_core_AttrPair(arg1);
+    dictionary[m.name$1] = m.value$1;
+    i = ((1 + i) | 0)
+  };
+  var this$64 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary);
+  var this$11 = $as_Lcom_lambdaminute_frase_web_Repl$State($this.state_scala).evaluated$1;
+  var this$10 = $m_sci_List$();
+  var bf = this$10.ReusableCBFInstance$2;
+  var this$60 = $as_sci_List($f_sc_IterableLike__zipWithIndex__scg_CanBuildFrom__O(this$11, bf));
+  var f = (function(this$2$1) {
+    return (function(x0$2$2) {
+      var x0$2 = $as_T2(x0$2$2);
+      if ((x0$2 !== null)) {
+        var step = $as_T(x0$2.$$und1__O());
+        var idx = $uI(x0$2.$$und2__O());
+        var v$1 = {
+          "marginTop": "1em"
+        };
+        var pair$2 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$1);
+        var array$1 = [];
+        var dictionary$1 = {};
+        dictionary$1[pair$2.name$1] = pair$2.value$1;
+        var i$1 = 0;
+        var len$1 = $uI(array$1.length);
+        while ((i$1 < len$1)) {
+          var index$1 = i$1;
+          var arg1$1 = array$1[index$1];
+          var m$1 = $as_Lslinky_core_AttrPair(arg1$1);
+          dictionary$1[m$1.name$1] = m$1.value$1;
+          i$1 = ((1 + i$1) | 0)
+        };
+        var this$52 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$1);
+        var v$2 = {
+          "color": "#aaa"
+        };
+        var pair$3 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$2);
+        var array$2 = [];
+        var dictionary$2 = {};
+        dictionary$2[pair$3.name$1] = pair$3.value$1;
+        var i$2 = 0;
+        var len$2 = $uI(array$2.length);
+        while ((i$2 < len$2)) {
+          var index$2 = i$2;
+          var arg1$2 = array$2[index$2];
+          var m$2 = $as_Lslinky_core_AttrPair(arg1$2);
+          dictionary$2[m$2.name$1] = m$2.value$1;
+          i$2 = ((1 + i$2) | 0)
+        };
+        var this$23 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("i", dictionary$2);
+        var s = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array(["Step ", " > "])).s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([idx]));
+        var a = this$23.slinky$core$WithAttrs$$name$f;
+        var properties = this$23.slinky$core$WithAttrs$$attrs$f;
+        var x0 = $i_react.createElement(a, properties, s);
+        var properties$1 = {};
+        var x0$1 = $i_react.createElement("code", properties$1, x0);
+        var elems = $m_sci_Nil$();
+        var x1 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("br", {}, elems);
+        var s$1 = new $c_s_StringContext().init___sc_Seq(new $c_sjs_js_WrappedArray().init___sjs_js_Array(["", ""])).s__sc_Seq__T(new $c_sjs_js_WrappedArray().init___sjs_js_Array([step]));
+        var properties$2 = {};
+        var x2 = $i_react.createElement("code", properties$2, s$1);
+        var a$1 = this$52.slinky$core$WithAttrs$$name$f;
+        var properties$3 = this$52.slinky$core$WithAttrs$$attrs$f;
+        return $i_react.createElement(a$1, properties$3, x0$1, x1, x2)
+      } else {
+        throw new $c_s_MatchError().init___O(x0$2)
+      }
+    })
+  })($this);
+  var this$59 = $m_sci_List$();
+  var bf$1 = this$59.ReusableCBFInstance$2;
+  if ((bf$1 === $m_sci_List$().ReusableCBFInstance$2)) {
+    if ((this$60 === $m_sci_Nil$())) {
+      var jsx$1 = $m_sci_Nil$()
+    } else {
+      var arg1$3 = this$60.head__O();
+      var h = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$3), $m_sci_Nil$());
+      var t = h;
+      var rest = $as_sci_List(this$60.tail__O());
+      while ((rest !== $m_sci_Nil$())) {
+        var arg1$4 = rest.head__O();
+        var nx = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$4), $m_sci_Nil$());
+        t.tl$5 = nx;
+        t = nx;
+        rest = $as_sci_List(rest.tail__O())
+      };
+      var jsx$1 = h
+    }
+  } else {
+    var b = $f_sc_TraversableLike__builder$1__psc_TraversableLike__scg_CanBuildFrom__scm_Builder(this$60, bf$1);
+    var these = this$60;
+    while ((!these.isEmpty__Z())) {
+      var arg1$5 = these.head__O();
+      b.$$plus$eq__O__scm_Builder(f(arg1$5));
+      these = $as_sci_List(these.tail__O())
+    };
+    var jsx$1 = b.result__O()
+  };
+  var s$2 = $as_sc_Iterable(jsx$1);
+  var cv = $m_s_Predef$().singleton$und$less$colon$less$2;
+  var jsx$2 = $m_sjs_js_JSConverters$JSRichGenTraversableOnce$();
+  var this$62 = $m_sc_Iterable$();
+  var col = $as_sc_GenTraversableOnce(s$2.map__F1__scg_CanBuildFrom__O(cv, this$62.ReusableCBFInstance$2));
+  var x0$3 = jsx$2.toJSArray$extension__sc_GenTraversableOnce__sjs_js_Array(col);
+  var a$2 = this$64.slinky$core$WithAttrs$$name$f;
+  var properties$4 = this$64.slinky$core$WithAttrs$$attrs$f;
+  return $i_react.createElement(a$2, properties$4, x0$3)
+}
 function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase_web_Repl__Lslinky_core_facade_ReactElement($this) {
   var pair = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-text-field");
   var v = {
@@ -19113,7 +19159,7 @@ function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase
     dictionary[m.name$1] = m.value$1;
     i = ((1 + i) | 0)
   };
-  var this$54 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary);
+  var this$57 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary);
   var pair$2 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("type", "text");
   var v$1 = $s_Lcom_lambdaminute_frase_web_Repl__handleInput__p4__Lcom_lambdaminute_frase_web_Repl__F1($this);
   var pair$3 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("onChange", (function(f) {
@@ -19124,7 +19170,11 @@ function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase
   var pair$4 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("size", "80");
   var pair$5 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("id", "code");
   var pair$6 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-text-field__input");
-  var array$1 = [pair$3, pair$4, pair$5, pair$6];
+  var v$2 = {
+    "fontFamily": "monospace"
+  };
+  var pair$7 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$2);
+  var array$1 = [pair$3, pair$4, pair$5, pair$6, pair$7];
   var dictionary$1 = {};
   dictionary$1[pair$2.name$1] = pair$2.value$1;
   var i$1 = 0;
@@ -19141,11 +19191,11 @@ function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase
   var jsx$1 = $m_Lslinky_core_facade_React$();
   var a = withAttrs.slinky$core$WithAttrs$$name$f;
   var x0 = jsx$1.createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement(a, withAttrs.slinky$core$WithAttrs$$attrs$f, children);
-  var pair$7 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-floating-label");
-  var pair$8 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("htmlFor", "code");
-  var array$2 = [pair$8];
+  var pair$8 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-floating-label");
+  var pair$9 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("htmlFor", "code");
+  var array$2 = [pair$9];
   var dictionary$2 = {};
-  dictionary$2[pair$7.name$1] = pair$7.value$1;
+  dictionary$2[pair$8.name$1] = pair$8.value$1;
   var i$2 = 0;
   var len$2 = $uI(array$2.length);
   while ((i$2 < len$2)) {
@@ -19155,14 +19205,14 @@ function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase
     dictionary$2[m$2.name$1] = m$2.value$1;
     i$2 = ((1 + i$2) | 0)
   };
-  var this$38 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("label", dictionary$2);
-  var a$1 = this$38.slinky$core$WithAttrs$$name$f;
-  var properties = this$38.slinky$core$WithAttrs$$attrs$f;
+  var this$41 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("label", dictionary$2);
+  var a$1 = this$41.slinky$core$WithAttrs$$name$f;
+  var properties = this$41.slinky$core$WithAttrs$$attrs$f;
   var x1 = $i_react.createElement(a$1, properties, "Enter lambda calculus to be evaluated");
-  var pair$9 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-line-ripple");
+  var pair$10 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-line-ripple");
   var array$3 = [];
   var dictionary$3 = {};
-  dictionary$3[pair$9.name$1] = pair$9.value$1;
+  dictionary$3[pair$10.name$1] = pair$10.value$1;
   var i$3 = 0;
   var len$3 = $uI(array$3.length);
   while ((i$3 < len$3)) {
@@ -19177,8 +19227,8 @@ function $s_Lcom_lambdaminute_frase_web_Repl__codeInput__Lcom_lambdaminute_frase
   var jsx$2 = $m_Lslinky_core_facade_React$();
   var a$2 = withAttrs$1.slinky$core$WithAttrs$$name$f;
   var x2 = jsx$2.createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement(a$2, withAttrs$1.slinky$core$WithAttrs$$attrs$f, children$1);
-  var a$3 = this$54.slinky$core$WithAttrs$$name$f;
-  var properties$1 = this$54.slinky$core$WithAttrs$$attrs$f;
+  var a$3 = this$57.slinky$core$WithAttrs$$name$f;
+  var properties$1 = this$57.slinky$core$WithAttrs$$attrs$f;
   return $i_react.createElement(a$3, properties$1, x0, x1, x2)
 }
 function $s_Lcom_lambdaminute_frase_web_Repl__defaultKeywords__p4__Lcom_lambdaminute_frase_web_Repl__Lcom_lambdaminute_frase_calculus_semantic_DefaultKeywords($this) {
@@ -19213,6 +19263,9 @@ function $s_Lcom_lambdaminute_frase_web_Repl__$$anonfun$handleInput$1__p4__Lcom_
   var this$4 = $as_Ljava_io_PrintStream(this$3.outVar$2.v$1);
   this$4.java$lang$JSConsoleBasedPrintStream$$printString__T__V((x + "\n"));
   $m_Lorg_scalajs_dom_package$().window__Lorg_scalajs_dom_raw_Window().scrollTo(0, $uI($m_Lorg_scalajs_dom_package$().document__Lorg_scalajs_dom_raw_HTMLDocument().body.scrollHeight))
+}
+function $s_Lcom_lambdaminute_frase_web_Repl__resultStyle__p4__Lcom_lambdaminute_frase_web_Repl__sjs_js_Object($this) {
+  return $this.resultStyle$4
 }
 function $s_Lcom_lambdaminute_frase_web_Repl__defaultBuiltins__p4__Lcom_lambdaminute_frase_web_Repl__F1($this) {
   return $as_F1($this.defaultBuiltins$4)
@@ -19297,6 +19350,14 @@ function $a_Lcom_lambdaminute_frase_web_Repl() {
           "value": null
         }
       });
+      $g.Object.defineProperties(this, {
+        resultStyle$4: {
+          "configurable": true,
+          "enumerable": true,
+          "writable": true,
+          "value": null
+        }
+      });
       $m_Lslinky_core_annotations_react$().bump__F0__V(new $c_sjsr_AnonFunction0().init___sjs_js_Function0((function($this) {
         return (function() {
           $s_Lcom_lambdaminute_frase_web_Repl__$$anonfun$new$1__p4__Lcom_lambdaminute_frase_web_Repl__V($this)
@@ -19319,7 +19380,13 @@ function $a_Lcom_lambdaminute_frase_web_Repl() {
           var e$3 = e$3$2;
           $s_Lcom_lambdaminute_frase_web_Repl__$$anonfun$handleStepsInput$1__p4__Lcom_lambdaminute_frase_web_Repl__Lorg_scalajs_dom_raw_Event__V(this$3, e$3)
         })
-      })(this))
+      })(this));
+      this.resultStyle$4 = {
+        "marginTop": $m_sjs_js_Any$().fromString__T__sjs_js_Any("1em"),
+        "padding": $m_sjs_js_Any$().fromString__T__sjs_js_Any("1em"),
+        "borderRadius": $m_sjs_js_Any$().fromString__T__sjs_js_Any("5px"),
+        "backgroundColor": $m_sjs_js_Any$().fromString__T__sjs_js_Any("#f0f6ff")
+      }
     });
     /** @constructor */
     var $h_Lcom_lambdaminute_frase_web_Repl = (function $h_Lcom_lambdaminute_frase_web_Repl() {
@@ -24746,8 +24813,12 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
   var x0$1 = $i_react.createElement("header", properties$1, x0);
   var a$1 = this$26.slinky$core$WithAttrs$$name$f;
   var properties$2 = this$26.slinky$core$WithAttrs$$attrs$f;
-  var x0$7 = $i_react.createElement(a$1, properties$2, x0$1);
-  var pair$2 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mainPage");
+  var x0$9 = $i_react.createElement(a$1, properties$2, x0$1);
+  var v$1 = {
+    "display": "flex",
+    "justifyContent": "space-between"
+  };
+  var pair$2 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$1);
   var array$2 = [];
   var dictionary$2 = {};
   dictionary$2[pair$2.name$1] = pair$2.value$1;
@@ -24760,8 +24831,8 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
     dictionary$2[m$2.name$1] = m$2.value$1;
     i$2 = ((1 + i$2) | 0)
   };
-  var this$125 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$2);
-  var pair$3 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-typography--headline4");
+  var this$161 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$2);
+  var pair$3 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mainPage");
   var array$3 = [];
   var dictionary$3 = {};
   dictionary$3[pair$3.name$1] = pair$3.value$1;
@@ -24774,12 +24845,8 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
     dictionary$3[m$3.name$1] = m$3.value$1;
     i$3 = ((1 + i$3) | 0)
   };
-  var this$44 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("h3", dictionary$3);
-  var a$2 = this$44.slinky$core$WithAttrs$$name$f;
-  var properties$3 = this$44.slinky$core$WithAttrs$$attrs$f;
-  var x0$6 = $i_react.createElement(a$2, properties$3, "Examples:");
-  var v$1 = $s_Lcom_lambdaminute_frase_web_App__snippetsStyle__p5__Lcom_lambdaminute_frase_web_App__sjs_js_Object($this);
-  var pair$4 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$1);
+  var this$123 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$3);
+  var pair$4 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-typography--headline4");
   var array$4 = [];
   var dictionary$4 = {};
   dictionary$4[pair$4.name$1] = pair$4.value$1;
@@ -24792,41 +24859,39 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
     dictionary$4[m$4.name$1] = m$4.value$1;
     i$4 = ((1 + i$4) | 0)
   };
-  var this$110 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$4);
-  var this$106 = $s_Lcom_lambdaminute_frase_web_App__examples__p5__Lcom_lambdaminute_frase_web_App__sci_List($this);
+  var this$50 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("h3", dictionary$4);
+  var a$2 = this$50.slinky$core$WithAttrs$$name$f;
+  var properties$3 = this$50.slinky$core$WithAttrs$$attrs$f;
+  var x0$6 = $i_react.createElement(a$2, properties$3, "Examples:");
+  var v$2 = $s_Lcom_lambdaminute_frase_web_App__snippetsStyle__p5__Lcom_lambdaminute_frase_web_App__sjs_js_Object($this);
+  var pair$5 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$2);
+  var array$5 = [];
+  var dictionary$5 = {};
+  dictionary$5[pair$5.name$1] = pair$5.value$1;
+  var i$5 = 0;
+  var len$5 = $uI(array$5.length);
+  while ((i$5 < len$5)) {
+    var index$5 = i$5;
+    var arg1$5 = array$5[index$5];
+    var m$5 = $as_Lslinky_core_AttrPair(arg1$5);
+    dictionary$5[m$5.name$1] = m$5.value$1;
+    i$5 = ((1 + i$5) | 0)
+  };
+  var this$116 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$5);
+  var this$112 = $s_Lcom_lambdaminute_frase_web_App__examples__p5__Lcom_lambdaminute_frase_web_App__sci_List($this);
   var f = (function(this$2$1) {
     return (function(x0$2$2) {
       var x0$2 = $as_T2(x0$2$2);
       if ((x0$2 !== null)) {
         var program = $as_T(x0$2.$$und1__O());
         var explanation = $as_T(x0$2.$$und2__O());
-        var pair$5 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("key", program);
-        var pair$6 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-card");
-        var v$2 = $s_Lcom_lambdaminute_frase_web_App__snippetItem__p5__Lcom_lambdaminute_frase_web_App__sjs_js_Object(this$2$1);
-        var pair$7 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$2);
-        var array$5 = [pair$6, pair$7];
-        var dictionary$5 = {};
-        dictionary$5[pair$5.name$1] = pair$5.value$1;
-        var i$5 = 0;
-        var len$5 = $uI(array$5.length);
-        while ((i$5 < len$5)) {
-          var index$5 = i$5;
-          var arg1$5 = array$5[index$5];
-          var m$5 = $as_Lslinky_core_AttrPair(arg1$5);
-          dictionary$5[m$5.name$1] = m$5.value$1;
-          i$5 = ((1 + i$5) | 0)
-        };
-        var this$98 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$5);
-        var properties$4 = {};
-        var x0$4 = $i_react.createElement("code", properties$4, program);
-        var pair$8 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-typography--body2");
-        var v$3 = {
-          "color": "#888"
-        };
-        var pair$9 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$3);
-        var array$6 = [pair$9];
+        var pair$6 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("key", program);
+        var pair$7 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-card");
+        var v$3 = $s_Lcom_lambdaminute_frase_web_App__snippetItem__p5__Lcom_lambdaminute_frase_web_App__sjs_js_Object(this$2$1);
+        var pair$8 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$3);
+        var array$6 = [pair$7, pair$8];
         var dictionary$6 = {};
-        dictionary$6[pair$8.name$1] = pair$8.value$1;
+        dictionary$6[pair$6.name$1] = pair$6.value$1;
         var i$6 = 0;
         var len$6 = $uI(array$6.length);
         while ((i$6 < len$6)) {
@@ -24836,33 +24901,53 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
           dictionary$6[m$6.name$1] = m$6.value$1;
           i$6 = ((1 + i$6) | 0)
         };
-        var this$83 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("i", dictionary$6);
-        var a$3 = this$83.slinky$core$WithAttrs$$name$f;
-        var properties$5 = this$83.slinky$core$WithAttrs$$attrs$f;
+        var this$104 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$6);
+        var properties$4 = {};
+        var x0$4 = $i_react.createElement("code", properties$4, program);
+        var pair$9 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-typography--body2");
+        var v$4 = {
+          "color": "#888"
+        };
+        var pair$10 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$4);
+        var array$7 = [pair$10];
+        var dictionary$7 = {};
+        dictionary$7[pair$9.name$1] = pair$9.value$1;
+        var i$7 = 0;
+        var len$7 = $uI(array$7.length);
+        while ((i$7 < len$7)) {
+          var index$7 = i$7;
+          var arg1$7 = array$7[index$7];
+          var m$7 = $as_Lslinky_core_AttrPair(arg1$7);
+          dictionary$7[m$7.name$1] = m$7.value$1;
+          i$7 = ((1 + i$7) | 0)
+        };
+        var this$89 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("i", dictionary$7);
+        var a$3 = this$89.slinky$core$WithAttrs$$name$f;
+        var properties$5 = this$89.slinky$core$WithAttrs$$attrs$f;
         var x0$3 = $i_react.createElement(a$3, properties$5, explanation);
         var properties$6 = {};
         var x1 = $i_react.createElement("p", properties$6, x0$3);
-        var a$4 = this$98.slinky$core$WithAttrs$$name$f;
-        var properties$7 = this$98.slinky$core$WithAttrs$$attrs$f;
+        var a$4 = this$104.slinky$core$WithAttrs$$name$f;
+        var properties$7 = this$104.slinky$core$WithAttrs$$attrs$f;
         return $i_react.createElement(a$4, properties$7, x0$4, x1)
       } else {
         throw new $c_s_MatchError().init___O(x0$2)
       }
     })
   })($this);
-  var this$105 = $m_sci_List$();
-  var bf = this$105.ReusableCBFInstance$2;
+  var this$111 = $m_sci_List$();
+  var bf = this$111.ReusableCBFInstance$2;
   if ((bf === $m_sci_List$().ReusableCBFInstance$2)) {
-    if ((this$106 === $m_sci_Nil$())) {
+    if ((this$112 === $m_sci_Nil$())) {
       var jsx$1 = $m_sci_Nil$()
     } else {
-      var arg1$7 = this$106.head__O();
-      var h = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$7), $m_sci_Nil$());
+      var arg1$8 = this$112.head__O();
+      var h = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$8), $m_sci_Nil$());
       var t = h;
-      var rest = $as_sci_List(this$106.tail__O());
+      var rest = $as_sci_List(this$112.tail__O());
       while ((rest !== $m_sci_Nil$())) {
-        var arg1$8 = rest.head__O();
-        var nx = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$8), $m_sci_Nil$());
+        var arg1$9 = rest.head__O();
+        var nx = new $c_sci_$colon$colon().init___O__sci_List(f(arg1$9), $m_sci_Nil$());
         t.tl$5 = nx;
         t = nx;
         rest = $as_sci_List(rest.tail__O())
@@ -24870,11 +24955,11 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
       var jsx$1 = h
     }
   } else {
-    var b = $f_sc_TraversableLike__builder$1__psc_TraversableLike__scg_CanBuildFrom__scm_Builder(this$106, bf);
-    var these = this$106;
+    var b = $f_sc_TraversableLike__builder$1__psc_TraversableLike__scg_CanBuildFrom__scm_Builder(this$112, bf);
+    var these = this$112;
     while ((!these.isEmpty__Z())) {
-      var arg1$9 = these.head__O();
-      b.$$plus$eq__O__scm_Builder(f(arg1$9));
+      var arg1$10 = these.head__O();
+      b.$$plus$eq__O__scm_Builder(f(arg1$10));
       these = $as_sci_List(these.tail__O())
     };
     var jsx$1 = b.result__O()
@@ -24882,23 +24967,62 @@ function $s_Lcom_lambdaminute_frase_web_App__render__Lcom_lambdaminute_frase_web
   var s = $as_sc_Iterable(jsx$1);
   var cv = $m_s_Predef$().singleton$und$less$colon$less$2;
   var jsx$2 = $m_sjs_js_JSConverters$JSRichGenTraversableOnce$();
-  var this$108 = $m_sc_Iterable$();
-  var col = $as_sc_GenTraversableOnce(s.map__F1__scg_CanBuildFrom__O(cv, this$108.ReusableCBFInstance$2));
+  var this$114 = $m_sc_Iterable$();
+  var col = $as_sc_GenTraversableOnce(s.map__F1__scg_CanBuildFrom__O(cv, this$114.ReusableCBFInstance$2));
   var x0$5 = jsx$2.toJSArray$extension__sc_GenTraversableOnce__sjs_js_Array(col);
-  var a$5 = this$110.slinky$core$WithAttrs$$name$f;
-  var properties$8 = this$110.slinky$core$WithAttrs$$attrs$f;
+  var a$5 = this$116.slinky$core$WithAttrs$$name$f;
+  var properties$8 = this$116.slinky$core$WithAttrs$$attrs$f;
   var x1$1 = $i_react.createElement(a$5, properties$8, x0$5);
-  var elems = $m_sci_Nil$();
-  var x2 = $m_Lslinky_core_facade_React$().createElement__sjs_js_$bar__sjs_js_Dictionary__sc_Seq__Lslinky_core_facade_ReactElement("hr", {}, elems);
+  var a$6 = this$123.slinky$core$WithAttrs$$name$f;
+  var properties$9 = this$123.slinky$core$WithAttrs$$attrs$f;
+  var x0$8 = $i_react.createElement(a$6, properties$9, x0$6, x1$1);
+  var pair$11 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mainPage mdc-card");
+  var v$5 = {
+    "padding": "0 2em 2em 2em"
+  };
+  var pair$12 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("style", v$5);
+  var array$8 = [pair$12];
+  var dictionary$8 = {};
+  dictionary$8[pair$11.name$1] = pair$11.value$1;
+  var i$8 = 0;
+  var len$8 = $uI(array$8.length);
+  while ((i$8 < len$8)) {
+    var index$8 = i$8;
+    var arg1$11 = array$8[index$8];
+    var m$8 = $as_Lslinky_core_AttrPair(arg1$11);
+    dictionary$8[m$8.name$1] = m$8.value$1;
+    i$8 = ((1 + i$8) | 0)
+  };
+  var this$154 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("div", dictionary$8);
+  var pair$13 = new $c_Lslinky_core_AttrPair().init___T__sjs_js_Any("className", "mdc-typography--headline4");
+  var array$9 = [];
+  var dictionary$9 = {};
+  dictionary$9[pair$13.name$1] = pair$13.value$1;
+  var i$9 = 0;
+  var len$9 = $uI(array$9.length);
+  while ((i$9 < len$9)) {
+    var index$9 = i$9;
+    var arg1$12 = array$9[index$9];
+    var m$9 = $as_Lslinky_core_AttrPair(arg1$12);
+    dictionary$9[m$9.name$1] = m$9.value$1;
+    i$9 = ((1 + i$9) | 0)
+  };
+  var this$144 = new $c_Lslinky_core_WithAttrs().init___T__sjs_js_Dictionary("h3", dictionary$9);
+  var a$7 = this$144.slinky$core$WithAttrs$$name$f;
+  var properties$10 = this$144.slinky$core$WithAttrs$$attrs$f;
+  var x0$7 = $i_react.createElement(a$7, properties$10, "REPL");
   var jsx$3 = $m_Lslinky_core_KeyAndRefAddingStage$();
-  var this$124 = $m_Lcom_lambdaminute_frase_web_Repl$();
+  var this$153 = $m_Lcom_lambdaminute_frase_web_Repl$();
   var constructor = $a_Lcom_lambdaminute_frase_web_Repl();
-  var x3 = jsx$3.build__Lslinky_core_KeyAndRefAddingStage__Lslinky_core_facade_ReactElement(this$124.apply__O__sjs_js_Dynamic__Lslinky_core_KeyAndRefAddingStage((void 0), constructor));
-  var a$6 = this$125.slinky$core$WithAttrs$$name$f;
-  var properties$9 = this$125.slinky$core$WithAttrs$$attrs$f;
-  var x1$2 = $i_react.createElement(a$6, properties$9, x0$6, x1$1, x2, x3);
-  var properties$10 = {};
-  return $i_react.createElement("div", properties$10, x0$7, x1$2)
+  var x1$2 = jsx$3.build__Lslinky_core_KeyAndRefAddingStage__Lslinky_core_facade_ReactElement(this$153.apply__O__sjs_js_Dynamic__Lslinky_core_KeyAndRefAddingStage((void 0), constructor));
+  var a$8 = this$154.slinky$core$WithAttrs$$name$f;
+  var properties$11 = this$154.slinky$core$WithAttrs$$attrs$f;
+  var x1$3 = $i_react.createElement(a$8, properties$11, x0$7, x1$2);
+  var a$9 = this$161.slinky$core$WithAttrs$$name$f;
+  var properties$12 = this$161.slinky$core$WithAttrs$$attrs$f;
+  var x1$4 = $i_react.createElement(a$9, properties$12, x0$8, x1$3);
+  var properties$13 = {};
+  return $i_react.createElement("div", properties$13, x0$9, x1$4)
 }
 function $s_Lcom_lambdaminute_frase_web_App__titleStyle__p5__Lcom_lambdaminute_frase_web_App__sjs_js_Object($this) {
   return $this.titleStyle$5
@@ -24950,7 +25074,8 @@ function $a_Lcom_lambdaminute_frase_web_App() {
       this.examples$5 = $m_sci_List$().apply__sc_Seq__sci_List(new $c_sjs_js_WrappedArray().init___sjs_js_Array([$m_s_Predef$ArrowAssoc$().$$minus$greater$extension__O__O__T2($m_s_Predef$().ArrowAssoc__O__O("+ 41 1"), "Adds 41 and 1 by applying the function `+` first to 41, then to 1 to produce the result"), $m_s_Predef$ArrowAssoc$().$$minus$greater$extension__O__O__T2($m_s_Predef$().ArrowAssoc__O__O("(x . + 40 x) 2"), "The left parenthesis is a lambda abstraction, allowing x to be replaced upon application (here, with 2)"), $m_s_Predef$ArrowAssoc$().$$minus$greater$extension__O__O__T2($m_s_Predef$().ArrowAssoc__O__O("true yes no"), "`true` and `false` are functions in Frase, i.e. true = a . b . a, false = a . b . b"), $m_s_Predef$ArrowAssoc$().$$minus$greater$extension__O__O__T2($m_s_Predef$().ArrowAssoc__O__O("yCombinator x"), new $c_sci_StringOps().init___T($m_s_Predef$().augmentString__T__T("the keyword `yCombinator` allows for recursion, duplicating the expression on the righthand side\n        |and infinitely replacing it on the lefthand side, i.e. yCombinator = (f . (x . f (x x)) (x . f (x x)))")).stripMargin__T()), $m_s_Predef$ArrowAssoc$().$$minus$greater$extension__O__O__T2($m_s_Predef$().ArrowAssoc__O__O("yCombinator (fac . n . ( (<= n 1) 1 (* n (fac (- n 1))))) 3"), "yCombinator with the non-recursive part of the factorial function as an argument")]));
       this.titleStyle$5 = {
         "display": $m_sjs_js_Any$().fromString__T__sjs_js_Any("flex"),
-        "justifyContent": $m_sjs_js_Any$().fromString__T__sjs_js_Any("center")
+        "justifyContent": $m_sjs_js_Any$().fromString__T__sjs_js_Any("center"),
+        "margin": $m_sjs_js_Any$().fromString__T__sjs_js_Any("auto")
       };
       this.snippetsStyle$5 = {
         "display": $m_sjs_js_Any$().fromString__T__sjs_js_Any("flex"),
