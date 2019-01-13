@@ -72,6 +72,13 @@ import scala.scalajs.js.Dynamic
     }
   }
 
+  private val resultStyle = Dynamic.literal(
+    "marginTop"       -> "1em",
+    "padding"         -> "1em",
+    "borderRadius"    -> "5px",
+    "backgroundColor" -> "#f0f6ff"
+  )
+
   def codeInput =
     div(className := "mdc-text-field", style := Dynamic.literal("marginTop" -> "1em"))(
       input(
@@ -80,26 +87,33 @@ import scala.scalajs.js.Dynamic
         size := "80",
         id := "code",
         className := "mdc-text-field__input",
+        style := Dynamic.literal("fontFamily" -> "monospace")
       ),
       label(className := "mdc-floating-label", htmlFor := "code")("Enter lambda calculus to be evaluated"),
       div(className := "mdc-line-ripple")
     )
 
+  private def results =
+    div(className := "mdc-card", style := Dynamic.literal("marginTop" -> "1em", "padding" -> "1em"))(
+      state.evaluated.zipWithIndex.map {
+        case (step, idx) =>
+          div(style := Dynamic.literal("marginTop" -> "1em"))(
+            code(i(style := Dynamic.literal("color" -> "#aaa"))(s"Step $idx > ")),
+            br(),
+            code(s"${step.toString}"))
+      }
+    )
+
   override def render(): ReactElement = div(
     lineInput,
     codeInput,
-    br(),
-    br(),
-    s"Last evaluated result: ",
-    b(state.evaluated.takeRight(1).mkString),
-    s" (total steps: ${state.evaluated.length})",
-    br(),
-    br(),
-    state.evaluated.zipWithIndex.map {
-      case (step, idx) =>
-        div(className := "mdc-card", key := step, style := Dynamic.literal("marginTop" -> "1em", "padding" -> "1em"))(
-          i(style := Dynamic.literal("color" -> "#aaa"))(s"Step $idx >"),
-          p(s"${step.toString}"))
-    }
+    if (state.evaluated.takeRight(1).nonEmpty)
+      div(className := "mdc-elevation--z3", style := resultStyle)(
+        b(code(state.evaluated.takeRight(1).mkString)),
+        br(),
+        s" (total steps: ${state.evaluated.length})",
+      )
+    else div(),
+    results
   )
 }

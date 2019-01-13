@@ -6,7 +6,7 @@ body {
 }
 
 .mainPage {
-    margin: auto;
+    margin: 0 5% auto 5%;
     max-width: 40%;
     display: flex;
     align-items: flex-start;

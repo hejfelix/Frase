@@ -26,7 +26,7 @@ object IndexCss extends js.Object
     "yCombinator (fac . n . ( (<= n 1) 1 (* n (fac (- n 1))))) 3" -> "yCombinator with the non-recursive part of the factorial function as an argument"
   )
 
-  private val titleStyle = js.Dynamic.literal("display" -> "flex", "justifyContent" -> "center")
+  private val titleStyle = js.Dynamic.literal("display" -> "flex", "justifyContent" -> "center", "margin" -> "auto")
   private val snippetsStyle =
     js.Dynamic.literal("display" -> "flex", "flexDirection" -> "column", "justifyContent" -> "space-evenly")
   private val snippetItem =
@@ -39,19 +39,23 @@ object IndexCss extends js.Object
   def render(): ReactElement =
     div(
       div(style := titleStyle)(header(h1(className := "mdc-typography--headline1")("Welcome to Frase Web"))),
-      div(className := "mainPage")(
-        h3(className := "mdc-typography--headline4")("Examples:"),
-        div(style := snippetsStyle)(
-          examples
-            .map {
-              case (program, explanation) =>
-                div(key := program, className := "mdc-card", style := snippetItem)(
-                  code(program),
-                  p(i(className := "mdc-typography--body2", style := Dynamic.literal("color" -> "#888"))(explanation)))
-            },
+      div(style := Dynamic.literal("display" -> "flex", "justifyContent" -> "space-between"))(
+        div(className := "mainPage")(
+          h3(className := "mdc-typography--headline4")("Examples:"),
+          div(style := snippetsStyle)(
+            examples
+              .map {
+                case (program, explanation) =>
+                  div(key := program, className := "mdc-card", style := snippetItem)(
+                    code(program),
+                    p(i(className := "mdc-typography--body2", style := Dynamic.literal("color" -> "#888"))(
+                      explanation)))
+              },
+          ),
         ),
-        hr(),
-        Repl()
+        div(className := "mainPage mdc-card", style := Dynamic.literal("padding" -> "0 2em 2em 2em"))(
+          h3(className := "mdc-typography--headline4")("REPL"),
+          Repl())
       )
     )
 }
