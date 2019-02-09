@@ -1,7 +1,8 @@
 package com.lambdaminute.frase.calculus
 
 import com.lambdaminute.frase.calculus.grammar.{DefaultLexer, DefaultParser}
-import com.lambdaminute.frase.calculus.interpreter.{BetaReduction, DefaultBuiltins, DefaultInterpreter, Interpreter}
+import com.lambdaminute.frase.calculus.interpreter.interpreter.BetaReduction
+import com.lambdaminute.frase.calculus.interpreter.{DefaultBuiltins, DefaultInterpreter, Interpreter}
 import com.lambdaminute.frase.calculus.semantic.{DefaultKeywords, Keywords}
 
 package object interactive extends ParserHelper {

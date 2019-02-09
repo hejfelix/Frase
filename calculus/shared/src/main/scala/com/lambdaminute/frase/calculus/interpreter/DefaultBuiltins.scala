@@ -2,6 +2,7 @@ package com.lambdaminute.frase.calculus.interpreter
 
 import com.lambdaminute.frase.calculus.ast.Ast
 import com.lambdaminute.frase.calculus.ast.Ast.{Application => App, _}
+import com.lambdaminute.frase.calculus.interpreter.interpreter.BetaReduction
 import com.lambdaminute.frase.calculus.semantic.Keywords
 
 object DefaultBuiltins {
@@ -28,5 +29,6 @@ object DefaultBuiltins {
       case App(App(Identifier("%"), Integer(a)), Integer(b))   => Integer(a % b)
     }
   }
+
 
 }

@@ -6,6 +6,7 @@ import cats.implicits._
 import com.lambdaminute.frase.calculus.ast.Ast.{Application, Identifier, LambdaAbstraction, Term}
 import com.lambdaminute.frase.calculus.errors.FraseError
 import com.lambdaminute.frase.calculus.grammar.Parser
+import com.lambdaminute.frase.calculus.interpreter.interpreter.BetaReduction
 import com.lambdaminute.frase.calculus.semantic.Keywords
 
 class ConcurrentInterpreter[F[_]](parser: Parser, keywords: Keywords, builtIns: Keywords => BetaReduction)(
